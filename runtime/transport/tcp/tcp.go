@@ -109,7 +109,7 @@ func (cfg ConnCfg) Accept() transport.Channel {
 	}
 	conn, err := ln.Accept()
 	if err != nil {
-		log.Fatalf("cannot accept connection at %s: %v", err)
+		log.Fatalf("cannot accept connection at :%s: %v", cfg.Port, err)
 	}
 	return cfg.newConn(conn)
 }
