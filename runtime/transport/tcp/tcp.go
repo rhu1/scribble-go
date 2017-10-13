@@ -40,17 +40,40 @@ package tcp
 
 import (
 	"bufio"
+	"encoding/gob"
 	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net"
 	"time"
+
+	"github.com/nickng/scribble-go/runtime/transport"
 )
 
 var (
 	ErrCloseUnfinishedConn = errors.New("transport/tcp: closing connection with unread data")
 )
+
+// SerialisationError is the kind of error where a value
+// cannot be sent due to serialisation failure.
+type SerialisationError struct {
+	cause error
+}
+
+func (e SerialisationError) Error() string {
+	return fmt.Sprintf("transport/tcp send: serialisation failed: %v", e.cause)
+}
+
+// DeserialisationError is the kind of error where a value
+// cannot be received due to deserialisation failure.
+type DeserialisationError struct {
+	cause error
+}
+
+func (e DeserialisationError) Error() string {
+	return fmt.Sprintf("transport/tcp recv: deserisalisation failed: %v", e.cause)
+}
 
 // ConnCfg is a connection configuration, contains
 // the details required to establish a connection.
@@ -79,7 +102,7 @@ func NewConnectionWithRetry(host, port string, retryWait time.Duration) ConnCfg 
 // details from cfg, and returns the TCP stream as a ReadWriteCloser.
 //
 // Accept blocks while waiting for connection to be accepted.
-func (cfg ConnCfg) Accept() io.ReadWriteCloser {
+func (cfg ConnCfg) Accept() transport.Channel {
 	ln, err := net.Listen("tcp", fmt.Sprintf(":%s", cfg.Port))
 	if err != nil {
 		log.Fatalf("cannot listen at :%s: %v", cfg.Port, err)
@@ -93,7 +116,7 @@ func (cfg ConnCfg) Accept() io.ReadWriteCloser {
 
 // Connect establishes a connection with a TCP socket using details
 // from cfg, and returns the TCP stream as a ReadWriteCloser.
-func (cfg ConnCfg) Connect() io.ReadWriteCloser {
+func (cfg ConnCfg) Connect() transport.Channel {
 	addr := net.JoinHostPort(cfg.Host, cfg.Port)
 	conn, err := net.Dial("tcp", addr)
 	if err != nil {
@@ -113,6 +136,9 @@ func (cfg ConnCfg) newConn(rwc net.Conn) *Conn {
 	}
 	c.bufr = newReader(c.rwc)
 	c.bufw = newWriter(c.rwc)
+
+	c.enc = gob.NewEncoder(NewDelimWriter(c, cfg.DelimMeth))
+	c.dec = gob.NewDecoder(NewDelimReader(c, cfg.DelimMeth))
 	return c
 }
 
@@ -130,8 +156,14 @@ type Conn struct {
 	// bufr is a buffered stream to the TCP connection.
 	bufr *bufio.Reader
 
+	// dec is a deserialisation decoder for messages from the TCP connection.
+	dec *gob.Decoder
+
 	// bufw is a buffered stream to the TCP connection.
 	bufw *bufio.Writer
+
+	// enc is a serialisation encoder for messages to the TCP connection.
+	enc *gob.Encoder
 }
 
 // newReader returns a fresh buffered Reader.
@@ -178,4 +210,22 @@ func (c *Conn) Close() error {
 		return ErrCloseUnfinishedConn
 	}
 	return c.rwc.Close()
+}
+
+// Send serialises values val then sends the serialised
+// values to the underlying stream of connection c.
+func (c *Conn) Send(val interface{}) error {
+	if err := c.enc.Encode(val); err != nil {
+		return SerialisationError{cause: err}
+	}
+	return nil
+}
+
+// Recv receives values from the underlying stream then deserialises and
+// writes the deserialised values to the pointer addresses specified by ptr.
+func (c *Conn) Recv(ptr interface{}) error {
+	if err := c.dec.Decode(ptr); err != nil {
+		return DeserialisationError{cause: err}
+	}
+	return nil
 }

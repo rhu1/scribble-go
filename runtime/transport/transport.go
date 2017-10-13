@@ -35,11 +35,25 @@ type Transport interface {
 	// from the opposite side of the Transport endpoint.
 	//
 	// The caller of Accept is typically the server-side of a binary transport.
-	Accept() io.ReadWriteCloser
+	Accept() Channel
 
 	// Connect establishes a connection by connecting to the opposite side of
 	// the Transport endpoint.
 	//
 	// The caller of Connect is typically the client-side of a binary transport.
-	Connect() io.ReadWriteCloser
+	Connect() Channel
+}
+
+// Channel is an abstract binary communication channel
+// where messages are Send and Recv on the channel.
+type Channel interface {
+	io.ReadWriteCloser
+
+	// Send sends a value val to the channel.
+	// The value is transformed and transmitted over the Transport.
+	Send(val interface{}) error
+
+	// Recv receives a value from the underlying Transport,
+	// and writes the received value to ptr (pointer to the variable).
+	Recv(ptr interface{}) error
 }
