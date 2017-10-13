@@ -58,6 +58,9 @@ type ConnCfg struct {
 	Host string
 	Port string
 
+	// DelimMeth specifies delimiter implementation.
+	DelimMeth DelimitMethod
+
 	// retryWait specifies the time to wait before retrying connection.
 	retryWait time.Duration
 }
@@ -116,7 +119,10 @@ func (cfg ConnCfg) newConn(rwc net.Conn) *Conn {
 // Conn is a connected TCP stream/connection, and wraps a net.Conn created
 // by either Accept or Connect.
 //
-// Conn implements ReadWriteCloser and can be used as is.
+// Conn implements ReadWriteCloser and can be used as is, more fine-grained
+// message formatting control (such as delimited multi messages) should use
+// NewSizedReader/SizedWriter (message with size prefix) or
+// NewDelimReader/DelimWriter (delimited message).
 type Conn struct {
 	// rwc is the real TCP connection.
 	rwc net.Conn
