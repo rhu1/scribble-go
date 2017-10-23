@@ -26,8 +26,6 @@ func main() {
 			}
 		}
 
-		time.Sleep(150 * time.Millisecond)
-
 		serverMain := mkservmain(10)
 		serverEpt.Run(serverMain)
 		wg.Done()

@@ -41,10 +41,10 @@ type Server_1To1_1 struct {
 }
 
 // Session hasn't started, so an error is returned if anything 'goes wrong'
+// For the server, wait until a connection for each participant is available
 func (ept *ServerEpt) Init() (*Server_1To1_1, error) {
 	for i := 0; i < ept.n_worker; i++ {
-		if ept.conn_worker[i] == nil {
-			return nil, fmt.Errorf("invalid connection from 'server' to 'worker' participant %d", i)
+		for ept.conn_worker[i] == nil {
 		}
 	}
 	return &Server_1To1_1{session.LinearResource{}, ept}, nil
