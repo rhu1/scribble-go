@@ -29,7 +29,9 @@ func (ept *ServerEpt) ConnectionToW(i int, addr, port string) error {
 	if i < 1 || i > ept.n_worker {
 		return fmt.Errorf("participant %d of role 'worker' out of bounds", i)
 	}
-	ept.conn_worker[i-1] = tcp.NewConnection(addr, port).Accept().(*tcp.Conn)
+	go func(i int, addr, port string) {
+		ept.conn_worker[i-1] = tcp.NewConnection(addr, port).Accept().(*tcp.Conn)
+	}(i, addr, port)
 	return nil
 }
 
@@ -117,7 +119,7 @@ type Worker_1To1_1 struct {
 func (ept *WorkerEpt) Init() (*Worker_1To1_1, error) {
 	for i := 0; i < ept.n_server; i++ {
 		if ept.conn_server[i] == nil {
-			return nil, fmt.Errorf("invalid connection from 'worker' to 'server' participant %d", i)
+			return nil, fmt.Errorf("invalid connection from 'worker' %d to 'server' participant %d", ept.roleId, i)
 		}
 	}
 	return &Worker_1To1_1{session.LinearResource{}, ept}, nil
@@ -127,24 +129,24 @@ type Worker_1To1_End struct {
 }
 
 func (st1 *Worker_1To1_1) RecvAll() ([]int, *Worker_1To1_End) {
-	var tmp interface{}
+	var tmp int
 	st1.Use()
 
 	res := make([]int, st1.ept.n_server)
 	for i, conn := range st1.ept.conn_server {
-		conn.Recv(&tmp)
-		res[i] = tmp.(int)
+		err := conn.Recv(&tmp)
+		if err != nil {
+			log.Fatalf("wrong value from server at %d: %s", st1.ept.roleId, err)
+		}
+		res[i] = tmp
 	}
 	return res, &Worker_1To1_End{}
 }
 
 func (ept *WorkerEpt) Run(f func(*Worker_1To1_1) *Worker_1To1_End) {
-
 	st1, err := ept.Init()
-
 	if err != nil {
 		log.Fatalf("failed to initialise the session: %s", err)
 	}
-
 	f(st1)
 }
