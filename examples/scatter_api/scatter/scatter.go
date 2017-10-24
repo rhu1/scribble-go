@@ -3,51 +3,67 @@ package scatter
 import (
 	"fmt"
 	"github.com/nickng/scribble-go/runtime/session"
+	"github.com/nickng/scribble-go/runtime/transport"
 	"github.com/nickng/scribble-go/runtime/transport/tcp"
 	"log"
 )
 
-type ServerEpt struct {
-	roleId   int
-	numRoles int
+const Server = "server"
+const Worker = "worker"
 
-	n_worker    int
-	conn_worker []*tcp.Conn
+type Server_1To1_Init struct {
+	session.LinearResource
+	ept *session.Endpoint
 }
 
-func NewServer(id, nserver, nworker int) (*ServerEpt, error) {
+func NewServer(id, nserver, nworker int) (*Server_1To1_Init, error) {
 	if id > nserver || id < 1 {
-		return nil, fmt.Errorf("Server id not in range [1, %d]", nserver)
+		return nil, fmt.Errorf("'server' id not in range [1, %d]", nserver)
 	}
 	if nworker < 1 {
 		return nil, fmt.Errorf("Wrong number of participants of role 'worker': %d", nworker)
 	}
-	return (&ServerEpt{id, nserver, nworker, make([]*tcp.Conn, nworker)}), nil
+	conn := make(map[string][]transport.Channel)
+	conn[Worker] = make([]transport.Channel, nworker)
+
+	return &Server_1To1_Init{session.LinearResource{}, &session.Endpoint{id, nserver, conn}}, nil
 }
 
-func (ept *ServerEpt) ConnectionToW(i int, addr, port string) error {
-	if i < 1 || i > ept.n_worker {
-		return fmt.Errorf("participant %d of role 'worker' out of bounds", i)
+func (ini *Server_1To1_Init) Accept(rolename string, id int, addr, port string) error {
+	cn, ok := ini.ept.Conn[rolename]
+	if !ok {
+		return fmt.Errorf("rolename '%s' does not exist", rolename)
+	}
+	if id < 1 || id > len(cn) {
+		return fmt.Errorf("participant %d of role '%s' out of bounds", id, rolename)
 	}
 	go func(i int, addr, port string) {
-		ept.conn_worker[i-1] = tcp.NewConnection(addr, port).Accept().(*tcp.Conn)
-	}(i, addr, port)
+		ini.ept.Conn[rolename][i-1] = tcp.NewConnection(addr, port).Accept().(*tcp.Conn)
+	}(id, addr, port)
 	return nil
 }
 
 type Server_1To1_1 struct {
 	session.LinearResource
-	ept *ServerEpt
+	ept *session.Endpoint
 }
 
 // Session hasn't started, so an error is returned if anything 'goes wrong'
-// For the server, wait until a connection for each participant is available
-func (ept *ServerEpt) Init() (*Server_1To1_1, error) {
-	for i := 0; i < ept.n_worker; i++ {
-		for ept.conn_worker[i] == nil {
+// For the server, wait until a connection for each participant is available.
+// FIXME: inefficient spinlock.
+// TODO: Assumption, rolename and
+func (ini *Server_1To1_Init) Init() (*Server_1To1_1, error) {
+	ini.Use()
+	conn := ini.ept.Conn[Worker]
+	n_worker := len(conn)
+
+	// FIXME
+	for i := 0; i < n_worker; i++ {
+		for ini.ept.Conn[Worker][i] == nil {
 		}
 	}
-	return &Server_1To1_1{session.LinearResource{}, ept}, nil
+
+	return &Server_1To1_1{session.LinearResource{}, ini.ept}, nil
 }
 
 type Server_1To1_End struct {
@@ -56,21 +72,21 @@ type Server_1To1_End struct {
 // Session has started, so if an error occurs, then a runtime error is produced
 // and the program exits
 func (st1 *Server_1To1_1) SendAll(pl []int) *Server_1To1_End {
-	if len(pl) != st1.ept.n_worker {
-		log.Fatalf("error, sending wrong number of arguments in 'st1': %d != %d", st1.ept.n_worker, len(pl))
+	if len(pl) != len(st1.ept.Conn[Worker]) {
+		log.Fatalf("sending wrong number of arguments in 'st1': %d != %d", len(st1.ept.Conn[Worker]), len(pl))
 	}
 	st1.Use()
 
 	for i, v := range pl {
-		st1.ept.conn_worker[i].Send(v)
+		st1.ept.Conn[Worker][i].Send(v)
 	}
 	return &Server_1To1_End{}
 }
 
 // Convenience to check that user implements the full protocol
-func (ept *ServerEpt) Run(f func(*Server_1To1_1) *Server_1To1_End) {
+func (ini *Server_1To1_Init) Run(f func(*Server_1To1_1) *Server_1To1_End) {
 
-	st1, err := ept.Init()
+	st1, err := ini.Init()
 
 	if err != nil {
 		log.Fatalf("failed to initialise the session: %s", err)
@@ -79,72 +95,73 @@ func (ept *ServerEpt) Run(f func(*Server_1To1_1) *Server_1To1_End) {
 	f(st1)
 }
 
-// One way of generalising this could be describing an interface for endpoints
-// instead of structs?
-type WorkerEpt struct {
-	roleId   int
-	numRoles int
-
-	n_server    int
-	conn_server []*tcp.Conn
+type Worker_1Ton_Init struct {
+	session.LinearResource
+	ept *session.Endpoint
 }
 
-func NewWorker(id, nworker, nserver int) (*WorkerEpt, error) {
+func NewWorker(id, nworker, nserver int) (*Worker_1Ton_Init, error) {
 	if id > nworker || id < 1 {
-		return nil, fmt.Errorf("Worker id not in range [1, %d]", nworker)
+		return nil, fmt.Errorf("'worker' id not in range [1, %d]", nworker)
 	}
 	if nserver < 1 {
 		return nil, fmt.Errorf("Wrong number of participants of role 'server': %d", nserver)
 	}
-	return (&WorkerEpt{id, nworker, nserver, make([]*tcp.Conn, nserver)}), nil
+	conn := make(map[string][]transport.Channel)
+	conn[Server] = make([]transport.Channel, nserver)
+
+	return &Worker_1Ton_Init{session.LinearResource{}, session.NewEndpoint(id, nworker, conn)}, nil
 }
 
-func (ept *WorkerEpt) ConnectionToS(i int, addr, port string) error {
-	if i < 1 || i > ept.n_server {
-		return fmt.Errorf("participant %d of role 'server' out of bounds", i)
+func (ini *Worker_1Ton_Init) Connect(rolename string, id int, addr, port string) error {
+	cn, ok := ini.ept.Conn[rolename]
+	if !ok {
+		return fmt.Errorf("rolename '%s' does not exist", rolename)
 	}
-	// Difference with ConnectionToW is in the use of 'Connect' instead of
-	// 'Accept'. If we want to generalise this, we'd need to sort this out.
-	// Also, probably a good idea to use tcp.NewConnectionWithRetry
-	ept.conn_server[i-1] = tcp.NewConnection(addr, port).Connect().(*tcp.Conn)
+	if id < 1 || id > len(cn) {
+		return fmt.Errorf("participant %d of role '%s' out of bounds", id, rolename)
+	}
+	// Probably a good idea to use tcp.NewConnectionWithRetry
+	ini.ept.Conn[rolename][id-1] = tcp.NewConnection(addr, port).Connect()
 	return nil
 }
 
-type Worker_1To1_1 struct {
+type Worker_1Ton_1 struct {
 	session.LinearResource
-	ept *WorkerEpt
+	ept *session.Endpoint
 }
 
 // Session hasn't started, so an error is returned if anything 'goes wrong'
-func (ept *WorkerEpt) Init() (*Worker_1To1_1, error) {
-	for i := 0; i < ept.n_server; i++ {
-		if ept.conn_server[i] == nil {
-			return nil, fmt.Errorf("invalid connection from 'worker' %d to 'server' participant %d", ept.roleId, i)
+func (ini *Worker_1Ton_Init) Init() (*Worker_1Ton_1, error) {
+	n_server := len(ini.ept.Conn[Server])
+	for i := 0; i < n_server; i++ {
+		if ini.ept.Conn[Server][i] == nil {
+			return nil, fmt.Errorf("invalid connection from 'worker[%d]' to 'server[%d]'", ini.ept.Id, i)
 		}
 	}
-	return &Worker_1To1_1{session.LinearResource{}, ept}, nil
+	return &Worker_1Ton_1{session.LinearResource{}, ini.ept}, nil
 }
 
-type Worker_1To1_End struct {
+type Worker_1Ton_End struct {
 }
 
-func (st1 *Worker_1To1_1) RecvAll() ([]int, *Worker_1To1_End) {
+func (st1 *Worker_1Ton_1) RecvAll() ([]int, *Worker_1Ton_End) {
 	var tmp int
 	st1.Use()
 
-	res := make([]int, st1.ept.n_server)
-	for i, conn := range st1.ept.conn_server {
+	res := make([]int, len(st1.ept.Conn[Server]))
+	for i, conn := range st1.ept.Conn[Server] {
 		err := conn.Recv(&tmp)
 		if err != nil {
-			log.Fatalf("wrong value from server at %d: %s", st1.ept.roleId, err)
+			log.Fatalf("wrong value from server at %d: %s", st1.ept.Id, err)
 		}
 		res[i] = tmp
 	}
-	return res, &Worker_1To1_End{}
+	return res, &Worker_1Ton_End{}
 }
 
-func (ept *WorkerEpt) Run(f func(*Worker_1To1_1) *Worker_1To1_End) {
-	st1, err := ept.Init()
+func (ini *Worker_1Ton_Init) Run(f func(*Worker_1Ton_1) *Worker_1Ton_End) {
+	st1, err := ini.Init()
 	if err != nil {
 		log.Fatalf("failed to initialise the session: %s", err)
 	}
