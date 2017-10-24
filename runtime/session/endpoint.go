@@ -8,7 +8,7 @@ import (
 type Endpoint struct {
 	roleId   int
 	numRoles int
-	conn     map[string][]*tcp.Conn
+	Conn     map[string][]*tcp.Conn
 }
 
 func NewEndpoint(roleId, numRoles int, conn map[string][]*tcp.Conn) *Endpoint {
@@ -16,7 +16,7 @@ func NewEndpoint(roleId, numRoles int, conn map[string][]*tcp.Conn) *Endpoint {
 }
 
 func (ept *Endpoint) Accept(rolename string, id int, addr, port string) error {
-	cn, ok := ept.conn[rolename]
+	cn, ok := ept.Conn[rolename]
 	if !ok {
 		return fmt.Errorf("rolename '%s' does not exist", rolename)
 	}
@@ -24,13 +24,13 @@ func (ept *Endpoint) Accept(rolename string, id int, addr, port string) error {
 		return fmt.Errorf("participant %d of role '%s' out of bounds", id, rolename)
 	}
 	go func(i int, addr, port string) {
-		ept.conn[rolename][i-1] = tcp.NewConnection(addr, port).Accept().(*tcp.Conn)
+		ept.Conn[rolename][i-1] = tcp.NewConnection(addr, port).Accept().(*tcp.Conn)
 	}(id, addr, port)
 	return nil
 }
 
 func (ept *Endpoint) Connect(rolename string, id int, addr, port string) error {
-	cn, ok := ept.conn[rolename]
+	cn, ok := ept.Conn[rolename]
 	if !ok {
 		return fmt.Errorf("rolename '%s' does not exist", rolename)
 	}
@@ -38,6 +38,6 @@ func (ept *Endpoint) Connect(rolename string, id int, addr, port string) error {
 		return fmt.Errorf("participant %d of role '%s' out of bounds", id, rolename)
 	}
 	// Probably a good idea to use tcp.NewConnectionWithRetry
-	ept.conn[rolename][id-1] = tcp.NewConnection(addr, port).Connect().(*tcp.Conn)
+	ept.Conn[rolename][id-1] = tcp.NewConnection(addr, port).Connect().(*tcp.Conn)
 	return nil
 }
