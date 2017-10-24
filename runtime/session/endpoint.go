@@ -6,7 +6,7 @@ import (
 )
 
 type Endpoint struct {
-	roleId   int
+	Id       int
 	numRoles int
 	Conn     map[string][]*tcp.Conn
 }
