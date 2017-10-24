@@ -1,5 +1,10 @@
 package session
 
+import (
+	"fmt"
+	"github.com/nickng/scribble-go/runtime/transport/tcp"
+)
+
 type Endpoint struct {
 	roleId   int
 	numRoles int
