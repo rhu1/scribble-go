@@ -6,7 +6,7 @@ import (
 
 type Endpoint struct {
 	Id       int
-	numRoles int
+	NumRoles int
 	Conn     map[string][]transport.Channel
 }
 
