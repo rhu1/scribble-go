@@ -33,7 +33,7 @@ func main() {
 
 	go serverCode()
 
-	time.Sleep(1000 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 
 	clientCode := func(i int) {
 		clientIni, err := scatter.NewWorker(i, 10, 1)
