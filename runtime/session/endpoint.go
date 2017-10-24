@@ -21,7 +21,7 @@ func (ept *Endpoint) Accept(rolename string, id int, addr, port string) error {
 		return fmt.Errorf("rolename '%s' does not exist", rolename)
 	}
 	if id < 1 || id > len(cn) {
-		return fmt.Errorf("participant %d of role '%s' out of bounds", i, rolename)
+		return fmt.Errorf("participant %d of role '%s' out of bounds", id, rolename)
 	}
 	go func(i int, addr, port string) {
 		ept.conn[rolename][i-1] = tcp.NewConnection(addr, port).Accept().(*tcp.Conn)
