@@ -2,9 +2,9 @@ package dot
 
 import (
 	"fmt"
-	"github.com/nickng/scribble-go/runtime/session"
-	"github.com/nickng/scribble-go/runtime/transport"
-	"github.com/nickng/scribble-go/runtime/transport/tcp"
+	"github.com/nickng/scribble-go-runtime/runtime/session"
+	"github.com/nickng/scribble-go-runtime/runtime/transport"
+	"github.com/nickng/scribble-go-runtime/runtime/transport/tcp"
 	"log"
 )
 
@@ -69,6 +69,7 @@ type RoleA_1To1_End struct {
 func (st1 *RoleA_1To1_1) DotSend(v int) *RoleA_1To1_End {
 	st1.Use()
 
+	//s1.ept.Id -- self id -- TODO: "-1" is hardcoded left-index 1
 	err := st1.ept.Conn[RoleB][st1.ept.Id-1].Send(v)
 	if err != nil {
 		log.Fatalf("wrong value from A at %d: %s", st1.ept.Id, err)

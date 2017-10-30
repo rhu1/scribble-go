@@ -1,7 +1,7 @@
 package session
 
 import (
-	"github.com/nickng/scribble-go/runtime/transport"
+	"github.com/nickng/scribble-go-runtime/runtime/transport"
 )
 
 type Endpoint struct {

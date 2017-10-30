@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./gather"
+	"github.com/nickng/scribble-go-runtime/examples/gather_api/gather"
 	"fmt"
 	"log"
 	"strconv"
