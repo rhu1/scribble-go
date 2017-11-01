@@ -97,6 +97,17 @@ func (cfg ConnCfg) Connect() transport.Channel {
 	return &Conn{cfg.ch}
 }
 
+// Accept listens for and accepts connection from a TCP socket using
+// details from cfg, and returns the TCP stream as a ReadWriteCloser.
+//
+// Accept blocks while waiting for connection to be accepted.
+func (cfg ConnCfg) Accept() transport.Channel {
+	if cfg.ch == nil {
+		log.Fatalf("transport/shm: invalid channel")
+	}
+	return &Conn{cfg.ch}
+}
+
 func (c *Conn) Close() error {
 	return nil
 }
@@ -110,19 +121,13 @@ func (c *Conn) Send(val interface{}) error {
 }
 
 func (c *Conn) Recv(ptr interface{}) error {
+	if c.ch == nil {
+		return DeserialisationError{}
+	}
+	v := <-c.ch
+
 	ptrValue := reflect.ValueOf(ptr)
 	val := reflect.Indirect(ptrValue)
-	val.Set(reflect.ValueOf(<-c.ch))
+	val.Set(reflect.ValueOf(v))
 	return nil
-}
-
-// Accept listens for and accepts connection from a TCP socket using
-// details from cfg, and returns the TCP stream as a ReadWriteCloser.
-//
-// Accept blocks while waiting for connection to be accepted.
-func (cfg ConnCfg) Accept() transport.Channel {
-	if cfg.ch == nil {
-		log.Fatalf("transport/shm: invalid channel")
-	}
-	return &Conn{cfg.ch}
 }
