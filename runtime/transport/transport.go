@@ -47,7 +47,7 @@ type Transport interface {
 // Channel is an abstract binary communication channel
 // where messages are Send and Recv on the channel.
 type Channel interface {
-	io.ReadWriteCloser
+	io.Closer
 
 	// Send sends a value val to the channel.
 	// The value is transformed and transmitted over the Transport.
