@@ -4,14 +4,18 @@ import (
 	"../scatter"
 	"fmt"
 	"log"
+	"os"
+	"runtime"
 	"strconv"
 	"sync"
 	"time"
 
+	"github.com/nickng/scribble-go/runtime/session"
 	"github.com/nickng/scribble-go/runtime/transport/tcp"
 )
 
 func main() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
 	wg := new(sync.WaitGroup)
 	wg.Add(11)
 
@@ -23,7 +27,7 @@ func main() {
 		// One connection for each participant in the group
 		for i := 1; i <= 10; i++ {
 			conn := tcp.NewConnection("127.0.0.1", strconv.Itoa(33333+i))
-			err := serverIni.Accept(scatter.Worker, i, conn)
+			err := session.Accept(serverIni, scatter.Worker, i, conn)
 			if err != nil {
 				log.Fatalf("failed to create connection to participant %d of role 'worker': %s", i, err)
 			}
@@ -45,7 +49,7 @@ func main() {
 		}
 		// One connection for each participant in the group
 		conn := tcp.NewConnection("127.0.0.1", strconv.Itoa(33333+i))
-		err = clientIni.Connect(scatter.Server, 1, conn)
+		err = session.Connect(clientIni, scatter.Server, 1, conn)
 		if err != nil {
 			log.Fatalf("failed to create connection from participant %d of role 'worker': %s", i, err)
 		}
@@ -68,14 +72,25 @@ func mkservmain(nw int) func(st1 *scatter.Server_1To1_1) *scatter.Server_1To1_En
 		payload[i] = 42 + i
 	}
 	return func(st1 *scatter.Server_1To1_1) *scatter.Server_1To1_End {
-		return st1.SendAll(payload)
+		for i := 0; i < 100000; i++ {
+			st1 = st1.Scatter(payload)
+		}
+		return st1.Quit()
 	}
 }
 
 func mkworkermain(idx int) func(st1 *scatter.Worker_1Ton_1) *scatter.Worker_1Ton_End {
 	return func(st1 *scatter.Worker_1Ton_1) *scatter.Worker_1Ton_End {
-		r, st := st1.RecvAll()
-		fmt.Println("Received payload at worker ", idx, "\t: ", r[0])
-		return st
+		var st2 *scatter.Worker_1Ton_End
+		var pl int
+		for {
+			select {
+			case st1 = <-st1.Scatter(&pl):
+				fmt.Fprintf(os.Stdout, "Received payload at worker %d\t:\t%d\n", idx, pl)
+			case st2 = <-st1.Quit():
+				return st2
+			}
+		}
+		return st2
 	}
 }
