@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"../scatter"
+	"../gather"
 
 	"github.com/nickng/scribble-go/runtime/session"
 	"github.com/nickng/scribble-go/runtime/transport/tcp"
@@ -36,14 +36,14 @@ func main() {
 	wg.Add(ncpu + 1)
 
 	serverCode := func() {
-		serverIni, err := scatter.NewServer(1, 1, ncpu)
+		serverIni, err := gather.NewServer(1, 1, ncpu)
 		if err != nil {
 			log.Fatalf("cannot create server endpoint: %s", err)
 		}
 		// One connection for each participant in the group
 		for i := 1; i <= ncpu; i++ {
 			conn := tcp.NewConnection("127.0.0.1", strconv.Itoa(33333+i))
-			err := session.Accept(serverIni, scatter.Worker, i, conn)
+			err := session.Accept(serverIni, gather.Worker, i, conn)
 			if err != nil {
 				log.Fatalf("failed to create connection to participant %d of role 'worker': %s", i, err)
 			}
@@ -58,13 +58,13 @@ func main() {
 	time.Sleep(100 * time.Millisecond)
 
 	clientCode := func(i int) {
-		clientIni, err := scatter.NewWorker(i, ncpu, 1)
+		clientIni, err := gather.NewWorker(i, ncpu, 1)
 		if err != nil {
 			log.Fatalf("cannot create client endpoint: %s", err)
 		}
 		// One connection for each participant in the group
 		conn := tcp.NewConnection("127.0.0.1", strconv.Itoa(33333+i))
-		err = session.Connect(clientIni, scatter.Server, 1, conn)
+		err = session.Connect(clientIni, gather.Server, 1, conn)
 		if err != nil {
 			log.Fatalf("failed to create connection from participant %d of role 'worker': %s", i, err)
 		}
@@ -83,23 +83,19 @@ func main() {
 	fmt.Println(ncpu, "\t", Avg(run_endt.Sub(run_startt), niters))
 }
 
-func mkservmain(nw int) func(st1 *scatter.Server_1To1_1) *scatter.Server_1To1_End {
-	payload := make([]int, nw)
-	for i := 0; i < nw; i++ {
-		payload[i] = 42 + i
-	}
-	return func(st1 *scatter.Server_1To1_1) *scatter.Server_1To1_End {
+func mkservmain(nw int) func(st1 *gather.Server_1To1_1) *gather.Server_1To1_End {
+	return func(st1 *gather.Server_1To1_1) *gather.Server_1To1_End {
 		for i := 0; i < niters; i++ {
-			st1 = st1.SendAll(payload)
+			_, st1 = st1.RecvAll()
 		}
 		return nil
 	}
 }
 
-func mkworkermain(idx int) func(st1 *scatter.Worker_1Ton_1) *scatter.Worker_1Ton_End {
-	return func(st1 *scatter.Worker_1Ton_1) *scatter.Worker_1Ton_End {
+func mkworkermain(idx int) func(st1 *gather.Worker_1Ton_1) *gather.Worker_1Ton_End {
+	return func(st1 *gather.Worker_1Ton_1) *gather.Worker_1Ton_End {
 		for i := 0; i < niters; i++ {
-			_, st1 = st1.RecvAll()
+			st1 = st1.SendAll(41 + idx)
 		}
 		return nil
 	}

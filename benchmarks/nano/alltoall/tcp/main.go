@@ -9,9 +9,10 @@ import (
 	"sync"
 	"time"
 
-	"../scatter"
+	"../alltoall"
 
 	"github.com/nickng/scribble-go/runtime/session"
+	"github.com/nickng/scribble-go/runtime/transport"
 	"github.com/nickng/scribble-go/runtime/transport/tcp"
 )
 
@@ -33,40 +34,51 @@ func main() {
 	flag.IntVar(&niters, "niters", NITERS, "ITERS")
 	flag.Parse()
 	wg := new(sync.WaitGroup)
-	wg.Add(ncpu + 1)
+	wg.Add(2 * ncpu)
 
-	serverCode := func() {
-		serverIni, err := scatter.NewServer(1, 1, ncpu)
+	conn := make([][]transport.Transport, ncpu)
+	for i := 0; i < ncpu; i++ {
+		conn[i] = make([]transport.Transport, ncpu)
+		for j := 0; j < ncpu; j++ {
+			conn[i][j] = tcp.NewConnection("127.0.0.1", strconv.Itoa(33333+i*ncpu+j))
+		}
+	}
+
+	serverCode := func(idx int) {
+		serverIni, err := alltoall.NewServer(idx, ncpu, ncpu)
 		if err != nil {
 			log.Fatalf("cannot create server endpoint: %s", err)
 		}
 		// One connection for each participant in the group
 		for i := 1; i <= ncpu; i++ {
-			conn := tcp.NewConnection("127.0.0.1", strconv.Itoa(33333+i))
-			err := session.Accept(serverIni, scatter.Worker, i, conn)
+			err := session.Accept(serverIni, alltoall.Worker, i, conn[idx-1][i-1])
 			if err != nil {
 				log.Fatalf("failed to create connection to participant %d of role 'worker': %s", i, err)
 			}
 		}
 
-		serverMain := mkservmain(ncpu)
+		serverMain := mkservmain(idx, ncpu)
 		serverIni.Run(serverMain)
 		wg.Done()
 	}
 
-	go serverCode()
+	for i := 1; i <= ncpu; i++ {
+		go serverCode(i)
+	}
 	time.Sleep(100 * time.Millisecond)
 
 	clientCode := func(i int) {
-		clientIni, err := scatter.NewWorker(i, ncpu, 1)
+		clientIni, err := alltoall.NewWorker(i, ncpu, ncpu)
 		if err != nil {
 			log.Fatalf("cannot create client endpoint: %s", err)
 		}
 		// One connection for each participant in the group
-		conn := tcp.NewConnection("127.0.0.1", strconv.Itoa(33333+i))
-		err = session.Connect(clientIni, scatter.Server, 1, conn)
-		if err != nil {
-			log.Fatalf("failed to create connection from participant %d of role 'worker': %s", i, err)
+
+		for j := 1; j <= ncpu; j++ {
+			err = session.Connect(clientIni, alltoall.Server, j, conn[j-1][i-1])
+			if err != nil {
+				log.Fatalf("failed to create connection from participant %d of role 'worker': %s", i, err)
+			}
 		}
 
 		clientMain := mkworkermain(i)
@@ -83,12 +95,12 @@ func main() {
 	fmt.Println(ncpu, "\t", Avg(run_endt.Sub(run_startt), niters))
 }
 
-func mkservmain(nw int) func(st1 *scatter.Server_1To1_1) *scatter.Server_1To1_End {
-	payload := make([]int, nw)
-	for i := 0; i < nw; i++ {
-		payload[i] = 42 + i
+func mkservmain(idx, nw int) func(st1 *alltoall.Server_1Ton_1) *alltoall.Server_1Ton_End {
+	payload := make([]int, ncpu)
+	for i := 0; i < ncpu; i++ {
+		payload[i] = idx*42 + i
 	}
-	return func(st1 *scatter.Server_1To1_1) *scatter.Server_1To1_End {
+	return func(st1 *alltoall.Server_1Ton_1) *alltoall.Server_1Ton_End {
 		for i := 0; i < niters; i++ {
 			st1 = st1.SendAll(payload)
 		}
@@ -96,8 +108,8 @@ func mkservmain(nw int) func(st1 *scatter.Server_1To1_1) *scatter.Server_1To1_En
 	}
 }
 
-func mkworkermain(idx int) func(st1 *scatter.Worker_1Ton_1) *scatter.Worker_1Ton_End {
-	return func(st1 *scatter.Worker_1Ton_1) *scatter.Worker_1Ton_End {
+func mkworkermain(idx int) func(st1 *alltoall.Worker_1Ton_1) *alltoall.Worker_1Ton_End {
+	return func(st1 *alltoall.Worker_1Ton_1) *alltoall.Worker_1Ton_End {
 		for i := 0; i < niters; i++ {
 			_, st1 = st1.RecvAll()
 		}

@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"log"
 	"runtime"
-	"strconv"
 	"sync"
 	"time"
 
 	"../scatter"
 
 	"github.com/nickng/scribble-go/runtime/session"
-	"github.com/nickng/scribble-go/runtime/transport/tcp"
+	"github.com/nickng/scribble-go/runtime/transport"
+	"github.com/nickng/scribble-go/runtime/transport/shm"
 )
 
 const (
@@ -35,6 +35,11 @@ func main() {
 	wg := new(sync.WaitGroup)
 	wg.Add(ncpu + 1)
 
+	conn := make([]transport.Transport, ncpu)
+	for i := 0; i < ncpu; i++ {
+		conn[i] = shm.NewBufferedConnection(100)
+	}
+
 	serverCode := func() {
 		serverIni, err := scatter.NewServer(1, 1, ncpu)
 		if err != nil {
@@ -42,8 +47,7 @@ func main() {
 		}
 		// One connection for each participant in the group
 		for i := 1; i <= ncpu; i++ {
-			conn := tcp.NewConnection("127.0.0.1", strconv.Itoa(33333+i))
-			err := session.Accept(serverIni, scatter.Worker, i, conn)
+			err := session.Accept(serverIni, scatter.Worker, i, conn[i-1])
 			if err != nil {
 				log.Fatalf("failed to create connection to participant %d of role 'worker': %s", i, err)
 			}
@@ -63,8 +67,7 @@ func main() {
 			log.Fatalf("cannot create client endpoint: %s", err)
 		}
 		// One connection for each participant in the group
-		conn := tcp.NewConnection("127.0.0.1", strconv.Itoa(33333+i))
-		err = session.Connect(clientIni, scatter.Server, 1, conn)
+		err = session.Connect(clientIni, scatter.Server, 1, conn[i-1])
 		if err != nil {
 			log.Fatalf("failed to create connection from participant %d of role 'worker': %s", i, err)
 		}
