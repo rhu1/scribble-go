@@ -32,7 +32,7 @@ func main() {
 	wg := new(sync.WaitGroup)
 	wg.Add(ncpu + 1)
 
-	serverCode := func() {
+	serverCode := func() func() {
 
 		cnn := make([](*tcp.Conn), ncpu)
 		// One connection for each participant in the group
@@ -48,41 +48,51 @@ func main() {
 			payload[i] = 42 + i
 		}
 
-		for i := 0; i < ncpu; i++ {
-			for cnn[i] == nil {
+		return func() {
+			for i := 0; i < ncpu; i++ {
+				for cnn[i] == nil {
+				}
 			}
-		}
 
-		for i := 0; i < niters; i++ {
-			for j, v := range payload {
-				cnn[j].Send(v)
+			for i := 0; i < niters; i++ {
+				for j, v := range payload {
+					cnn[j].Send(v)
+				}
 			}
+			wg.Done()
 		}
-		wg.Done()
 	}
 
-	go serverCode()
+	serverf := serverCode()
 	time.Sleep(100 * time.Millisecond)
 
-	clientCode := func(i int) {
+	clientCode := func(i int) func() {
 		var tmp int
 
 		conn := tcp.NewConnection("127.0.0.1", strconv.Itoa(33333+i))
 		cnn := conn.Connect()
 
-		for i := 0; i < niters; i++ {
+		return func() {
+			for i := 0; i < niters; i++ {
 
-			err := cnn.Recv(&tmp)
-			if err != nil {
-				log.Fatalf("wrong value from server at %d: %s", i, err)
+				err := cnn.Recv(&tmp)
+				if err != nil {
+					log.Fatalf("wrong value from server at %d: %s", i, err)
+				}
 			}
+			wg.Done()
 		}
-		wg.Done()
+	}
+
+	clients := make([]func(), ncpu)
+	for i := 1; i <= ncpu; i++ {
+		clients[i-1] = clientCode(i)
 	}
 
 	run_startt := time.Now()
+	go serverf()
 	for i := 1; i <= ncpu; i++ {
-		go clientCode(i)
+		go clients[i-1]()
 	}
 	wg.Wait()
 	run_endt := time.Now()

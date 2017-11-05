@@ -33,12 +33,13 @@ func main() {
 		conn[i] = make(chan int, 100)
 	}
 
+	payload := make([]int, ncpu)
+	for i := 0; i < ncpu; i++ {
+		payload[i] = 42 + i
+	}
+
 	serverCode := func() {
 
-		payload := make([]int, ncpu)
-		for i := 0; i < ncpu; i++ {
-			payload[i] = 42 + i
-		}
 		for i := 0; i < niters; i++ {
 			for j := 0; j < ncpu; j++ {
 				conn[j] <- payload[j]
@@ -47,9 +48,6 @@ func main() {
 
 		wg.Done()
 	}
-
-	go serverCode()
-	time.Sleep(100 * time.Millisecond)
 
 	clientCode := func(i int) {
 
@@ -60,6 +58,7 @@ func main() {
 	}
 
 	run_startt := time.Now()
+	go serverCode()
 	for i := 1; i <= ncpu; i++ {
 		go clientCode(i)
 	}

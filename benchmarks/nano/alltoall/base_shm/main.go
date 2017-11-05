@@ -25,6 +25,7 @@ func main() {
 	flag.IntVar(&ncpu, "ncpu", NCPU, "GOMAXPROCS")
 	flag.IntVar(&niters, "niters", NITERS, "ITERS")
 	flag.Parse()
+	ncpu = ncpu / 2
 	wg := new(sync.WaitGroup)
 	wg.Add(2 * ncpu)
 
@@ -47,11 +48,6 @@ func main() {
 		wg.Done()
 	}
 
-	for i := 0; i < ncpu; i++ {
-		go serverCode(i)
-	}
-	time.Sleep(100 * time.Millisecond)
-
 	clientCode := func(i int) {
 
 		for j := 0; j < niters; j++ {
@@ -63,6 +59,9 @@ func main() {
 	}
 
 	run_startt := time.Now()
+	for i := 0; i < ncpu; i++ {
+		go serverCode(i)
+	}
 	for i := 1; i <= ncpu; i++ {
 		go clientCode(i)
 	}

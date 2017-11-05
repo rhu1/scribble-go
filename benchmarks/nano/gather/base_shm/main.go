@@ -44,9 +44,6 @@ func main() {
 		wg.Done()
 	}
 
-	go serverCode()
-	time.Sleep(100 * time.Millisecond)
-
 	clientCode := func(i int) {
 
 		for j := 0; j < niters; j++ {
@@ -56,6 +53,7 @@ func main() {
 	}
 
 	run_startt := time.Now()
+	go serverCode()
 	for i := 1; i <= ncpu; i++ {
 		go clientCode(i)
 	}

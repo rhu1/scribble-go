@@ -26,6 +26,7 @@ func Avg(d time.Duration, v int) float64 {
 }
 
 var ncpu, niters int
+var cpu1, cpu2 int
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
@@ -33,24 +34,30 @@ func main() {
 	flag.IntVar(&ncpu, "ncpu", NCPU, "GOMAXPROCS")
 	flag.IntVar(&niters, "niters", NITERS, "ITERS")
 	flag.Parse()
-	wg := new(sync.WaitGroup)
-	wg.Add(2 * ncpu)
 
-	conn := make([][]transport.Transport, ncpu)
-	for i := 0; i < ncpu; i++ {
-		conn[i] = make([]transport.Transport, ncpu)
-		for j := 0; j < ncpu; j++ {
-			conn[i][j] = tcp.NewConnection("127.0.0.1", strconv.Itoa(33333+i*ncpu+j))
+	cpu1 = ncpu / 2
+	cpu2 = ncpu - cpu1
+	if cpu2 == 0 {
+		cpu2 = 1
+	}
+	wg := new(sync.WaitGroup)
+	wg.Add(ncpu)
+
+	conn := make([][]transport.Transport, cpu1)
+	for i := 0; i < cpu1; i++ {
+		conn[i] = make([]transport.Transport, cpu2)
+		for j := 0; j < cpu2; j++ {
+			conn[i][j] = tcp.NewConnection("127.0.0.1", strconv.Itoa(33333+i*cpu2+j))
 		}
 	}
 
-	serverCode := func(idx int) {
-		serverIni, err := alltoall.NewServer(idx, ncpu, ncpu)
+	serverCode := func(idx int) func() {
+		serverIni, err := alltoall.NewServer(idx, cpu1, cpu2)
 		if err != nil {
 			log.Fatalf("cannot create server endpoint: %s", err)
 		}
 		// One connection for each participant in the group
-		for i := 1; i <= ncpu; i++ {
+		for i := 1; i <= cpu2; i++ {
 			err := session.Accept(serverIni, alltoall.Worker, i, conn[idx-1][i-1])
 			if err != nil {
 				log.Fatalf("failed to create connection to participant %d of role 'worker': %s", i, err)
@@ -58,23 +65,26 @@ func main() {
 		}
 
 		serverMain := mkservmain(idx, ncpu)
-		serverIni.Run(serverMain)
-		wg.Done()
+		return func() {
+			serverIni.Run(serverMain)
+			wg.Done()
+		}
 	}
 
-	for i := 1; i <= ncpu; i++ {
-		go serverCode(i)
+	servers := make([]func(), cpu1)
+	for i := 1; i <= cpu1; i++ {
+		servers[i-1] = serverCode(i)
 	}
-	time.Sleep(100 * time.Millisecond)
 
-	clientCode := func(i int) {
-		clientIni, err := alltoall.NewWorker(i, ncpu, ncpu)
+	clientCode := func(i int) func() {
+		clientIni, err := alltoall.NewWorker(i, cpu2, cpu1)
 		if err != nil {
 			log.Fatalf("cannot create client endpoint: %s", err)
 		}
 		// One connection for each participant in the group
 
-		for j := 1; j <= ncpu; j++ {
+		time.Sleep(100 * time.Millisecond)
+		for j := 1; j <= cpu1; j++ {
 			err = session.Connect(clientIni, alltoall.Server, j, conn[j-1][i-1])
 			if err != nil {
 				log.Fatalf("failed to create connection from participant %d of role 'worker': %s", i, err)
@@ -82,13 +92,23 @@ func main() {
 		}
 
 		clientMain := mkworkermain(i)
-		clientIni.Run(clientMain)
-		wg.Done()
+		return func() {
+			clientIni.Run(clientMain)
+			wg.Done()
+		}
+	}
+
+	clients := make([]func(), cpu2)
+	for i := 1; i <= cpu2; i++ {
+		clients[i-1] = clientCode(i)
 	}
 
 	run_startt := time.Now()
-	for i := 1; i <= ncpu; i++ {
-		go clientCode(i)
+	for i := 1; i <= cpu1; i++ {
+		go servers[i-1]()
+	}
+	for i := 1; i <= cpu2; i++ {
+		go clients[i-1]()
 	}
 	wg.Wait()
 	run_endt := time.Now()
@@ -96,8 +116,8 @@ func main() {
 }
 
 func mkservmain(idx, nw int) func(st1 *alltoall.Server_1Ton_1) *alltoall.Server_1Ton_End {
-	payload := make([]int, ncpu)
-	for i := 0; i < ncpu; i++ {
+	payload := make([]int, cpu2)
+	for i := 0; i < cpu2; i++ {
 		payload[i] = idx*42 + i
 	}
 	return func(st1 *alltoall.Server_1Ton_1) *alltoall.Server_1Ton_End {

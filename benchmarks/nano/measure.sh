@@ -4,8 +4,8 @@ rm measurements.log
 
 runtimes="./runtimes"
 basedir=${PWD}
-niters=30
-ngo=2
+niters=40
+ngo=16
 
 for i in `find . -type d`; do
   cd $i

@@ -40,28 +40,27 @@ func main() {
 		conn[i] = shm.NewBufferedConnection(100)
 	}
 
-	serverCode := func() {
-		serverIni, err := gather.NewServer(1, 1, ncpu)
+	serverIni, err := gather.NewServer(1, 1, ncpu)
+	if err != nil {
+		log.Fatalf("cannot create server endpoint: %s", err)
+	}
+	// One connection for each participant in the group
+	for i := 1; i <= ncpu; i++ {
+		err := session.Accept(serverIni, gather.Worker, i, conn[i-1])
 		if err != nil {
-			log.Fatalf("cannot create server endpoint: %s", err)
+			log.Fatalf("failed to create connection to participant %d of role 'worker': %s", i, err)
 		}
-		// One connection for each participant in the group
-		for i := 1; i <= ncpu; i++ {
-			err := session.Accept(serverIni, gather.Worker, i, conn[i-1])
-			if err != nil {
-				log.Fatalf("failed to create connection to participant %d of role 'worker': %s", i, err)
-			}
-		}
+	}
+	serverMain := mkservmain(ncpu)
 
-		serverMain := mkservmain(ncpu)
+	time.Sleep(100 * time.Millisecond)
+
+	serverCode := func() {
 		serverIni.Run(serverMain)
 		wg.Done()
 	}
 
-	go serverCode()
-	time.Sleep(100 * time.Millisecond)
-
-	clientCode := func(i int) {
+	clientCode := func(i int) func() {
 		clientIni, err := gather.NewWorker(i, ncpu, 1)
 		if err != nil {
 			log.Fatalf("cannot create client endpoint: %s", err)
@@ -73,13 +72,21 @@ func main() {
 		}
 
 		clientMain := mkworkermain(i)
-		clientIni.Run(clientMain)
-		wg.Done()
+		return func() {
+			clientIni.Run(clientMain)
+			wg.Done()
+		}
+	}
+
+	clients := make([]func(), ncpu)
+	for i := 1; i <= ncpu; i++ {
+		clients[i-1] = clientCode(i)
 	}
 
 	run_startt := time.Now()
-	for i := 1; i <= ncpu; i++ {
-		go clientCode(i)
+	go serverCode()
+	for i := 0; i < ncpu; i++ {
+		go clients[i]()
 	}
 	wg.Wait()
 	run_endt := time.Now()
