@@ -83,7 +83,8 @@ func main() {
 	}
 	wg.Wait()
 	run_endt := time.Now()
-	fmt.Println(ncpu, "\t", Avg(run_endt.Sub(run_startt), niters))
+	// fmt.Println(ncpu, "\t", Avg(run_endt.Sub(run_startt), niters))
+	fmt.Println(Avg(run_endt.Sub(run_startt), niters))
 }
 
 func mkservmain(nw int) func(st1 *gather.Server_1To1_1) *gather.Server_1To1_End {

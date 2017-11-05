@@ -91,7 +91,7 @@ func main() {
 	}
 	wg.Wait()
 	run_endt := time.Now()
-	fmt.Println(ncpu, "\t", Avg(run_endt.Sub(run_startt), niters))
+	fmt.Println(Avg(run_endt.Sub(run_startt), niters))
 }
 
 func mkservmain(idx, nw int) func(st1 *alltoall.Server_1Ton_1) *alltoall.Server_1Ton_End {
