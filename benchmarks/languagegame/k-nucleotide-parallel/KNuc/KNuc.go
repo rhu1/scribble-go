@@ -45,9 +45,9 @@ type A_1 struct {
 
 func (ini *A_Init) Init() (*A_1, error) {
 	ini.Use()
-	for _, v := range ini.ept.Conn {
-		for _, c := range v {
-			for c != nil {
+	for n, _ := range ini.ept.Conn {
+		for j, _ := range ini.ept.Conn[n] {
+			for ini.ept.Conn[n][j] == nil {
 			}
 		}
 	}
@@ -157,8 +157,8 @@ type B_1 struct {
 func (ini *B_Init) Init() (*B_1, error) {
 	ini.Use()
 	for n, l := range ini.ept.Conn {
-		for i, l := range l {
-			if l == nil {
+		for i, c := range l {
+			if c == nil {
 				return nil, fmt.Errorf("Invalid connection for worker %s[%d]", n, i)
 			}
 		}
@@ -256,7 +256,7 @@ type S_End struct {
 	ept *session.Endpoint
 }
 
-func (ini *S_2) Send_SA(s string) *S_End {
+func (ini *S_2) Send_SA(s int) *S_End {
 	ini.Use()
 	check(ini.ept.Conn[A][0].Send(s))
 	return &S_End{}
