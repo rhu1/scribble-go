@@ -16,14 +16,12 @@ type Server_1To1_Init struct {
 }
 
 func NewServer(id, nserver, nworker int) (*Server_1To1_Init, error) {
-	if id > nserver || id < 1 {
-		return nil, fmt.Errorf("'server' id not in range [1, %d]", nserver)
+	session.RoleRange(id, nserver)
+	conn, err := session.NewConn([]session.ParamRole{{Worker, nworker}})
+
+	if err != nil {
+		return nil, err
 	}
-	if nworker < 1 {
-		return nil, fmt.Errorf("Wrong number of participants of role 'worker': %d", nworker)
-	}
-	conn := make(map[string][]transport.Channel)
-	conn[Worker] = make([]transport.Channel, nworker)
 
 	return &Server_1To1_Init{session.LinearResource{}, &session.Endpoint{id, nserver, conn}}, nil
 }

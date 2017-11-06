@@ -70,7 +70,6 @@ func main() {
 	for i := 1; i <= ncpu1; i++ {
 		servers[i-1] = serverCode(i)
 	}
-	time.Sleep(100 * time.Millisecond)
 
 	clientCode := func(i int) func() {
 		clientIni, err := alltoall.NewWorker(i, ncpu2, ncpu1)

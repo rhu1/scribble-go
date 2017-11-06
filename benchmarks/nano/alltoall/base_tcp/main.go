@@ -73,12 +73,15 @@ func main() {
 		servers[i] = serverCode(i)
 	}
 
+	for i := 1; i <= 1000000; i++ {
+		// time waster instead of time.Sleep
+	}
+
 	clientCode := func(idx int) func() {
 		var tmp int
 
 		cnn := make([](*tcp.Conn), ncpu1)
 		// One connection for each participant in the group
-		time.Sleep(100 * time.Millisecond)
 		for i := 1; i <= ncpu1; i++ {
 			cnn[i-1] = conn[i-1][idx].Connect().(*tcp.Conn)
 		}

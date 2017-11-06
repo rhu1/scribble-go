@@ -76,6 +76,10 @@ func main() {
 		servers[i-1] = serverCode(i)
 	}
 
+	for i := 1; i <= 1000000; i++ {
+		// time waster instead of time.Sleep
+	}
+
 	clientCode := func(i int) func() {
 		clientIni, err := alltoall.NewWorker(i, cpu2, cpu1)
 		if err != nil {
@@ -83,7 +87,6 @@ func main() {
 		}
 		// One connection for each participant in the group
 
-		time.Sleep(100 * time.Millisecond)
 		for j := 1; j <= cpu1; j++ {
 			err = session.Connect(clientIni, alltoall.Server, j, conn[j-1][i-1])
 			if err != nil {
