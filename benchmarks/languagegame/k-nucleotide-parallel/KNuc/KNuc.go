@@ -104,8 +104,6 @@ func (ini *A_3) RecvS() ([]int, *A_4) {
 }
 
 type A_End struct {
-	session.LinearResource
-	ept *session.Endpoint
 }
 
 func (ini *A_4) RecvB() ([]string, *A_End) {
@@ -180,8 +178,6 @@ func (ini *B_1) Recv_BA() (string, *B_2) {
 }
 
 type B_End struct {
-	session.LinearResource
-	ept *session.Endpoint
 }
 
 func (ini *B_2) Send_BA(pl string) *B_End {
