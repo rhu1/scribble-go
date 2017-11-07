@@ -69,32 +69,34 @@ func (e DeserialisationError) Error() string {
 // ConnCfg is a connection configuration, contains
 // the details required to establish a connection.
 type ConnCfg struct {
-	ch chan unsafe.Pointer
+	chl chan unsafe.Pointer
+	chr chan unsafe.Pointer
 }
 
 type Conn struct {
-	ch chan unsafe.Pointer
+	chl chan unsafe.Pointer
+	chr chan unsafe.Pointer
 }
 
 // NewConnection is a convenient wrapper for a TCP connection
 // and can be used as either server-side or client-side.
 func NewConnection() ConnCfg {
-	return ConnCfg{make(chan unsafe.Pointer)}
+	return ConnCfg{make(chan unsafe.Pointer), make(chan unsafe.Pointer)}
 }
 
 // NewConnection is a convenient wrapper for a TCP connection
 // and can be used as either server-side or client-side.
 func NewBufferedConnection(n int) ConnCfg {
-	return ConnCfg{make(chan unsafe.Pointer, n)}
+	return ConnCfg{make(chan unsafe.Pointer, n), make(chan unsafe.Pointer, n)}
 }
 
 // Connect establishes a connection with a TCP socket using details
 // from cfg, and returns the TCP stream as a ReadWriteCloser.
 func (cfg ConnCfg) Connect() transport.Channel {
-	if cfg.ch == nil {
+	if cfg.chl == nil || cfg.chr {
 		log.Fatalf("transport/shm: invalid channel")
 	}
-	return &Conn{cfg.ch}
+	return &Conn{chl: cfg.chr, chr: cfg.chl}
 }
 
 // Accept listens for and accepts connection from a TCP socket using
@@ -102,10 +104,10 @@ func (cfg ConnCfg) Connect() transport.Channel {
 //
 // Accept blocks while waiting for connection to be accepted.
 func (cfg ConnCfg) Accept() transport.Channel {
-	if cfg.ch == nil {
+	if cfg.chl == nil || cfg.chr == nil {
 		log.Fatalf("transport/shm: invalid channel")
 	}
-	return &Conn{cfg.ch}
+	return &Conn{cfg.chl, cfg.chr}
 }
 
 func (c *Conn) Close() error {
@@ -113,18 +115,18 @@ func (c *Conn) Close() error {
 }
 
 func (c *Conn) Send(val interface{}) error {
-	if c.ch == nil {
+	if c.chl == nil {
 		return SerialisationError{}
 	}
-	c.ch <- unsafe.Pointer(&val)
+	c.chl <- unsafe.Pointer(&val)
 	return nil
 }
 
 func (c *Conn) Recv(ptr interface{}) error {
-	if c.ch == nil {
+	if c.chr == nil {
 		return DeserialisationError{}
 	}
-	uptr := <-c.ch
+	uptr := <-c.chr
 
 	var word uint
 
