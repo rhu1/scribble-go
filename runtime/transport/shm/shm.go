@@ -41,7 +41,7 @@ package shm
 import (
 	"fmt"
 	"log"
-	"reflect"
+	"unsafe"
 
 	"github.com/nickng/scribble-go/runtime/transport"
 )
@@ -69,23 +69,23 @@ func (e DeserialisationError) Error() string {
 // ConnCfg is a connection configuration, contains
 // the details required to establish a connection.
 type ConnCfg struct {
-	ch chan interface{}
+	ch chan unsafe.Pointer
 }
 
 type Conn struct {
-	ch chan interface{}
+	ch chan unsafe.Pointer
 }
 
 // NewConnection is a convenient wrapper for a TCP connection
 // and can be used as either server-side or client-side.
 func NewConnection() ConnCfg {
-	return ConnCfg{make(chan interface{})}
+	return ConnCfg{make(chan unsafe.Pointer)}
 }
 
 // NewConnection is a convenient wrapper for a TCP connection
 // and can be used as either server-side or client-side.
 func NewBufferedConnection(n int) ConnCfg {
-	return ConnCfg{make(chan interface{}, n)}
+	return ConnCfg{make(chan unsafe.Pointer, n)}
 }
 
 // Connect establishes a connection with a TCP socket using details
@@ -116,7 +116,7 @@ func (c *Conn) Send(val interface{}) error {
 	if c.ch == nil {
 		return SerialisationError{}
 	}
-	c.ch <- val
+	c.ch <- unsafe.Pointer(&val)
 	return nil
 }
 
@@ -124,10 +124,59 @@ func (c *Conn) Recv(ptr interface{}) error {
 	if c.ch == nil {
 		return DeserialisationError{}
 	}
-	v := <-c.ch
+	uptr := <-c.ch
 
-	ptrValue := reflect.ValueOf(ptr)
-	val := reflect.Indirect(ptrValue)
-	val.Set(reflect.ValueOf(v))
+	var word uint
+
+	switch ptr.(type) {
+	case *bool:
+		**(**bool)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
+			**(**bool)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+	case *float32:
+		**(**float32)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
+			**(**float32)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+	case *float64:
+		**(**float64)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
+			**(**float64)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+	case *int:
+		**(**int)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
+			**(**int)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+	case *int8:
+		**(**int8)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
+			**(**int8)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+	case *int16:
+		**(**int16)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
+			**(**int16)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+	case *int32:
+		**(**int32)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
+			**(**int32)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+	case *int64:
+		**(**int64)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
+			**(**int64)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+	case *uint:
+		**(**uint)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
+			**(**uint)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+	case *uint8:
+		**(**uint8)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
+			**(**uint8)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+	case *uint16:
+		**(**uint16)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
+			**(**uint16)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+	case *uint32:
+		**(**uint32)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
+			**(**uint32)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+	case *uint64:
+		**(**uint64)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
+			**(**uint64)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+	case *uintptr:
+		**(**uintptr)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
+			**(**uintptr)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+	case *string:
+		**(**string)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
+			**(**string)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+	default:
+		**(**unsafe.Pointer)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
+			**(**unsafe.Pointer)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+	}
 	return nil
 }
