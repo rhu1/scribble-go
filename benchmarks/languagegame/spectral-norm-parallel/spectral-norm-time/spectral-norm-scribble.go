@@ -45,7 +45,7 @@ import (
 	"github.com/nickng/scribble-go/runtime/session"
 	"github.com/nickng/scribble-go/runtime/transport"
 	"github.com/nickng/scribble-go/runtime/transport/shm"
-	"math"
+	// "math"
 	"runtime"
 	"time"
 )
@@ -206,7 +206,7 @@ func master(N int, u, v Vec, x *Vec) func(*SN.A_1) *SN.A_End {
 			vBv += u[i] * v[i]
 			vv += v[i] * v[i]
 		}
-		fmt.Printf("%0.9f\n", math.Sqrt(vBv/vv))
+		// fmt.Printf("%0.9f\n", math.Sqrt(vBv/vv))
 
 		// finalise
 		return st1.SendEnd(pl)
