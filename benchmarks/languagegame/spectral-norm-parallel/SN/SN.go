@@ -279,6 +279,7 @@ func (st1 *B_1) timesOrEnd(data chan int, st2 chan chan *B_2, st3 chan chan *B_E
 	conn := st1.ept.Conn[A][0]
 
 	err := conn.Recv(&lbl)
+	fmt.Println("Label[", st1.ept.Id, "]: ", lbl)
 	if err != nil {
 		log.Fatalf("wrong label from server at %d: %s", st1.ept.Id, err)
 	}
@@ -289,6 +290,7 @@ func (st1 *B_1) timesOrEnd(data chan int, st2 chan chan *B_2, st3 chan chan *B_E
 		if err != nil {
 			log.Fatalf("wrong value(times) from server at %d: %s", st1.ept.Id, err)
 		}
+		fmt.Println("Label[", st1.ept.Id, "]: ", lbl, " = ", res)
 		data <- res
 		ch <- &B_2{session.LinearResource{}, st1.ept}
 		st2 <- ch
@@ -298,6 +300,7 @@ func (st1 *B_1) timesOrEnd(data chan int, st2 chan chan *B_2, st3 chan chan *B_E
 	if lbl == LEnd {
 		ch := make(chan *B_End, 1)
 		err = conn.Recv(&res)
+		fmt.Println("Label[", st1.ept.Id, "]: ", lbl, " = ", res)
 		if err != nil {
 			log.Fatalf("wrong value(end) from server at %d: %s", st1.ept.Id, err)
 		}

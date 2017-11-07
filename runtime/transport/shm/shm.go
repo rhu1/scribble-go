@@ -93,7 +93,7 @@ func NewBufferedConnection(n int) ConnCfg {
 // Connect establishes a connection with a TCP socket using details
 // from cfg, and returns the TCP stream as a ReadWriteCloser.
 func (cfg ConnCfg) Connect() transport.Channel {
-	if cfg.chl == nil || cfg.chr {
+	if cfg.chl == nil || cfg.chr == nil {
 		log.Fatalf("transport/shm: invalid channel")
 	}
 	return &Conn{chl: cfg.chr, chr: cfg.chl}
