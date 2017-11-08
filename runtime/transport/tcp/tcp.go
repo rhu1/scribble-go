@@ -46,6 +46,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"sync"
 	"time"
 
 	"github.com/nickng/scribble-go/runtime/transport"
@@ -134,11 +135,15 @@ func (cfg ConnCfg) newConn(rwc net.Conn) *Conn {
 	c := &Conn{
 		rwc: rwc,
 	}
+	c.rdMu.Lock()
 	c.bufr = newReader(c.rwc)
-	c.bufw = newWriter(c.rwc)
-
-	c.enc = gob.NewEncoder(NewDelimWriter(c, cfg.DelimMeth))
 	c.dec = gob.NewDecoder(NewDelimReader(c, cfg.DelimMeth))
+	c.rdMu.Unlock()
+
+	c.wtMu.Lock()
+	c.bufw = newWriter(c.rwc)
+	c.enc = gob.NewEncoder(NewDelimWriter(c, cfg.DelimMeth))
+	c.wtMu.Unlock()
 	return c
 }
 
@@ -153,17 +158,17 @@ type Conn struct {
 	// rwc is the real TCP connection.
 	rwc net.Conn
 
-	// bufr is a buffered stream to the TCP connection.
-	bufr *bufio.Reader
+	// guards the read buffer and the decoder
+	rdMu sync.Mutex
 
-	// dec is a deserialisation decoder for messages from the TCP connection.
-	dec *gob.Decoder
+	bufr *bufio.Reader // bufr is a buffered stream to the TCP connection.
+	dec  *gob.Decoder  // dec is a serialisation decoder for messages from rwc.
 
-	// bufw is a buffered stream to the TCP connection.
-	bufw *bufio.Writer
+	// guards the write buffer and the encoder
+	wtMu sync.Mutex
 
-	// enc is a serialisation encoder for messages to the TCP connection.
-	enc *gob.Encoder
+	bufw *bufio.Writer // bufw is a buffered stream to the TCP connection.
+	enc  *gob.Encoder  // enc is a serialisation encoder for messages to rwc.
 }
 
 // newReader returns a fresh buffered Reader.
@@ -215,6 +220,8 @@ func (c *Conn) Close() error {
 // Send serialises values val then sends the serialised
 // values to the underlying stream of connection c.
 func (c *Conn) Send(val interface{}) error {
+	c.wtMu.Lock()
+	defer c.wtMu.Unlock()
 	if err := c.enc.Encode(val); err != nil {
 		return SerialisationError{cause: err}
 	}
@@ -224,6 +231,8 @@ func (c *Conn) Send(val interface{}) error {
 // Recv receives values from the underlying stream then deserialises and
 // writes the deserialised values to the pointer addresses specified by ptr.
 func (c *Conn) Recv(ptr interface{}) error {
+	c.rdMu.Lock()
+	defer c.rdMu.Unlock()
 	if err := c.dec.Decode(ptr); err != nil {
 		return DeserialisationError{cause: err}
 	}
