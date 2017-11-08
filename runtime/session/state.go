@@ -18,7 +18,10 @@ func Accept(ini PreState, rolename string, id int, conn transport.Transport) err
 		return fmt.Errorf("participant %d of role '%s' out of bounds", id, rolename)
 	}
 	go func(i int, conn transport.Transport) {
-		ini.Ept().Conn[rolename][i-1] = conn.Accept()
+		c := conn.Accept()
+		ini.Ept().ConnMu.Lock()
+		ini.Ept().Conn[rolename][i-1] = c
+		ini.Ept().ConnMu.Unlock()
 	}(id, conn)
 	return nil
 }
@@ -32,6 +35,9 @@ func Connect(ini PreState, rolename string, id int, conn transport.Transport) er
 		return fmt.Errorf("participant %d of role '%s' out of bounds", id, rolename)
 	}
 	// Probably a good idea to use tcp.NewConnectionWithRetry
-	ini.Ept().Conn[rolename][id-1] = conn.Connect()
+	c := conn.Connect()
+	ini.Ept().ConnMu.Lock()
+	ini.Ept().Conn[rolename][id-1] = c
+	ini.Ept().ConnMu.Unlock()
 	return nil
 }
