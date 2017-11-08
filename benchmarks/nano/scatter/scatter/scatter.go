@@ -23,7 +23,7 @@ func NewServer(id, nserver, nworker int) (*Server_1To1_Init, error) {
 		return nil, err
 	}
 
-	return &Server_1To1_Init{session.LinearResource{}, &session.Endpoint{Id: id, NumRoles: nserver, Conn: conn}}, nil
+	return &Server_1To1_Init{session.LinearResource{}, session.NewEndpoint(id, nserver, conn)}, nil
 }
 
 func (ini *Server_1To1_Init) Ept() *session.Endpoint { return ini.ept }
@@ -40,8 +40,9 @@ type Server_1To1_1 struct {
 func (ini *Server_1To1_Init) Init() (*Server_1To1_1, error) {
 	ini.Use()
 	ini.Ept().ConnMu.RLock()
-	for i := range ini.ept.Conn[Worker] {
-		for ini.Ept().Conn[Worker][i] == nil {
+	for i, conn := range ini.ept.Conn[Worker] {
+		if conn == nil { // ini.ept.Conn[Worker][i]
+			return nil, fmt.Errorf("invalid connection from 'server[%d]' to 'worker[%d]'", ini.ept.Id, i)
 		}
 	}
 	ini.Ept().ConnMu.RUnlock()
@@ -107,12 +108,14 @@ type Worker_1Ton_1 struct {
 
 // Session hasn't started, so an error is returned if anything 'goes wrong'
 func (ini *Worker_1Ton_Init) Init() (*Worker_1Ton_1, error) {
-	n_server := len(ini.ept.Conn[Server])
-	for i := 0; i < n_server; i++ {
-		if ini.ept.Conn[Server][i] == nil {
+
+	ini.ept.ConnMu.Lock()
+	for i, conn := range ini.ept.Conn[Server] {
+		if conn == nil { // ini.ept.Conn[Server][i]
 			return nil, fmt.Errorf("invalid connection from 'worker[%d]' to 'server[%d]'", ini.ept.Id, i)
 		}
 	}
+	ini.ept.ConnMu.Unlock()
 	return &Worker_1Ton_1{session.LinearResource{}, ini.ept}, nil
 }
 
@@ -123,6 +126,7 @@ func (st1 *Worker_1Ton_1) RecvAll() ([]int, *Worker_1Ton_1) {
 	var tmp int
 	st1.Use()
 
+	st1.ept.ConnMu.Lock()
 	res := make([]int, len(st1.ept.Conn[Server]))
 	for i, conn := range st1.ept.Conn[Server] {
 		err := conn.Recv(&tmp)
@@ -131,6 +135,7 @@ func (st1 *Worker_1Ton_1) RecvAll() ([]int, *Worker_1Ton_1) {
 		}
 		res[i] = tmp
 	}
+	st1.ept.ConnMu.Unlock()
 	return res, &Worker_1Ton_1{session.LinearResource{}, st1.ept}
 }
 
