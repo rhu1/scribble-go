@@ -23,7 +23,7 @@ func NewServer(id, nserver, nworker int) (*Server_1To1_Init, error) {
 		return nil, err
 	}
 
-	return &Server_1To1_Init{session.LinearResource{}, &session.Endpoint{id, nserver, conn}}, nil
+	return &Server_1To1_Init{session.LinearResource{}, &session.Endpoint{Id: id, NumRoles: nserver, Conn: conn}}, nil
 }
 
 func (ini *Server_1To1_Init) Ept() *session.Endpoint { return ini.ept }
@@ -39,14 +39,12 @@ type Server_1To1_1 struct {
 // TODO: Assumption, rolename and
 func (ini *Server_1To1_Init) Init() (*Server_1To1_1, error) {
 	ini.Use()
-	conn := ini.ept.Conn[Worker]
-	n_worker := len(conn)
-
-	// FIXME
-	for i := 0; i < n_worker; i++ {
-		for ini.ept.Conn[Worker][i] == nil {
+	ini.Ept().ConnMu.RLock()
+	for i := range ini.ept.Conn[Worker] {
+		for ini.Ept().Conn[Worker][i] == nil {
 		}
 	}
+	ini.Ept().ConnMu.RUnlock()
 
 	return &Server_1To1_1{session.LinearResource{}, ini.ept}, nil
 }
@@ -62,9 +60,11 @@ func (st1 *Server_1To1_1) SendAll(pl []int) *Server_1To1_1 {
 	}
 	st1.Use()
 
+	st1.ept.ConnMu.RLock()
 	for i, v := range pl {
 		st1.ept.Conn[Worker][i].Send(v)
 	}
+	st1.ept.ConnMu.RUnlock()
 	return &Server_1To1_1{session.LinearResource{}, st1.ept}
 }
 
