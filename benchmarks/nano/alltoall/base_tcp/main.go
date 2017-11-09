@@ -50,24 +50,25 @@ func main() {
 	serverCode := func(idx int) func() {
 
 		cnn := make([](*tcp.Conn), ncpu2)
-		rwm := new(sync.RWMutex)
+		cnnMu := new(sync.RWMutex)
 		// One connection for each participant in the group
 		for i := 1; i <= ncpu2; i++ {
 			go func(i int) {
-				rwm.Lock()
-				cnn[i-1] = conn[idx][i-1].Accept().(*tcp.Conn)
-				rwm.Unlock()
+				c := conn[idx][i-1].Accept().(*tcp.Conn)
+				cnnMu.Lock()
+				cnn[i-1] = c
+				cnnMu.Unlock()
 			}(i)
 		}
 
 		return func() {
 
 			for i := 0; i < niters; i++ {
-				rwm.RLock()
+				cnnMu.RLock()
 				for _, cn := range cnn {
 					cn.Send(42)
 				}
-				rwm.RUnlock()
+				cnnMu.RUnlock()
 			}
 			wg.Done()
 		}
@@ -89,8 +90,9 @@ func main() {
 		rwm := new(sync.RWMutex)
 		// One connection for each participant in the group
 		for i := 1; i <= ncpu1; i++ {
+			c := conn[i-1][idx].Connect().(*tcp.Conn)
 			rwm.Lock()
-			cnn[i-1] = conn[i-1][idx].Connect().(*tcp.Conn)
+			cnn[i-1] = c
 			rwm.Unlock()
 		}
 

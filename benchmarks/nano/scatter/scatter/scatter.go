@@ -108,14 +108,14 @@ type Worker_1Ton_1 struct {
 
 // Session hasn't started, so an error is returned if anything 'goes wrong'
 func (ini *Worker_1Ton_Init) Init() (*Worker_1Ton_1, error) {
-
+	ini.Use()
 	ini.ept.ConnMu.Lock()
+	defer ini.ept.ConnMu.Unlock()
 	for i, conn := range ini.ept.Conn[Server] {
 		if conn == nil { // ini.ept.Conn[Server][i]
 			return nil, fmt.Errorf("invalid connection from 'worker[%d]' to 'server[%d]'", ini.ept.Id, i)
 		}
 	}
-	ini.ept.ConnMu.Unlock()
 	return &Worker_1Ton_1{session.LinearResource{}, ini.ept}, nil
 }
 
@@ -123,19 +123,17 @@ type Worker_1Ton_End struct {
 }
 
 func (st1 *Worker_1Ton_1) RecvAll() ([]int, *Worker_1Ton_1) {
-	var tmp int
 	st1.Use()
 
-	st1.ept.ConnMu.Lock()
 	res := make([]int, len(st1.ept.Conn[Server]))
+	st1.ept.ConnMu.Lock()
+	defer st1.ept.ConnMu.Unlock()
 	for i, conn := range st1.ept.Conn[Server] {
-		err := conn.Recv(&tmp)
+		err := conn.Recv(&res[i])
 		if err != nil {
 			log.Fatalf("wrong value from server at %d: %s", st1.ept.Id, err)
 		}
-		res[i] = tmp
 	}
-	st1.ept.ConnMu.Unlock()
 	return res, &Worker_1Ton_1{session.LinearResource{}, st1.ept}
 }
 

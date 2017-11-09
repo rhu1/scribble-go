@@ -25,7 +25,7 @@ func NewServer(id, nserver, nworker int) (*Server_1To1_Init, error) {
 	conn := make(map[string][]transport.Channel)
 	conn[Worker] = make([]transport.Channel, nworker)
 
-	return &Server_1To1_Init{session.LinearResource{}, &session.Endpoint{id, nserver, conn}}, nil
+	return &Server_1To1_Init{session.LinearResource{}, session.NewEndpoint(id, nserver, conn)}, nil
 }
 
 func (ini *Server_1To1_Init) Ept() *session.Endpoint { return ini.ept }
@@ -41,12 +41,11 @@ type Server_1To1_1 struct {
 // TODO: Assumption, rolename and
 func (ini *Server_1To1_Init) Init() (*Server_1To1_1, error) {
 	ini.Use()
-	conn := ini.ept.Conn[Worker]
-	n_worker := len(conn)
-
-	// FIXME
-	for i := 0; i < n_worker; i++ {
-		for ini.ept.Conn[Worker][i] == nil {
+	ini.ept.ConnMu.RLock()
+	defer ini.ept.ConnMu.RUnlock()
+	for i, conn := range ini.ept.Conn[Worker] {
+		if conn == nil { // ini.ept.Conn[Worker][i]
+			return nil, fmt.Errorf("invalid connection from 'server[%d]' to 'worker[%d]'", ini.ept.Id, i)
 		}
 	}
 
@@ -60,11 +59,15 @@ type Server_1To1_End struct {
 // and the program exits
 func (st1 *Server_1To1_1) RecvAll() ([]int, *Server_1To1_1) {
 	st1.Use()
-	ln := len(st1.ept.Conn[Worker])
-	res := make([]int, ln)
 
-	for i := 0; i < ln; i++ {
-		st1.ept.Conn[Worker][i].Recv(&res[i])
+	st1.ept.ConnMu.Lock()
+	defer st1.ept.ConnMu.Unlock()
+	res := make([]int, len(st1.ept.Conn[Worker]))
+	for i, conn := range st1.ept.Conn[Worker] {
+		err := conn.Recv(&res[i])
+		if err != nil {
+			log.Fatalf("wrong value from server at %d: %s", st1.ept.Id, err)
+		}
 	}
 	return res, &Server_1To1_1{session.LinearResource{}, st1.ept}
 }

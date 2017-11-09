@@ -40,8 +40,9 @@ func main() {
 		for i := 1; i <= ncpu; i++ {
 			go func(i int) {
 				conn := tcp.NewConnection("127.0.0.1", strconv.Itoa(33333+i))
+				c := conn.Accept().(*tcp.Conn)
 				rwm.Lock()
-				cnn[i-1] = conn.Accept().(*tcp.Conn)
+				cnn[i-1] = c
 				rwm.Unlock()
 			}(i)
 		}
@@ -56,11 +57,11 @@ func main() {
 			}
 
 			for i := 0; i < niters; i++ {
+				rwm.RLock()
 				for _, cn := range cnn {
-					rwm.RLock()
 					cn.Recv(&tmp)
-					rwm.RUnlock()
 				}
+				rwm.RUnlock()
 			}
 			wg.Done()
 		}
