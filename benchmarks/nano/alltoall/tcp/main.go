@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"../alltoall"
+	"github.com/nickng/scribble-go/benchmarks/nano/alltoall/alltoall"
 
 	"github.com/nickng/scribble-go/runtime/session"
 	"github.com/nickng/scribble-go/runtime/transport"

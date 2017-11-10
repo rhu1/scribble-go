@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"../gather"
+	"github.com/nickng/scribble-go/benchmarks/nano/gather/gather"
 
 	"github.com/nickng/scribble-go/runtime/session"
 	"github.com/nickng/scribble-go/runtime/transport"
