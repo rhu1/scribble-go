@@ -53,19 +53,20 @@ func main() {
 		}
 
 		return func() {
-			for i := 0; i < ncpu; i++ {
-				cnnMu.RLock()
-				for cnn[i] == nil {
+			cnnMu.RLock()
+			for i, conn := range cnn {
+				if conn == nil {
+					log.Fatalf("cnn[%d] is empty", i)
 				}
-				cnnMu.RUnlock()
 			}
+			cnnMu.RUnlock()
 
 			for i := 0; i < niters; i++ {
+				cnnMu.RLock()
 				for j, v := range payload {
-					cnnMu.RLock()
 					cnn[j].Send(v)
-					cnnMu.RUnlock()
 				}
+				cnnMu.RUnlock()
 			}
 			wg.Done()
 		}
