@@ -80,17 +80,19 @@ func NewA(id, numA, numB int) (*A_Init, error) {
 		return nil, err
 	}
 
-	return &A_Init{session.LinearResource{}, &session.Endpoint{id, numA, conn}}, nil
+	return &A_Init{session.LinearResource{}, session.NewEndpoint(id, numA, conn)}, nil
 }
 
 func (ini *A_Init) Init() (*A_1, error) {
 	ini.Use()
+	ini.ept.ConnMu.Lock()
 	for n, _ := range ini.ept.Conn {
 		for j, _ := range ini.ept.Conn[n] {
 			for ini.ept.Conn[n][j] == nil {
 			}
 		}
 	}
+	ini.ept.ConnMu.Unlock()
 	return &A_1{session.LinearResource{}, ini.ept}, nil
 }
 
@@ -99,10 +101,12 @@ func (ini *A_1) SendTimes(pl []int) *A_2 {
 	if len(pl) != len(ini.ept.Conn[B]) {
 		log.Panicf("Incorrect number of arguments to role 'A' SendS")
 	}
+	ini.ept.ConnMu.RLock()
 	for i, c := range ini.ept.Conn[B] {
 		check(c.Send(LTimes))
 		check(c.Send(pl[i]))
 	}
+	ini.ept.ConnMu.RUnlock()
 	return &A_2{session.LinearResource{}, ini.ept}
 }
 
@@ -111,10 +115,12 @@ func (ini *A_1) SendEnd(pl []int) *A_End {
 	if len(pl) != len(ini.ept.Conn[B]) {
 		log.Panicf("Incorrect number of arguments to role 'A' SendS")
 	}
+	ini.ept.ConnMu.RLock()
 	for i, c := range ini.ept.Conn[B] {
 		check(c.Send(LEnd))
 		check(c.Send(pl[i]))
 	}
+	ini.ept.ConnMu.RUnlock()
 	return &A_End{}
 }
 
@@ -122,10 +128,12 @@ func (ini *A_2) RecvDone() ([]int, *A_3) {
 	var tmp int
 	pl := make([]int, len(ini.ept.Conn[B]))
 
+	ini.ept.ConnMu.RLock()
 	for i, c := range ini.ept.Conn[B] {
 		check(c.Recv(&tmp))
 		pl[i] = tmp
 	}
+	ini.ept.ConnMu.RUnlock()
 	return pl, &A_3{session.LinearResource{}, ini.ept}
 }
 
@@ -134,9 +142,11 @@ func (ini *A_3) SendNext(pl []int) *A_4 {
 	if len(pl) != len(ini.ept.Conn[B]) {
 		log.Panicf("Incorrect number of arguments to role 'A' SendS")
 	}
+	ini.ept.ConnMu.RLock()
 	for i, c := range ini.ept.Conn[B] {
 		check(c.Send(pl[i]))
 	}
+	ini.ept.ConnMu.RUnlock()
 	return &A_4{session.LinearResource{}, ini.ept}
 }
 
@@ -144,10 +154,12 @@ func (ini *A_4) RecvDone() ([]int, *A_5) {
 	var tmp int
 	pl := make([]int, len(ini.ept.Conn[B]))
 
+	ini.ept.ConnMu.RLock()
 	for i, c := range ini.ept.Conn[B] {
 		check(c.Recv(&tmp))
 		pl[i] = tmp
 	}
+	ini.ept.ConnMu.RUnlock()
 	return pl, &A_5{session.LinearResource{}, ini.ept}
 }
 
@@ -156,9 +168,11 @@ func (ini *A_5) SendTimesTr(pl []int) *A_6 {
 	if len(pl) != len(ini.ept.Conn[B]) {
 		log.Panicf("Incorrect number of arguments to role 'A' SendS")
 	}
+	ini.ept.ConnMu.RLock()
 	for i, c := range ini.ept.Conn[B] {
 		check(c.Send(pl[i]))
 	}
+	ini.ept.ConnMu.RUnlock()
 	return &A_6{session.LinearResource{}, ini.ept}
 }
 
@@ -166,10 +180,12 @@ func (ini *A_6) RecvDone() ([]int, *A_7) {
 	var tmp int
 	pl := make([]int, len(ini.ept.Conn[B]))
 
+	ini.ept.ConnMu.RLock()
 	for i, c := range ini.ept.Conn[B] {
 		check(c.Recv(&tmp))
 		pl[i] = tmp
 	}
+	ini.ept.ConnMu.RUnlock()
 	return pl, &A_7{session.LinearResource{}, ini.ept}
 }
 
@@ -222,7 +238,7 @@ func NewB(id, numB, numA int) (*B_Init, error) {
 		return nil, err
 	}
 
-	return &B_Init{session.LinearResource{}, &session.Endpoint{id, numB, conn}}, nil
+	return &B_Init{session.LinearResource{}, session.NewEndpoint(id, numB, conn)}, nil
 }
 
 type B_1 struct {
