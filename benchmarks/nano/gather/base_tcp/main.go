@@ -36,6 +36,8 @@ func main() {
 
 		cnn := make([](*tcp.Conn), ncpu)
 		cnnMu := new(sync.RWMutex)
+		cnnWg := new(sync.WaitGroup)
+		cnnWg.Add(ncpu)
 		// One connection for each participant in the group
 		for i := 1; i <= ncpu; i++ {
 			go func(i int) {
@@ -44,18 +46,12 @@ func main() {
 				cnnMu.Lock()
 				cnn[i-1] = c
 				cnnMu.Unlock()
+				cnnWg.Done()
 			}(i)
 		}
 
 		return func() {
-			cnnMu.RLock()
-			for i, conn := range cnn {
-				if conn == nil {
-					log.Fatalf("conn[%d] is nil", i)
-				}
-
-			}
-			cnnMu.RUnlock()
+			cnnWg.Wait()
 			var tmp int
 
 			for i := 0; i < niters; i++ {
