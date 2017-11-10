@@ -71,7 +71,7 @@ func (st1 *Server_1To1_1) SendAll(pl []int) *Server_1To1_1 {
 
 // Convenience to check that user implements the full protocol
 func (ini *Server_1To1_Init) Run(f func(*Server_1To1_1) *Server_1To1_End) {
-
+	ini.ept.CheckConnection()
 	st1, err := ini.Init()
 
 	if err != nil {
@@ -138,6 +138,7 @@ func (st1 *Worker_1Ton_1) RecvAll() ([]int, *Worker_1Ton_1) {
 }
 
 func (ini *Worker_1Ton_Init) Run(f func(*Worker_1Ton_1) *Worker_1Ton_End) {
+	ini.ept.CheckConnection()
 	st1, err := ini.Init()
 	if err != nil {
 		log.Fatalf("failed to initialise the session: %s", err)
