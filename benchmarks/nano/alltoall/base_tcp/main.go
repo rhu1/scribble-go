@@ -51,6 +51,8 @@ func main() {
 
 		cnn := make([](*tcp.Conn), ncpu2)
 		cnnMu := new(sync.RWMutex)
+		cnnWg := new(sync.WaitGroup)
+		cnnWg.Add(ncpu2)
 		// One connection for each participant in the group
 		for i := 1; i <= ncpu2; i++ {
 			go func(i int) {
@@ -58,10 +60,12 @@ func main() {
 				cnnMu.Lock()
 				cnn[i-1] = c
 				cnnMu.Unlock()
+				cnnWg.Done()
 			}(i)
 		}
 
 		return func() {
+			cnnWg.Wait()
 
 			for i := 0; i < niters; i++ {
 				cnnMu.RLock()
@@ -87,25 +91,30 @@ func main() {
 		var tmp int
 
 		cnn := make([](*tcp.Conn), ncpu1)
-		rwm := new(sync.RWMutex)
+		cnnMu := new(sync.RWMutex)
+		cnnWg := new(sync.WaitGroup)
+		cnnWg.Add(ncpu1)
 		// One connection for each participant in the group
 		for i := 1; i <= ncpu1; i++ {
 			c := conn[i-1][idx].Connect().(*tcp.Conn)
-			rwm.Lock()
+			cnnMu.Lock()
 			cnn[i-1] = c
-			rwm.Unlock()
+			cnnMu.Unlock()
+			cnnWg.Done()
 		}
 
 		return func() {
+			cnnWg.Wait()
+
 			for i := 0; i < niters; i++ {
-				rwm.RLock()
+				cnnMu.RLock()
 				for _, cn := range cnn {
 					err := cn.Recv(&tmp)
 					if err != nil {
 						log.Fatalf("wrong value from server at %d: %s", i, err)
 					}
 				}
-				rwm.RUnlock()
+				cnnMu.RUnlock()
 			}
 			wg.Done()
 		}
