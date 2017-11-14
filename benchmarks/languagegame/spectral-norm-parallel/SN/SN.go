@@ -212,6 +212,7 @@ func (ini *A_8) RecvDone() ([]int, *A_1) {
 }
 
 func (ini *A_Init) Run(f func(*A_1) *A_End) {
+	ini.ept.CheckConnection()
 	st1, err := ini.Init()
 	check(err)
 	f(st1)
@@ -418,6 +419,7 @@ func (ini *B_8) SendDone(pl int) *B_1 {
 }
 
 func (ini *B_Init) Run(f func(*B_1) *B_End) {
+	ini.ept.CheckConnection()
 	st1, err := ini.Init()
 	check(err)
 	f(st1)

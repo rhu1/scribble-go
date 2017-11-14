@@ -128,6 +128,7 @@ func (ini *A_4) RecvB() ([]string, *A_End) {
 }
 
 func (ini *A_Init) Run(f func(*A_1) *A_End) {
+	ini.ept.CheckConnection()
 	st1, err := ini.Init()
 	check(err)
 	f(st1)
@@ -204,6 +205,7 @@ func (ini *B_2) Send_BA(pl string) *B_End {
 }
 
 func (ini *B_Init) Run(f func(*B_1) *B_End) {
+	ini.ept.CheckConnection()
 	st1, err := ini.Init()
 	check(err)
 	f(st1)
