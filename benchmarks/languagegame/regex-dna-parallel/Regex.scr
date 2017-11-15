@@ -1,0 +1,13 @@
+module Regex;
+
+type <go> "int"    from "..." as int;
+type <go> "string" from "..." as string;
+
+global protocol Proto(role A(k), role B(k), role C(k))
+{
+  count(string)   from A[1..1] to B[1..k];
+  measure(int)    from A[1..1] to C[1..1];
+  donec(string)   from B[1..k] to A[1..1];
+  len(int)        from C[1..1] to A[1..1];
+}
+
