@@ -40,7 +40,6 @@ package tcp
 
 import (
 	"bufio"
-	"encoding/gob"
 	"errors"
 	"fmt"
 	"io"
@@ -83,7 +82,8 @@ type ConnCfg struct {
 	Port string
 
 	// DelimMeth specifies delimiter implementation.
-	DelimMeth DelimitMethod
+	DelimMeth     DelimitMethod
+	SerialiseMeth SerialiseMethod
 
 	// retryWait specifies the time to wait before retrying connection.
 	retryWait time.Duration
@@ -137,12 +137,12 @@ func (cfg ConnCfg) newConn(rwc net.Conn) *Conn {
 	}
 	c.rdMu.Lock()
 	c.bufr = newReader(c.rwc)
-	c.dec = gob.NewDecoder(NewDelimReader(c, cfg.DelimMeth))
+	c.dec = NewDeserialiser(NewDelimReader(c, cfg.DelimMeth), cfg.SerialiseMeth)
 	c.rdMu.Unlock()
 
 	c.wtMu.Lock()
 	c.bufw = newWriter(c.rwc)
-	c.enc = gob.NewEncoder(NewDelimWriter(c, cfg.DelimMeth))
+	c.enc = NewSerialiser(NewDelimWriter(c, cfg.DelimMeth), cfg.SerialiseMeth)
 	c.wtMu.Unlock()
 	return c
 }
@@ -162,13 +162,13 @@ type Conn struct {
 	rdMu sync.Mutex
 
 	bufr *bufio.Reader // bufr is a buffered stream to the TCP connection.
-	dec  *gob.Decoder  // dec is a serialisation decoder for messages from rwc.
+	dec  deserialiser  // dec is a serialisation decoder for messages from rwc.
 
 	// guards the write buffer and the encoder
 	wtMu sync.Mutex
 
 	bufw *bufio.Writer // bufw is a buffered stream to the TCP connection.
-	enc  *gob.Encoder  // enc is a serialisation encoder for messages to rwc.
+	enc  serialiser    // enc is a serialisation encoder for messages to rwc.
 }
 
 // newReader returns a fresh buffered Reader.
