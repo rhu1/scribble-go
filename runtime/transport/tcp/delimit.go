@@ -28,7 +28,7 @@ type DelimitMethod int
 const (
 	// DelimitByNewline is the default delimitation method, where a
 	// delimiter character '\n' is added to the end of each message.
-	// This delimitation methods is minimal but could cause error if
+	// This delimitation method is minimal but could cause error if
 	// the message is not encoded (e.g. contains '\n' in message body).
 	DelimitByNewline DelimitMethod = iota
 
@@ -39,6 +39,11 @@ const (
 	// Using this method the allocation can be reduced to minimum since
 	// the size of the message is known from the beginning.
 	DelimitBySize
+
+	// DelmitByCRLF is a delimitation method where the delimiter is the
+	// byte sequence '\r\n' (CRLF).
+	// This delimitation method is used by common protocols such as HTTP.
+	DelimitByCRLF
 )
 
 // NewDelimReader returns a new delimiter Reader for the connection c.
@@ -48,6 +53,8 @@ func NewDelimReader(c *Conn, m DelimitMethod) io.Reader {
 		return &newlineDelimReader{conn: c}
 	case DelimitBySize:
 		return &sizeDelimReader{conn: c}
+	case DelimitByCRLF:
+		return &crlfDelimReader{conn: c}
 	}
 	return nil
 }
@@ -59,6 +66,8 @@ func NewDelimWriter(c *Conn, m DelimitMethod) io.Writer {
 		return &newlineDelimWriter{conn: c}
 	case DelimitBySize:
 		return &sizeDelimWriter{conn: c}
+	case DelimitByCRLF:
+		return &crlfDelimWriter{conn: c}
 	}
 	return nil
 }
@@ -152,5 +161,112 @@ func (ndw *newlineDelimWriter) Write(p []byte) (n int, err error) {
 		ndw.conn.rwc.Close()
 	}
 	ndw.conn.bufw.Flush()
+	return n, err
+}
+
+var (
+	crlf       = []byte{'\r', '\n'}
+	doubleCrlf = []byte{'\r', '\n', '\r', '\n'}
+)
+
+// crlfDelimReader is a Reader that decodes
+// a \r\n delimited data stream encoded by crlfDelimWriter.
+type crlfDelimReader struct {
+	conn  *Conn
+	state int
+}
+
+// Read reads from and decodes the underlying delimited data stream
+// and copies the first decoded item into p.
+func (cdr *crlfDelimReader) Read(p []byte) (n int, err error) {
+	const (
+		stateBegin = iota
+		stateData
+		stateCR
+		stateCRLFBegin
+		stateCRLFCR // End of line: \r\n
+		stateEnd    // End of segment: \r\n \r\n
+	)
+	for n < len(p) && cdr.state != stateEnd {
+		var b byte
+		b, err := cdr.conn.bufr.ReadByte()
+		if err != nil {
+			if err == io.EOF {
+				cdr.state = stateBegin // reset state
+				return n, io.EOF       // end of all data
+			}
+			break
+		}
+		switch cdr.state {
+		case stateBegin:
+			if b == '\r' {
+				cdr.state = stateCR
+				continue
+			}
+			cdr.state = stateData
+
+		case stateData:
+			if b == '\r' {
+				cdr.state = stateCR
+				continue
+			}
+
+		case stateCR:
+			if b == '\n' {
+				cdr.state = stateCRLFBegin
+				continue
+			}
+			// Reset state: last read is normal data.
+			cdr.conn.bufr.UnreadByte()
+			b = '\r'
+			cdr.state = stateData
+
+		case stateCRLFBegin:
+			if b == '\r' {
+				cdr.state = stateCRLFCR
+				continue
+			}
+			if n+2 < len(p) {
+				p[n] = '\r'
+				n++
+				p[n] = '\n'
+				n++
+			}
+			cdr.state = stateBegin
+
+		case stateCRLFCR:
+			if b == '\n' {
+				cdr.state = stateEnd
+				continue
+			}
+			// Reset state: last read is normal data.
+			cdr.conn.bufr.UnreadByte()
+			b = '\r'
+			cdr.state = stateData
+		}
+		p[n] = b
+		n++
+	}
+	if err == nil && cdr.state == stateEnd { // Normal EOF
+		// end of delimited data (more to come)
+		cdr.state = stateBegin
+	}
+	return
+}
+
+// newlineDelimWriter is a Writer that adds \r\n suffix to delimit data.
+type crlfDelimWriter struct {
+	conn *Conn
+}
+
+// Write encode p into delimited data stream and writes
+// the encoded data to the underlying stream.
+func (cdw *crlfDelimWriter) Write(p []byte) (n int, err error) {
+	n, err = cdw.conn.bufw.Write(p)
+	_, err = cdw.conn.bufw.Write(doubleCrlf)
+	if err != nil {
+		cdw.conn.rwc.Close()
+	}
+	cdw.conn.bufw.Flush()
 	return n, err
 }
