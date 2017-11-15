@@ -99,7 +99,7 @@ func printKnucs(a kNucArray) {
 	}
 	for _, kn := range a {
 		ioutil.Discard.Write(([]byte)(fmt.Sprintf("%s %.3f\n", kn.name, 100*float64(kn.count)/float64(sum))))
-		// fmt.Printf("%s %.3f\n", kn.name, 100*float64(kn.count)/float64(sum))
+		//fmt.Printf("%s %.3f\n", kn.name, 100*float64(kn.count)/float64(sum))
 	}
 	// fmt.Print("\n")
 }
@@ -150,11 +150,11 @@ func main() {
 	// Create connections
 	connS := make([]transport.Transport, 2)
 	for i := 0; i < 2; i++ {
-		connS[i] = shm.NewBufferedConnection(1)
+		connS[i] = shm.NewConnection()
 	}
 	connB := make([]transport.Transport, nCPU)
 	for i := 0; i < nCPU; i++ {
-		connB[i] = shm.NewBufferedConnection(1)
+		connB[i] = shm.NewConnection()
 	}
 
 	// instantiate protocol
@@ -226,9 +226,9 @@ func sorter(i int, str string, arr *kNucArray) func(*KNuc.S_1) *KNuc.S_End {
 
 		_, st2 := st1.Recv_SA()
 
-		*arr = sortedArray(count(str, i))
+		*arr = sortedArray(count(str, i+1))
 
-		return st2.Send_SA(0)
+		return st2.Send_SA(i)
 	}
 }
 
@@ -247,6 +247,7 @@ func master(arr1, arr2 *kNucArray, interests []string) func(*KNuc.A_1) *KNuc.A_E
 
 		for _, rc := range res {
 			ioutil.Discard.Write(([]byte)(rc))
+			// fmt.Print(rc)
 		}
 
 		return ste

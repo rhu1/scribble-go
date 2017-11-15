@@ -38,13 +38,13 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"runtime"
-	"time"
 	"sort"
+	"time"
 )
 
 func count(data string, n int) map[string]int {
@@ -94,17 +94,17 @@ func printKnucs(a kNucArray) {
 		sum += kn.count
 	}
 	for _, kn := range a {
-                ioutil.Discard.Write(([]byte)(fmt.Sprintf("%s %.3f\n", kn.name, 100*float64(kn.count)/float64(sum))))
+		ioutil.Discard.Write(([]byte)(fmt.Sprintf("%s %.3f\n", kn.name, 100*float64(kn.count)/float64(sum))))
 		//fmt.Printf("%s %.3f\n", kn.name, 100*float64(kn.count)/float64(sum))
 	}
 	//fmt.Print("\n")
 }
 
 func main() {
-        run_startt := time.Now()
-        var nCPU int
-        flag.IntVar(&nCPU, "ncpu", 8, "GOMAXPROCS")
-        flag.Parse()
+	run_startt := time.Now()
+	var nCPU int
+	flag.IntVar(&nCPU, "ncpu", 8, "GOMAXPROCS")
+	flag.Parse()
 	runtime.GOMAXPROCS(8)
 	in := bufio.NewReader(os.Stdin)
 	three := []byte(">THREE ")
@@ -135,7 +135,6 @@ func main() {
 
 	var arr1, arr2 kNucArray
 
-
 	countsdone := make(chan bool)
 	go func() {
 		arr1 = sortedArray(count(str, 1))
@@ -146,21 +145,21 @@ func main() {
 		countsdone <- true
 	}()
 
-        allinterests := []string{"GGT", "GGTA", "GGTATT", "GGTATTTTAATT",
-                                 "GGT", "GGTA", "GGTATT", "GGTATTTTAATT",
-                                 "GGT", "GGTA", "GGTATT", "GGTATTTTAATT",
-                                 "GGT", "GGTA", "GGTATT", "GGTATTTTAATT",
-                                 "GGT", "GGTA", "GGTATT", "GGTATTTTAATT",
-                                 }
+	allinterests := []string{"GGT", "GGTA", "GGTATT", "GGTATTTTAATT",
+		"GGT", "GGTA", "GGTATT", "GGTATTTTAATT",
+		"GGT", "GGTA", "GGTATT", "GGTATTTTAATT",
+		"GGT", "GGTA", "GGTATT", "GGTATTTTAATT",
+		"GGT", "GGTA", "GGTATT", "GGTATTTTAATT",
+	}
 
-        interests := allinterests[:nCPU]
+	interests := allinterests[:nCPU]
 
 	results := make([]chan string, len(interests))
 	for i, s := range interests {
 		ch := make(chan string)
 		results[i] = ch
 		go func(result chan string, ss string) {
-                  result <- fmt.Sprintf("%d %s\n", countOne(str, ss), ss)
+			result <- fmt.Sprintf("%d %s\n", countOne(str, ss), ss)
 		}(ch, s)
 	}
 	<-countsdone
@@ -170,10 +169,10 @@ func main() {
 	for _, rc := range results {
 
 		//fmt.Print(<-rc)
-                ioutil.Discard.Write(([]byte)(<-rc)) // Simulate the print
+		ioutil.Discard.Write(([]byte)(<-rc)) // Simulate the print
 	}
 
-        run_endt := time.Now()
-        fmt.Println(len(data), "\t", nCPU, "\t", run_endt.Sub(run_startt).Nanoseconds())
+	run_endt := time.Now()
+	fmt.Println(len(data), "\t", nCPU, "\t", run_endt.Sub(run_startt).Nanoseconds())
 
 }

@@ -1,7 +1,9 @@
 #!/bin/sh
 
-LIST="k-nucleotide-time \
-      orig-time"
+# LIST="k-nucleotide-time \
+#       orig-time"
+
+LIST="k-nucleotide-time"
 
 INPUT="input1.fasta input2.fasta input3.fasta input4.fasta"
 
