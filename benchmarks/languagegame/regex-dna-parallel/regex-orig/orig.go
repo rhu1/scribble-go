@@ -38,10 +38,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	// "github.com/pkg/profile"
 	"io/ioutil"
 	"os"
 	"regexp"
 	"runtime"
+	"runtime/trace"
 	"time"
 )
 
@@ -108,6 +110,19 @@ func countMatches(pat string, bytes []byte) int {
 }
 
 func main() {
+	//defer profile.Start(profile.MemProfile).Stop()
+	//defer profile.Start().Stop()
+	f, err := os.Create("trace.out")
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	err = trace.Start(f)
+	if err != nil {
+		panic(err)
+	}
+	defer trace.Stop()
 	run_startt := time.Now()
 	var nCPU int
 	flag.IntVar(&nCPU, "ncpu", 8, "GOMAXPROCS")
@@ -149,6 +164,5 @@ func main() {
 	ioutil.Discard.Write(([]byte)(fmt.Sprintf("\n%d\n%d\n%d\n", ilen, clen, <-lenresult)))
 	//fmt.Printf("\n%d\n%d\n%d\n", ilen, clen, <-lenresult)
 	run_endt := time.Now()
-
 	fmt.Println(ilen, "\t", nCPU, "\t", run_endt.Sub(run_startt).Nanoseconds())
 }

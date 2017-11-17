@@ -127,12 +127,14 @@ type Worker_1Ton_End struct {
 func (st1 *Worker_1Ton_1) RecvAll() ([]int, *Worker_1Ton_1) {
 	st1.Use()
 
+	var tmp int
 	res := make([]int, len(st1.ept.Conn[Server]))
 	for i, conn := range st1.ept.Conn[Server] {
-		err := conn.Recv(&res[i])
+		err := conn.Recv(&tmp)
 		if err != nil {
 			log.Fatalf("Wrong value from server at %d: %s", st1.ept.Id, err)
 		}
+		res[i] = tmp
 	}
 	return res, &Worker_1Ton_1{session.LinearResource{}, st1.ept}
 }

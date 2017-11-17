@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/nickng/scribble-go/benchmarks/nano/alltoall/alltoall"
+	"../alltoall"
 
 	"github.com/nickng/scribble-go/runtime/session"
 	"github.com/nickng/scribble-go/runtime/transport"
@@ -125,6 +125,7 @@ func mkservmain(idx, nw int) func(st1 *alltoall.Server_1Ton_1) *alltoall.Server_
 	}
 	return func(st1 *alltoall.Server_1Ton_1) *alltoall.Server_1Ton_End {
 		for i := 0; i < niters; i++ {
+			fmt.Println("Sent payload ", payload, " from ", idx)
 			st1 = st1.SendAll(payload)
 		}
 		return nil
@@ -133,8 +134,10 @@ func mkservmain(idx, nw int) func(st1 *alltoall.Server_1Ton_1) *alltoall.Server_
 
 func mkworkermain(idx int) func(st1 *alltoall.Worker_1Ton_1) *alltoall.Worker_1Ton_End {
 	return func(st1 *alltoall.Worker_1Ton_1) *alltoall.Worker_1Ton_End {
+		var v []int
 		for i := 0; i < niters; i++ {
-			_, st1 = st1.RecvAll()
+			v, st1 = st1.RecvAll()
+			fmt.Println("Received payload ", v, "at ", idx)
 		}
 		return nil
 	}

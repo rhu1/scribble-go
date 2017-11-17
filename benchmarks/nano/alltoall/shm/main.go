@@ -35,8 +35,11 @@ func main() {
 	flag.Parse()
 	ncpu1 := ncpu / 2
 	ncpu2 = ncpu - ncpu1
+	if ncpu2 == 0 {
+		ncpu2 = 1
+	}
 	wg := new(sync.WaitGroup)
-	wg.Add(ncpu)
+	wg.Add(ncpu1 + ncpu2)
 
 	conn := make([][]transport.Transport, ncpu1)
 	for i := 0; i < ncpu1; i++ {

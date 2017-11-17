@@ -36,17 +36,19 @@ POSSIBILITY OF SUCH DAMAGE.
 package main
 
 import (
-	"../Regex"
 	"flag"
 	"fmt"
-	"github.com/nickng/scribble-go/runtime/session"
-	"github.com/nickng/scribble-go/runtime/transport"
-	"github.com/nickng/scribble-go/runtime/transport/shm"
 	"io/ioutil"
 	"os"
 	"regexp"
 	"runtime"
+	"runtime/trace"
 	"time"
+
+	"../Regex"
+	"github.com/nickng/scribble-go/runtime/session"
+	"github.com/nickng/scribble-go/runtime/transport"
+	"github.com/nickng/scribble-go/runtime/transport/shm"
 )
 
 var allvariants = []string{
@@ -112,6 +114,20 @@ func countMatches(pat string, bytes []byte) int {
 }
 
 func main() {
+	//defer profile.Start(profile.MemProfile).Stop()
+	//defer profile.Start().Stop()
+	f, err := os.Create("trace.out")
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	err = trace.Start(f)
+	if err != nil {
+		panic(err)
+	}
+	defer trace.Stop()
+	/***** Exactly as base case */
 	run_startt := time.Now()
 	var nCPU int
 	flag.IntVar(&nCPU, "ncpu", 8, "num goroutines")
@@ -127,14 +143,20 @@ func main() {
 	// Delete the comment lines and newlines
 	bytes = regexp.MustCompile("(>[^\n]+)?\n").ReplaceAll(bytes, []byte{})
 	clen := len(bytes)
+	/****************************/
 
-	// Create connections
+	/* Connections are created through shm.NewConnection(), instead of make(chan
+	 * int). They are greated once, and stored in a slice. The original code
+	 * creates the necessary chanels just before running the corresponding worker*/
 	connB := make([]transport.Transport, nCPU)
 	for i := 0; i < nCPU; i++ {
 		connB[i] = shm.NewConnection()
 	}
 	connC := shm.NewConnection()
+	/*************************************************************************/
 
+	/* Session pre-initialisation: This is completely new, and not needed in
+	* original code */
 	// instantiate protocol
 	mini, _ := Regex.NewA(1, 1, nCPU, 1)
 	for i, _ := range connB {
@@ -170,7 +192,11 @@ func main() {
 	for idx := 0; idx < nCPU; idx++ {
 		bmains[idx] = mkbmain(idx)
 	}
+	/*************************************************************************/
 
+	/* Launch workers. Unlike in first program, they stop at first recv until
+	* master distributes tasks. In original program, they start computing
+	* earlier, right after channel creation */
 	go cmain()
 	for idx := 0; idx < nCPU; idx++ {
 		go bmains[idx]()
@@ -184,15 +210,19 @@ func main() {
 func substr(bb []byte) func(*Regex.C_1) *Regex.C_End {
 	return func(st1 *Regex.C_1) *Regex.C_End {
 		_, st2 := st1.Measure()
+		/*** Exactly as base program, after Measure() for synchronisation ***/
 		for _, sub := range substs {
 			bb = regexp.MustCompile(sub.pat).ReplaceAll(bb, []byte(sub.repl))
 		}
 		return st2.Len(len(bb))
+		/*********************************************************************/
 	}
 }
 
 func worker(bytes []byte) func(*Regex.B_1) *Regex.B_End {
 	return func(st1 *Regex.B_1) *Regex.B_End {
+		/* Count receives variant, and calls countMatches, just as the original
+		 * program. The result is sent using Donec, instead of a custom channel. */
 		s, st2 := st1.Count()
 		return st2.Donec(countMatches(s, bytes))
 	}
@@ -201,13 +231,20 @@ func worker(bytes []byte) func(*Regex.B_1) *Regex.B_End {
 func master(ilen, clen int, variants []string) func(*Regex.A_1) *Regex.A_End {
 	return func(st1 *Regex.A_1) *Regex.A_End {
 
+		/* Send variants through a channel. In base case, variants are passed to
+		 * goroutines as function arguments. The base case should be faster */
 		st2 := st1.Count(variants)
 
+		/*After workers received the interest variants, measure sends a token to
+		* worker C to continue */
 		st4 := st2.Measure(0)
 
+		/* Wait for workers to finish and gather results. Original program does
+		* not need this, since the recv are done while printing results */
 		rs, st3 := st4.Donec()
 		a, ste := st3.Len()
 
+		/**** Exactly as original program */
 		for i, c := range rs {
 			//fmt.Printf("%s %d\n", variants[i], c)
 			ioutil.Discard.Write(([]byte)(fmt.Sprintf("%s %d\n", variants[i], c)))
@@ -215,6 +252,7 @@ func master(ilen, clen int, variants []string) func(*Regex.A_1) *Regex.A_End {
 
 		//fmt.Printf("\n%d\n%d\n%d\n", ilen, clen, a)
 		ioutil.Discard.Write(([]byte)(fmt.Sprintf("\n%d\n%d\n%d\n", ilen, clen, a)))
+		/***********************************/
 		return ste
 	}
 }
