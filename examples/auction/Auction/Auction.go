@@ -294,7 +294,7 @@ type Auctioneer_1To1_2 struct {
 
 func (a2 *Auctioneer_1To1_2) SendAll(args []int) *Auctioneer_1To1_3 {
 	if want, got := len(args), len(a2.ept.Conn[Bidder]); want != got {
-		log.Fatal("Sending wrong number of arguments in 'a2': %d != %d", want, got)
+		log.Fatalf("Sending wrong number of arguments in 'a2': %d != %d", want, got)
 	}
 	a2.Use()
 
