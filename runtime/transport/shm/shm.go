@@ -66,28 +66,30 @@ func (e DeserialisationError) Error() string {
 	return fmt.Sprintf("transport/shm recv: deserisalisation failed: %v", e.cause)
 }
 
+type t = interface{}
+
 // ConnCfg is a connection configuration, contains
 // the details required to establish a connection.
 type ConnCfg struct {
-	chl chan unsafe.Pointer
-	chr chan unsafe.Pointer
+	chl chan t
+	chr chan t
 }
 
 type Conn struct {
-	chl chan unsafe.Pointer
-	chr chan unsafe.Pointer
+	chl chan t
+	chr chan t
 }
 
 // NewConnection is a convenient wrapper for a TCP connection
 // and can be used as either server-side or client-side.
 func NewConnection() ConnCfg {
-	return ConnCfg{make(chan unsafe.Pointer), make(chan unsafe.Pointer)}
+	return ConnCfg{make(chan t), make(chan t)}
 }
 
 // NewConnection is a convenient wrapper for a TCP connection
 // and can be used as either server-side or client-side.
 func NewBufferedConnection(n int) ConnCfg {
-	return ConnCfg{make(chan unsafe.Pointer, n), make(chan unsafe.Pointer, n)}
+	return ConnCfg{make(chan t, n), make(chan t, n)}
 }
 
 // Connect establishes a connection with a TCP socket using details
@@ -118,7 +120,42 @@ func (c *Conn) Send(val interface{}) error {
 	if c.chl == nil {
 		return SerialisationError{}
 	}
-	c.chl <- unsafe.Pointer(&val)
+
+	switch val := val.(type) {
+	case bool:
+		c.chl <- &val
+	case float32:
+		c.chl <- &val
+	case float64:
+		c.chl <- &val
+	case int:
+		c.chl <- &val
+	case int8:
+		c.chl <- &val
+	case int16:
+		c.chl <- &val
+	case int32:
+		c.chl <- &val
+	case int64:
+		c.chl <- &val
+	case uint:
+		c.chl <- &val
+	case uint8:
+		c.chl <- &val
+	case uint16:
+		c.chl <- &val
+	case uint32:
+		c.chl <- &val
+	case uint64:
+		c.chl <- &val
+	case uintptr:
+		c.chl <- &val
+	case string:
+		c.chl <- &val
+	default:
+		// Handle pointer types.
+		c.chl <- &val
+	}
 	return nil
 }
 
@@ -126,59 +163,53 @@ func (c *Conn) Recv(ptr interface{}) error {
 	if c.chr == nil {
 		return DeserialisationError{}
 	}
-	uptr := <-c.chr
+	ifacePtr := <-c.chr
 
-	var word uint
-
-	switch ptr.(type) {
+	switch ptr := ptr.(type) {
 	case *bool:
-		**(**bool)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
-			**(**bool)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+		*ptr = *(ifacePtr.(*bool))
 	case *float32:
-		**(**float32)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
-			**(**float32)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+		*ptr = *(ifacePtr.(*float32))
 	case *float64:
-		**(**float64)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
-			**(**float64)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+		*ptr = *(ifacePtr.(*float64))
 	case *int:
-		**(**int)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
-			**(**int)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+		*ptr = *(ifacePtr.(*int))
 	case *int8:
-		**(**int8)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
-			**(**int8)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+		*ptr = *(ifacePtr.(*int8))
 	case *int16:
-		**(**int16)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
-			**(**int16)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+		*ptr = *(ifacePtr.(*int16))
 	case *int32:
-		**(**int32)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
-			**(**int32)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+		*ptr = *(ifacePtr.(*int32))
 	case *int64:
-		**(**int64)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
-			**(**int64)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+		*ptr = *(ifacePtr.(*int64))
 	case *uint:
-		**(**uint)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
-			**(**uint)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+		*ptr = *(ifacePtr.(*uint))
 	case *uint8:
-		**(**uint8)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
-			**(**uint8)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+		*ptr = *(ifacePtr.(*uint8))
 	case *uint16:
-		**(**uint16)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
-			**(**uint16)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+		*ptr = *(ifacePtr.(*uint16))
 	case *uint32:
-		**(**uint32)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
-			**(**uint32)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+		*ptr = *(ifacePtr.(*uint32))
 	case *uint64:
-		**(**uint64)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
-			**(**uint64)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+		*ptr = *(ifacePtr.(*uint64))
 	case *uintptr:
-		**(**uintptr)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
-			**(**uintptr)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+		*ptr = *(ifacePtr.(*uintptr))
 	case *string:
-		**(**string)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
-			**(**string)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+		*ptr = *(ifacePtr.(*string))
 	default:
-		**(**unsafe.Pointer)(unsafe.Pointer(uintptr(unsafe.Pointer(&ptr)) + unsafe.Sizeof(word))) =
-			**(**unsafe.Pointer)(unsafe.Pointer(uintptr(uptr) + unsafe.Sizeof(word)))
+		// Handle pointer types.
+		dstPtr := *(**unsafe.Pointer)(ifaceToConcrete(ptr))
+		srcPtr := (*unsafe.Pointer)(ifaceToConcrete(**(**interface{})(ifaceToConcrete(ifacePtr))))
+		*dstPtr = *srcPtr
 	}
 	return nil
+}
+
+// ifaceToConcrete converts an interface to its concrete (pointer) value
+// based on the internals of the Go interface implementation.
+// This conversion skips the first 1-word of iftable and
+// returns an unsafe.Pointer to the concrete type.
+func ifaceToConcrete(ptr interface{}) unsafe.Pointer {
+	var word uint
+	return unsafe.Pointer(uintptr(unsafe.Pointer((*interface{})(unsafe.Pointer(&ptr)))) + unsafe.Sizeof(word))
 }
