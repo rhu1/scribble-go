@@ -46,7 +46,7 @@ func NewServer(id, nserver, nworker int) (*Server_1To1_Init, error) {
 	conn := make(map[string][]transport.Channel)
 	conn[Worker] = make([]transport.Channel, nworker)
 
-	return &Server_1To1_Init{session.LinearResource{}, &session.Endpoint{id, nserver, conn}}, nil
+	return &Server_1To1_Init{ept: session.NewEndpoint(id, nserver, conn)}, nil
 }
 
 type Server_1To1_1 struct {

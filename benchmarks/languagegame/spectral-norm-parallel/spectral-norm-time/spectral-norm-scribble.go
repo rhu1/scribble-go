@@ -39,13 +39,12 @@ POSSIBILITY OF SUCH DAMAGE.
 package main
 
 import (
-	"../SN"
 	"flag"
 	"fmt"
+	"github.com/nickng/scribble-go/benchmarks/languagegame/spectral-norm-parallel/SN" // Protocol API
 	"github.com/nickng/scribble-go/runtime/session"
 	"github.com/nickng/scribble-go/runtime/transport"
 	"github.com/nickng/scribble-go/runtime/transport/shm"
-	// "math"
 	"runtime"
 	"time"
 )

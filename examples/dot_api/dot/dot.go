@@ -26,7 +26,7 @@ func NewRoleA(id, nA, nB int) (*RoleA_1To1_Init, error) {
 	conn := make(map[string][]transport.Channel)
 	conn[RoleB] = make([]transport.Channel, nB)
 
-	return &RoleA_1To1_Init{session.LinearResource{}, &session.Endpoint{id, nA, conn}}, nil
+	return &RoleA_1To1_Init{ept: session.NewEndpoint(id, nA, conn)}, nil
 }
 
 func (ini *RoleA_1To1_Init) Accept(rolename string, id int, addr, port string) error {

@@ -36,11 +36,11 @@ POSSIBILITY OF SUCH DAMAGE.
 package main
 
 import (
-	"../KNuc" // Protocol API
 	"bufio"
 	"bytes"
 	"flag"
 	"fmt"
+	"github.com/nickng/scribble-go/benchmarks/languagegame/k-nucleotide-parallel/KNuc" // Protocol API
 	"github.com/nickng/scribble-go/runtime/session"
 	"github.com/nickng/scribble-go/runtime/transport"
 	"github.com/nickng/scribble-go/runtime/transport/shm"

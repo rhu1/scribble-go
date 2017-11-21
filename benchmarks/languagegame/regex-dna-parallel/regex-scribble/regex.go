@@ -45,7 +45,7 @@ import (
 	"runtime/trace"
 	"time"
 
-	"../Regex"
+	"github.com/nickng/scribble-go/benchmarks/languagegame/regex-dna-parallel/Regex" // Protocol API
 	"github.com/nickng/scribble-go/runtime/session"
 	"github.com/nickng/scribble-go/runtime/transport"
 	"github.com/nickng/scribble-go/runtime/transport/shm"
