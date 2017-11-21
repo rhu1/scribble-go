@@ -13,20 +13,21 @@
 // limitations under the License.
 
 /*
-Package shm provides a 'channel' transport implementation.
+Package shm provides a shared memory transport implementation.
+
+The messages in this transport are delivered by native Go channels.
 
 Typical usage of a connection:
 
-	cfg := NewConnection() // starts channel
-	s := cfg.Accept()      // does nothing except checking channel is OK
-	defer func(s *Conn){
+	cfg := NewConnection()  // Initialises a shared memory connection
+	s, c := cfg.Endpoints() // Equivalent to cfg.Accept(), cfg.Connect()
+	defer func(s *IOChan){
 		if err := s.Close(); err != nil {
 			// handle errors
 		}(s)
 	}
 	...
-	c := cfg.Connect() // does nothing except checking channel is OK
-	defer func(c *Conn){
+	defer func(c *IOChan){
 		if err := c.Close(); err != nil {
 			// handle errors
 		}(c)
@@ -46,24 +47,17 @@ import (
 	"github.com/nickng/scribble-go/runtime/transport"
 )
 
-// SerialisationError is the kind of error where a value
-// cannot be sent due to serialisation failure.
-type SerialisationError struct {
-	cause error
+// ChannelNotReadyError is the kind of error where a channel
+// is not ready to be used (e.g. uninitialised).
+type ChannelNotReadyError struct {
+	at string
 }
 
-func (e SerialisationError) Error() string {
-	return fmt.Sprintf("transport/shm send: serialisation failed: %v", e.cause)
-}
-
-// DeserialisationError is the kind of error where a value
-// cannot be received due to deserialisation failure.
-type DeserialisationError struct {
-	cause error
-}
-
-func (e DeserialisationError) Error() string {
-	return fmt.Sprintf("transport/shm recv: deserisalisation failed: %v", e.cause)
+func (e ChannelNotReadyError) Error() string {
+	if e.at != "" {
+		return fmt.Sprintf("transport/shm: channel not ready at %s", e.at)
+	}
+	return fmt.Sprintf("transport/shm: channel not ready\n\t(has it been initialised with NewConnection()?)")
 }
 
 type t = interface{}
@@ -71,34 +65,40 @@ type t = interface{}
 // ConnCfg is a connection configuration, contains
 // the details required to establish a connection.
 type ConnCfg struct {
-	chl chan t
-	chr chan t
+	chl chan t // channel left
+	chr chan t // channel right
 }
 
-type Conn struct {
-	chl chan t
-	chr chan t
+// IOChan is a connected shared memory connection,
+// and wraps a pair of read/write Go channels for communication.
+//
+// IOChan implements ReadWriteCloser and can be used as it. Messages
+// are delimited by the data type boundary as they are passed as
+// pointers. No serialisation are defined for IOChan.
+type IOChan struct {
+	chw chan<- t // channel to write to
+	chr <-chan t // channel to read from
 }
 
-// NewConnection is a convenient wrapper for a TCP connection
+// NewConnection is a convenient wrapper for an in-memory connection
 // and can be used as either server-side or client-side.
 func NewConnection() ConnCfg {
-	return ConnCfg{make(chan t), make(chan t)}
+	return ConnCfg{chl: make(chan t), chr: make(chan t)}
 }
 
-// NewConnection is a convenient wrapper for a TCP connection
+// NewBufferedConnection is a convenient wrapper for an in-memory connection
 // and can be used as either server-side or client-side.
 func NewBufferedConnection(n int) ConnCfg {
-	return ConnCfg{make(chan t, n), make(chan t, n)}
+	return ConnCfg{chl: make(chan t, n), chr: make(chan t, n)}
 }
 
 // Connect establishes a connection with a TCP socket using details
 // from cfg, and returns the TCP stream as a ReadWriteCloser.
 func (cfg ConnCfg) Connect() transport.Channel {
 	if cfg.chl == nil || cfg.chr == nil {
-		log.Fatalf("transport/shm: invalid channel")
+		log.Fatalf("cannot connect: %v", ChannelNotReadyError{})
 	}
-	return &Conn{chl: cfg.chr, chr: cfg.chl}
+	return &IOChan{chw: cfg.chr, chr: cfg.chl}
 }
 
 // Accept listens for and accepts connection from a TCP socket using
@@ -107,61 +107,70 @@ func (cfg ConnCfg) Connect() transport.Channel {
 // Accept blocks while waiting for connection to be accepted.
 func (cfg ConnCfg) Accept() transport.Channel {
 	if cfg.chl == nil || cfg.chr == nil {
-		log.Fatalf("transport/shm: invalid channel")
+		log.Fatalf("cannot accept: %v", ChannelNotReadyError{})
 	}
-	return &Conn{cfg.chl, cfg.chr}
+	return &IOChan{chw: cfg.chl, chr: cfg.chr}
 }
 
-func (c *Conn) Close() error {
+// Endpoints is a convenient function that returns the dual endpoints
+// created by Accept and Connect, such that messages sent to one endpoint
+// can be received by the other and vice versa.
+func (cfg ConnCfg) Endpoints() (s transport.Channel, c transport.Channel) {
+	s, c = cfg.Accept(), cfg.Connect()
+	return s, c
+}
+
+func (c *IOChan) Close() error {
+	close(c.chw) // Close the sending side.
 	return nil
 }
 
-func (c *Conn) Send(val interface{}) error {
-	if c.chl == nil {
-		return SerialisationError{}
+func (c *IOChan) Send(val interface{}) error {
+	if c.chw == nil {
+		return ChannelNotReadyError{at: "Send()"}
 	}
 
 	switch val := val.(type) {
 	case bool:
-		c.chl <- &val
+		c.chw <- &val
 	case float32:
-		c.chl <- &val
+		c.chw <- &val
 	case float64:
-		c.chl <- &val
+		c.chw <- &val
 	case int:
-		c.chl <- &val
+		c.chw <- &val
 	case int8:
-		c.chl <- &val
+		c.chw <- &val
 	case int16:
-		c.chl <- &val
+		c.chw <- &val
 	case int32:
-		c.chl <- &val
+		c.chw <- &val
 	case int64:
-		c.chl <- &val
+		c.chw <- &val
 	case uint:
-		c.chl <- &val
+		c.chw <- &val
 	case uint8:
-		c.chl <- &val
+		c.chw <- &val
 	case uint16:
-		c.chl <- &val
+		c.chw <- &val
 	case uint32:
-		c.chl <- &val
+		c.chw <- &val
 	case uint64:
-		c.chl <- &val
+		c.chw <- &val
 	case uintptr:
-		c.chl <- &val
+		c.chw <- &val
 	case string:
-		c.chl <- &val
+		c.chw <- &val
 	default:
 		// Handle pointer types.
-		c.chl <- &val
+		c.chw <- &val
 	}
 	return nil
 }
 
-func (c *Conn) Recv(ptr interface{}) error {
+func (c *IOChan) Recv(ptr interface{}) error {
 	if c.chr == nil {
-		return DeserialisationError{}
+		return ChannelNotReadyError{at: "Recv()"}
 	}
 	ifacePtr := <-c.chr
 
