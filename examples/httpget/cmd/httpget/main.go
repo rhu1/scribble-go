@@ -51,12 +51,12 @@ func Fetcher(id int, conns []transport.Transport, wg *sync.WaitGroup) {
 	svrConn.DelimMeth = tcp.DelimitByCRLF
 	for i := 1; i <= nServer; i++ {
 		if err := session.Connect(f, httpget.Server, i, svrConn); err != nil {
-			log.Fatalf("Cannot connect to %s[%d]", httpget.Server, i, err)
+			log.Fatalf("Cannot connect to %s[%d]: %v", httpget.Server, i, err)
 		}
 	}
 	for i := 1; i <= nMaster; i++ {
 		if err := session.Connect(f, httpget.Master, i, conns[id-1]); err != nil { // id - 1
-			log.Fatalf("Cannot connect to %s[%d]", httpget.Master, i, err)
+			log.Fatalf("Cannot connect to %s[%d]: %v", httpget.Master, i, err)
 		}
 	}
 
