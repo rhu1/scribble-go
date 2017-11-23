@@ -20,7 +20,7 @@ global protocol Game(role a, role b, role c) {
   InfoBC(String) from b to c;
   InfoCA(String) from c to a;
   InfoAB(String) from a to b;
-  
+
   rec t {
     choice at a {
       Mov1AB(Int) from a to b;
