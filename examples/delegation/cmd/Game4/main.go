@@ -13,7 +13,7 @@ import (
 
 const (
 	nServer = 1
-	nClient = 1
+	nClient = 4
 )
 
 func main() {
@@ -23,13 +23,13 @@ func main() {
 	}
 
 	wg := new(sync.WaitGroup)
-	wg.Add(2)
+	wg.Add(nServer + nClient)
 
 	go server(sharedCons, wg)
 	go client(1, sharedCons[0], wg)
-	//go client(2, sharedCons[1], wg)
-	//go client(3, sharedCons[2], wg)
-	//go client(4, sharedCons[3], wg)
+	go client(2, sharedCons[1], wg)
+	go client(3, sharedCons[2], wg)
+	go client(4, sharedCons[3], wg)
 
 	wg.Wait()
 }
@@ -46,8 +46,9 @@ func client(id int, conn transport.Transport, wg *sync.WaitGroup) {
 
 	client.Run(func(st *Game4.Client_client_1) *Game4.Client_client_End {
 		games, st0 := st.Recv_Play()
-		games[id-1].Run(func(st *Game4.Game_player_1tok_1) *Game4.Game_player_1tok_End {
-			fmt.Println("Game4.")
+		// We only receive the game endpoint we are supposed to play.
+		games[0].Run(func(st *Game4.Game_player_1tok_1) *Game4.Game_player_1tok_End {
+			fmt.Printf("Client %d playing Game4.", id)
 			return st.Game()
 		})
 		return st0
