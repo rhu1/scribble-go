@@ -1,0 +1,235 @@
+module irc;
+
+// Based on https://modern.ircdocs.horse/
+//
+// This protocol
+// - Does not use SASL
+// - Requires login (PASS)
+
+global protocol IRC(role C, role S)
+{
+  // Capability negotiation
+  // This command negotiates with the server what features are supported.
+  // For example, CAP LS 302 means client support version 302 (IRCv3.2)
+  //
+  CAP_LS(int) from C to S;
+
+  // Password
+  //
+  PASS(string) from C to S;
+  choice at S {
+    ERR_NEEDMOREPARAMS() from S to C; // 461
+  } or {
+    ERR_ALREADYREGISTERED() from S to C; // 462
+  } or {
+    // Successful. No output from server.
+    //
+    OK() from S to C;
+
+    // Set nickname of connected client
+    //
+    NICK(string) from C to S;
+    choice at S {
+      ERR_NONICKNAMEGIVEN() from S to C; // 431
+    } or {
+      ERR_ERRONEUSNICKNAME() from S to C; // 432
+    } or {
+      ERR_NICKNAMEINUSE() from S to C;
+    } or {
+      ERR_NICKCOLLISION() from S to C;
+    } or {
+      // Successful. No output from server.
+      //
+      OK() from S to C;
+
+      // User identification
+      // parameters: username realname
+      //
+      USER(string, string) from C to S;
+      choice at S {
+        ERR_NEEDMOREPARAMS() from S to C; // 461
+      } or {
+        ERR_ALREADYREGISTERED() from S to C; // 462
+      } or {
+        OK() from S to C;
+
+        // End of capability negotiation
+        //
+        CAP_END() from C to S;
+
+        // Successful completion of registration process.
+        // <client> :Welcome to the <networkname> Network, <nick>
+        //
+        RPL_WELCOME(client, string, string) from S to C; // 001
+
+
+        // <client> :Your host is <servername>, running version <version>
+        //
+        RPL_YOURHOST(client, string, string) from S to C; // 002
+
+        // <client> :This server was created <datetime>
+        //
+        RPL_CREATED(client, string) from S to C; // 003
+
+        // <client> <servername> <version> <available user modes>
+        // <available channel modes> [<channel modes with a parameter>]
+        //
+        RPL_MYINFO(client, string, string, string, string) from S to C; // 004
+
+        // <client> <1-13 tokens> :are supported by this server
+        RPL_ISUPPORT(client, string) from S to C; // 005
+
+
+      }
+    }
+  }
+
+
+}
+
+global protocol Messaging(role C, S)
+{
+  choice at C {
+
+    // Restricted to one channel only
+    //
+    JOIN(channel) from C to S;
+    choice at S {
+      ERR_NEEDMOREPARAMS() from S to C; // 461
+      do Messaging(C, S);
+    } or {
+      ERR_NOSUCHCHANNEL() from S to C; // 403
+      do Messaging(C, S);
+    } or {
+      ERR_TOOMANYCHANNELS() from S to C; // 405
+      do Messaging(C, S);
+    } or {
+      ERR_BADCHANNELKEY() from S to C; // 475
+      do Messaging(C, S);
+    } or {
+      ERR_BANNEDFROMCHAN() from S to C; // 475
+      do Messaging(C, S);
+    } or {
+      ERR_CHANNELISFULL() from S to C; // 471
+      do Messaging(C, S);
+    } or {
+      ERR_INVITEONLYCHAN() from S to C; // 473
+      do Messaging(C, S);
+    } or {
+      RPL_TOPIC() from S to C; // 332
+      do Messaging(C, S);
+    } or {
+      RPL_NAMREPLY() from S to C; // 353
+      do Messaging(C, S);
+    }
+
+  } or {
+
+    // Restricted to one channel only
+    //
+    PART(channel) from C to S;
+    choice at S {
+      ERR_NEEDMOREPARAMS() from S to C; // 461
+      do Messaging(C, S);
+    } or {
+      ERR_NOSUCHCHANNEL() from S to C; // 403
+      do Messaging(C, S);
+    } or {
+      ERR_NOTONCHANNEL() from S to C; // 442
+      do Messaging(C, S);
+    }
+
+  } or {
+
+    // TOPIC <channel> <topic>
+    TOPIC(channel, string) from C to S;
+    choice at S {
+      ERR_NEEDMOREPARAMS() from S to C;  // 461
+      do Messaging(C, S);
+    } or {
+      ERR_NOSUCHCHANNEL() from S to C;  // 403
+      do Messaging(C, S);
+    } or {
+      ERR_NOTONCHANNEL() from S to C;  // 442
+      do Messaging(C, S);
+    } or {
+      ERR_CHANOPRIVSNEEDED() from S to C;  // 482
+      do Messaging(C, S);
+    } or {
+      RPL_NOTOPIC() from S to C; // 331
+      do Messaging(C, S);
+    } or {
+      RPL_TOPIC() from S to C; // 332
+      do Messaging(C, S);
+    } or {
+      RPL_TOPICTIME() from S to C; // 333
+      do Messaging(C, S);
+    }
+
+  } or {
+
+    // Restricted to one target channel/user
+    // PRIVMSG <target> <text to be sent>
+    //
+    PRIVMSG(string, string) from C to S;
+    choice at S {
+      ERR_NOSUCHNICK() from S to C; // 401
+      do Messaging(C, S);
+    } or {
+      ERR_NOSUCHSERVER() from S to C; // 402
+      do Messaging(C, S);
+    } or {
+      ERR_CANNOTSENDTOCHAN() from S to C; // 404
+      do Messaging(C, S);
+    } or {
+      ERR_TOOMANYTARGETS() from S to C; // 407
+      do Messaging(C, S);
+    } or {
+      ERR_NORECIPIENT() from S to C; // 411
+      do Messaging(C, S);
+    } or {
+      ERR_NOTEXTTOSEND() from S to C; // 412
+      do Messaging(C, S);
+    } or {
+      ERR_NOTOPLEVEL() from S to C; // 413
+      do Messaging(C, S);
+    } or {
+      ERR_WILDTOPLEVEL() from S to C; // 414
+      do Messaging(C, S);
+    } or {
+      RPL_AWAY() from S to C; // 301
+      do Messaging(C, S);
+    } or {
+      OK() from S to C;
+      do Messaging(C, S);
+    }
+
+  } or {
+
+    // NAMES <channel>
+    //
+    NAMES(channel) from C to S;
+    do names_reply(C, S);
+
+  } or {
+    // QUIT :<reason>
+    QUIT(string) from C to S;
+
+    // Acknowledges quit.
+    ERROR() from S to C;
+  }
+}
+
+global protocol names_reply(role C, role S)
+{
+  choice at S {
+    ERR_NOSUCHNICK() from S to C; // 401
+    do Messaging(C, S);
+  } or {
+    RPL_NAMEREPLY() from S to C; // 353
+    do names_reply(C, S);
+  } or {
+    RPL_ENDOFNAMES() from S to C; // 366
+    do Messaging(C, S);
+  }
+}
