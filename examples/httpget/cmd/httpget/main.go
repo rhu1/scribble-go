@@ -44,7 +44,7 @@ func Fetcher(id int, conns []transport.Transport, wg *sync.WaitGroup) {
 	defer wg.Done()
 	f, err := httpget.NewFetcher(id, nFetcher, nMaster, nServer)
 	if err != nil {
-		log.Fatal("Cannot create new Fetcher: %v", err)
+		log.Fatalf("Cannot create new Fetcher: %v", err)
 	}
 	svrConn := tcp.NewConnection("127.0.0.1", "8100")
 	svrConn.SerialiseMeth = tcp.SerialiseWithPassthru
