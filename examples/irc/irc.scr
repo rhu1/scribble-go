@@ -201,6 +201,7 @@ global protocol Messaging(role C, S)
       do Messaging(C, S);
     } or {
       OK() from S to C;
+      // Use receiver protocol to deliver message from S to Cs.
       do Messaging(C, S);
     }
 
@@ -232,4 +233,44 @@ global protocol names_reply(role C, role S)
     RPL_ENDOFNAMES() from S to C; // 366
     do Messaging(C, S);
   }
+}
+
+// Receiver thread should be started at server after authentication.
+// This protocol interleaves with the main IRC protocol to deliver
+// messages to (all) clients.
+global protocol receiver(role C, role S) {
+    // PRIVMSG <target> <text to be sent>
+    //
+    PRIVMSG(string, string) from S to C;
+    choice at S {
+      ERR_NOSUCHNICK() from C to S; // 401
+    } or {
+      ERR_NOSUCHSERVER() from C to S; // 402
+      do Messaging(C, S);
+    } or {
+      ERR_CANNOTSENDTOCHAN() from C to S; // 404
+      do Messaging(C, S);
+    } or {
+      ERR_TOOMANYTARGETS() from C to S; // 407
+      do Messaging(C, S);
+    } or {
+      ERR_NORECIPIENT() from C to S; // 411
+      do Messaging(C, S);
+    } or {
+      ERR_NOTEXTTOSEND() from C to S; // 412
+      do Messaging(C, S);
+    } or {
+      ERR_NOTOPLEVEL() from C to S; // 413
+      do Messaging(C, S);
+    } or {
+      ERR_WILDTOPLEVEL() from C to S; // 414
+      do Messaging(C, S);
+    } or {
+      RPL_AWAY() from C to S; // 301
+      do Messaging(C, S);
+    } or {
+      OK() from C to S;
+      do Messaging(C, S);
+    }
+    do receiver(C, S);
 }
