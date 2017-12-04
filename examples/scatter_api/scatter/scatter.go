@@ -11,6 +11,13 @@ import (
 const Server = "server"
 const Worker = "worker"
 
+
+
+
+/*
+ * Session API
+ */
+
 type Server_1To1_Init struct {
 	session.LinearResource
 	ept *session.Endpoint
@@ -18,7 +25,7 @@ type Server_1To1_Init struct {
 
 /*
 	nserver = 1 -- right index of Server[1..1]
-	nworker = n
+	nworker = n -- right index of Worker?
 
 	implicit pre: left index of both is 1 -- codegen can generalise this?
 
@@ -83,6 +90,16 @@ func (ini *Server_1To1_Init) Init() (*Server_1To1_1, error) {
 
 	return &Server_1To1_1{session.LinearResource{}, ini.ept}, nil
 }
+
+
+
+
+
+
+
+/*
+ * State Chan API
+ */
 
 type Server_1To1_End struct {
 }
