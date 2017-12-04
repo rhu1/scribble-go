@@ -26,7 +26,7 @@ func NewMaster(id, nmaster, nworker int) (*Master_1To1_Init, error) {
 	conn := make(map[string][]transport.Channel)
 	conn[Worker] = make([]transport.Channel, nworker)
 
-	return &Master_1To1_Init{session.LinearResource{}, &session.Endpoint{id, nmaster, conn}}, nil
+	return &Master_1To1_Init{ept: session.NewEndpoint(id, nmaster, conn)}, nil
 }
 
 func (ini *Master_1To1_Init) Accept(rolename string, id int, addr, port string) error {

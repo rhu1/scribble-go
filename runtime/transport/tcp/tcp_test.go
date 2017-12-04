@@ -1,6 +1,7 @@
 package tcp_test
 
 import (
+	"io"
 	"sync"
 	"testing"
 	"time"
@@ -51,7 +52,7 @@ func TestConnectionSendRawByte(t *testing.T) {
 		defer wg.Done()
 		server := c.Accept()
 		p := make([]byte, 11)
-		n, err := server.Read(p)
+		n, err := server.(io.Reader).Read(p)
 		if err != nil {
 			t.Errorf("receive failed: %v", err)
 		}
@@ -63,7 +64,7 @@ func TestConnectionSendRawByte(t *testing.T) {
 		defer wg.Done()
 		client := c.Connect()
 		p := []byte("hello world")
-		n, err := client.Write(p)
+		n, err := client.(io.Writer).Write(p)
 		if err != nil {
 			t.Errorf("send failed: %v", err)
 		}

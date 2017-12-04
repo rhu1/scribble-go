@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/nickng/scribble-go-runtime/examples/dot_api/dot"
 	"fmt"
+	"github.com/nickng/scribble-go-runtime/examples/dot_api/dot"
 	"log"
 	"strconv"
 	"sync"

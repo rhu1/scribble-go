@@ -1,0 +1,26 @@
+//rhu@HZHL4 ~/code/go/src/github.com/scribble/go-runtime
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/scattergather/ScatterGather.scr -d test/scattergather/ -param Proto1 -param-api A -param-api B
+
+module SN;
+
+type <go> "int" from "..." as int;
+
+global protocol Proto(role A(k), role B(k))
+{
+  choice at A[1] {
+    times(int) from A[1..1] to B[1..k]; // u x v
+    done(int)  from B[1..k] to A[1..1];
+    next(int) from A[1..1] to B[1..k]; // v x u
+    done(int)  from B[1..k] to A[1..1];
+
+    timestr(int) from A[1..1] to B[1..k]; // v x u
+    done(int)  from B[1..k] to A[1..1];
+    next(int) from A[1..1] to B[1..k]; // v x u
+    done(int)  from B[1..k] to A[1..1];
+
+    do Proto(A, B);
+  } or {
+    end(int) from A[1..1] to B[1..k];
+  }
+}
+

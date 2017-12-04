@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/nickng/scribble-go/examples/scatter_api/scatter"
 	"log"
 	"strconv"
 	"sync"

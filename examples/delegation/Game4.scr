@@ -1,0 +1,9 @@
+module Game4;
+
+global protocol Client(role server, role clients(k)) {
+  Play(Game@player) from server[1..1] to client[1..k];
+}
+
+global protocol Game(role player(k)) {
+  // Game protocol.
+}
