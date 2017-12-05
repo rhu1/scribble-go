@@ -7,7 +7,7 @@ import (
 	"sync"
 	"strconv"
 
-	"github.com/nickng/scribble-go-runtime/test/foo1/Foo1/Proto1"
+	"github.com/rhu1/scribble-go-runtime/test/foo1/Foo1/Proto1"
 )
 
 
