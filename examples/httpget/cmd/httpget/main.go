@@ -8,11 +8,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/nickng/scribble-go/examples/httpget/httpget"
-	"github.com/nickng/scribble-go/runtime/session"
-	"github.com/nickng/scribble-go/runtime/transport"
-	"github.com/nickng/scribble-go/runtime/transport/shm"
-	"github.com/nickng/scribble-go/runtime/transport/tcp"
+	"github.com/nickng/scribble-go-runtime/examples/httpget/httpget"
+	"github.com/nickng/scribble-go-runtime/runtime/session"
+	"github.com/nickng/scribble-go-runtime/runtime/transport"
+	"github.com/nickng/scribble-go-runtime/runtime/transport/shm"
+	"github.com/nickng/scribble-go-runtime/runtime/transport/tcp"
 )
 
 const (

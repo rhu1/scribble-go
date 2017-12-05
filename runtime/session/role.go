@@ -17,5 +17,5 @@ func (r role) Name() string {
 
 // NewRole creates a new Role using the given name.
 func NewRole(name string) Role {
-	return &paramRole{name: name}
+	return &role{name: name}
 }

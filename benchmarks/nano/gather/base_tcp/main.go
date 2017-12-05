@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/nickng/scribble-go/runtime/transport/tcp"
+	"github.com/nickng/scribble-go-runtime/runtime/transport/tcp"
 )
 
 const (

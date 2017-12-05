@@ -1,13 +1,9 @@
 package session
 
 import (
-<<<<<<< HEAD
-	"github.com/nickng/scribble-go-runtime/runtime/transport"
-=======
 	"sync"
 
-	"github.com/nickng/scribble-go/runtime/transport"
->>>>>>> 7a0dfb73175da76dee98eee0f77838afa4195ffd
+	"github.com/nickng/scribble-go-runtime/runtime/transport"
 )
 
 type Endpoint struct {

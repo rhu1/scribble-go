@@ -47,7 +47,7 @@ func NewServer(id, nserver, nworker int) (*Server_1To1_Init, error) {
 	conn[Worker] = make([]transport.Channel, nworker)
 
 	// Server_1To1_Init is the "pre-state" before session proper -- used to do connect/accept
-	return &Server_1To1_Init{session.LinearResource{}, &session.Endpoint{id, nserver, conn}}, nil
+	return &Server_1To1_Init{session.LinearResource{}, session.NewEndpoint(id, nserver, conn)}, nil
 	//return &Server_1To1_Init{ept: session.NewEndpoint(id, nserver, conn)}, nil
 }
 
