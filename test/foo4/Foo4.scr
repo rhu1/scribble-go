@@ -1,0 +1,27 @@
+//Raymond@HZHL3 ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/foo4/Foo4.scr -d test/foo3/ -param Proto1 -param-api S
+
+
+// http://sandbox.kidstrythisathome.com/erdos/
+
+
+module Foo4;
+
+
+type <go> "int" from "..." as int;
+
+
+global protocol Proto1(role S(n), role W(n))
+{
+	//a(int) from S[1..1] to W[1..1];  // TODO
+	a(int) from S[1..1] to W[1..n];
+	choice at S
+	{
+		b(int) from S[1..1] to W[1..n];
+		c(int) from W[1..n] to S[1..1];
+	}
+	or
+	{
+		d(int) from S[1..1] to W[1..n];
+	}
+}
