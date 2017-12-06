@@ -12,7 +12,7 @@ import (
 
 
 func main() {
-	n := 2
+	n := 3
 
 	wg := new(sync.WaitGroup)
 	wg.Add(n+1)
