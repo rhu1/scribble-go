@@ -7,12 +7,12 @@ import (
 	"sync"
 	"strconv"
 
-	"github.com/rhu1/scribble-go-runtime/test/foo4/Foo4/Proto1"
+	"github.com/rhu1/scribble-go-runtime/test/foo5/Foo5/Proto1"
 )
 
 
 func main() {
-	n := 3
+	n := 2
 
 	wg := new(sync.WaitGroup)
 	wg.Add(n+1)
@@ -27,23 +27,12 @@ func main() {
 
 		var s1 *Proto1.Proto1_S_1To1_1 = serverIni.Init()
 
-		s2 := s1.Send_W_1Ton_a(1234, func(data int, i int) int { return data })
-
-		sum := func(xs []int) int {
-			res := 0
-			for j := 0; j < len(xs); j++ {
-				res = res + xs[j]	
-			}
-			return res
+		//var x int
+		for z := 0; z < 3; z++ {
+			s1 = s1.Send_W_1Ton_a(1234, func(data int, i int) int { return data })//.Recv_W_1Ton_c(&x, sum)
+			//fmt.Println("S got c:", x)
 		}
-
-		var x int
-		if (1 < 2) {
-			s2.Send_W_1Ton_b(1234, func(data int, i int) int { return data }).Recv_W_1Ton_c(&x, sum)
-			fmt.Println("S got c:", x)
-		} else {
-			s2.Send_W_1Ton_d(5678, func(data int, i int) int { return data })//.Recv_W_1Ton_b(&x, sum)
-		}
+		s1.Send_W_1Ton_b(5678, func(data int, i int) int { return data })
 
 		wg.Done()
 	}
@@ -56,18 +45,17 @@ func main() {
 		clientIni := P1.NewProto1_W_1Ton(i, 1)
 		clientIni.Connect(P1.S, 1, "127.0.0.1", strconv.Itoa(33333+i))
 
-		var c_i *Proto1.Proto1_W_1Ton_1 = clientIni.Init()
+		var c1 *Proto1.Proto1_W_1Ton_1 = clientIni.Init()
 
-		var y int
-		c2 := c_i.Recv_S_1To1_a(&y, func(data []int) int { return data[0] })
-
-		var x int	
-		select {
-		case c3 := <-c2.Recv_S_1To1_b(&x):
-			fmt.Println("W got b:", i, x)
-			c3.Send_S_1To1_c(5678, func(data int, i int) int { return data })
-		case <-c2.Recv_S_1To1_d(&x):
-			fmt.Println("W got d:", i, x)
+		for b := true; b; {
+			var x int	
+			select {
+			case c1 = <-c1.Recv_S_1To1_a(&x):
+				fmt.Println("W got a:", i, x)
+			case <-c1.Recv_S_1To1_b(&x):
+				fmt.Println("W got b:", i, x)
+				b = false
+			}
 		}
 
 		wg.Done()

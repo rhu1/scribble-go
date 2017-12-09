@@ -48,9 +48,9 @@ func main() {
 		var x int	
 		select {
 		case <-c_i.Recv_S_1To1_a(&x):
-			fmt.Println("C got a:", i, x)
+			fmt.Println("W got a:", i, x)
 		case <-c_i.Recv_S_1To1_b(&x):
-			fmt.Println("C got b:", i, x)
+			fmt.Println("W got b:", i, x)
 		}
 
 		wg.Done()

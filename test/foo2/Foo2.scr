@@ -1,4 +1,4 @@
-//Raymond@HZHL3 ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java
+//Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
 //$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/foo2/Foo2.scr -d test/foo2/ -param Proto1 -param-api S
 
 
