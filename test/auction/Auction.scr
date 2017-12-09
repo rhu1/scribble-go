@@ -1,0 +1,31 @@
+//Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/auction/Auction.scr -d test/auction/ -param Auction -param-api Auctioneer
+
+
+module Auction;
+
+type <go> "int"    from "..." as int;
+type <go> "string" from "..." as string;
+
+global protocol Auction(role Auctioneer(k), role Bidder(k))
+{
+  (int) from Bidder[1..k] to Auctioneer[1..1];
+  (int) from Auctioneer[1..1] to Bidder[1..k];
+  //do MoreBid(Auctioneer[1..k], Bidder[1..1]);
+  do MoreBid(Auctioneer, Bidder);
+}
+
+aux global protocol MoreBid(role Auctioneer(k), role Bidder(k)) {
+  // This should be marked as union type.
+  //(IntOrBool) from Bidder[1..k] to Auctioneer[1..1];
+  (int) from Bidder[1..k] to Auctioneer[1..1];
+
+  // Auctioneer reply with either new highest bid or declare winner.
+  choice at Auctioneer {
+    bid(int) from Auctioneer[1..1] to Bidder[1..k];
+    //do MoreBid(Auctioneer[1..1], Bidder[1..k]);
+    do MoreBid(Auctioneer, Bidder);
+  } or {
+    done(string) from Auctioneer[1..1] to Bidder[1..k];
+  }
+}
