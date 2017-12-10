@@ -26,19 +26,19 @@ import (
 type DelimitMethod int
 
 const (
-	// DelimitByNewline is the default delimitation method, where a
-	// delimiter character '\n' is added to the end of each message.
-	// This delimitation method is minimal but could cause error if
-	// the message is not encoded (e.g. contains '\n' in message body).
-	DelimitByNewline DelimitMethod = iota
-
-	// DelimitBySize is an alternative delimitation method, where the
+	// DelimitBySize is the default delimitation method, where the
 	// size of the message is prepended to each message. This is suitable
 	// for larger messages where initial buffer allocations are often not
 	// large enough to receive the complete message and requires resizing.
 	// Using this method the allocation can be reduced to minimum since
 	// the size of the message is known from the beginning.
-	DelimitBySize
+	DelimitBySize DelimitMethod = iota
+
+	// DelimitByNewline is an alternative delimitation method, where a
+	// delimiter character '\n' is added to the end of each message.
+	// This delimitation method is minimal but could cause error if
+	// the message is not encoded (e.g. contains '\n' in message body).
+	DelimitByNewline
 
 	// DelmitByCRLF is a delimitation method where the delimiter is the
 	// byte sequence '\r\n' (CRLF).
