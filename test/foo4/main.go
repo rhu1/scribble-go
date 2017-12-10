@@ -39,7 +39,7 @@ func main() {
 
 		var x int
 		if (1 < 2) {
-			s2.Send_W_1Ton_b(1234, func(data int, i int) int { return data }).Recv_W_1Ton_c(&x, sum)
+			s2.Send_W_1Ton_b(1234, func(data int, i int) int { return data }).Reduce_W_1Ton_c(&x, sum)
 			fmt.Println("S got c:", x)
 		} else {
 			s2.Send_W_1Ton_d(5678, func(data int, i int) int { return data })//.Recv_W_1Ton_b(&x, sum)
@@ -59,9 +59,10 @@ func main() {
 		var c_i *Proto1.Proto1_W_1Ton_1 = clientIni.Init()
 
 		var y int
-		c2 := c_i.Recv_S_1To1_a(&y, func(data []int) int { return data[0] })
+		c2 := c_i.Reduce_S_1To1_a(&y, func(data []int) int { return data[0] })
 
-		var x int	
+		var 
+x int	
 		select {
 		case c3 := <-c2.Recv_S_1To1_b(&x):
 			fmt.Println("W got b:", i, x)

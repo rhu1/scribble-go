@@ -49,7 +49,7 @@ func main() {
 
 		var c_i *Proto1.Proto1_W_1Ton_1 = clientIni.Init()
 		var x int	
-		c_i.Recv_S_1To1_a(&x, func(data []int) int { return data[0] })
+		c_i.Reduce_S_1To1_a(&x, func(data []int) int { return data[0] })
 
 		fmt.Println("Received: ", i, x)
 

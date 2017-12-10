@@ -18,6 +18,7 @@ global protocol Proto1(role S(n), role W(n))
 	{
 		b(int) from S[1..1] to W[1..n];
 		c(int) from W[1..n] to S[1..1];
+		//do Proto1(S(n), W(n));  // FIXME
 		do Proto1(S, W);
 	}
 	or

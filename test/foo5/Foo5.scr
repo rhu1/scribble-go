@@ -16,6 +16,7 @@ global protocol Proto1(role S(n), role W(n))
 	choice at S
 	{
 		a(int) from S[1..1] to W[1..n];
+		//do Proto1(S(n), W(n));  // FIXME
 		do Proto1(S, W);
 	}
 	or

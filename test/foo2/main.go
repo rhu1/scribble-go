@@ -26,19 +26,23 @@ func main() {
 			serverIni.Accept(P1.W, i, "127.0.0.1", strconv.Itoa(33333+i))  // FIXME: ensure ports open before clients request?
 		}
 
-		sum := func(xs []int) int {
+		/*sum := func(xs []int) int {
 			res := 0
 			for j := 0; j < len(xs); j++ {
 				res = res + xs[j]	
 			}
 			return res
-		}
+		}*/
 
 		var s1 *Proto1.Proto1_S_1To1_1 = serverIni.Init()
-		var x int	
-		s1.Send_W_1Ton_a(1234, func(data int, i int) int { return data }).Recv_W_1Ton_b(&x, sum)
+		s2 := s1.Send_W_1Ton_a(1234, func(data int, i int) int { return data })
+		//var x int	
+		//s2.Reduce_W_1Ton_b(&x, sum)
+		var xs []int
+		s2.Recv_W_1Ton_b(&xs)
 
-		fmt.Println("S Received: ", x)
+		//fmt.Println("S Received: ", x)
+		fmt.Println("S Received: ", xs)
 
 		wg.Done()
 	}
@@ -53,7 +57,7 @@ func main() {
 
 		var c_i *Proto1.Proto1_W_1Ton_1 = clientIni.Init()
 		var x int	
-		c_i.Recv_S_1To1_a(&x, func(data []int) int { return data[0] }).Send_S_1To1_b(i*100, func(data int, i int) int { return data })
+		c_i.Reduce_S_1To1_a(&x, func(data []int) int { return data[0] }).Send_S_1To1_b(i*100, func(data int, i int) int { return data })
 
 		fmt.Println("W Received: ", i, x)
 
