@@ -1,0 +1,53 @@
+//Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/game/orig_game/Game.scr -d test/game/orig_game -param Game
+
+
+module Game;
+
+type <go> "..." from "..." as Boolean;
+type <go> "..." from "..." as Int;
+type <go> "..." from "..." as String;
+
+/*global protocol ClientA(role p, role q) {
+  PlayA(Game@a) from q to p;
+}
+
+global protocol ClientB(role p, role q) {
+  PlayB(Game@b) from q to p;
+}
+
+global protocol ClientC(role p, role q) {
+  PlayC(Game@c) from q to p;
+}*/
+
+global protocol Game(role a, role b, role c) {
+  InfoBC(String) from b[1..1] to c[1..1];
+  InfoCA(String) from c[1..1] to a[1..1];
+  InfoAB(String) from a[1..1] to b[1..1];
+  
+  do t(a, b, c);
+ }
+  
+global protocol t(role a, role b, role c) {
+	choice at a {
+		Mov1AB(Int) from a[1..1] to b[1..1];
+		Mov1BC(Int) from b[1..1] to c[1..1];
+		choice at c {
+			Mov1CA(Int) from c[1..1] to a[1..1];
+			do t(a, b, c);
+		} or {
+			Mov2CA(Boolean) from c[1..1] to a[1..1];
+			do t(a, b, c);
+		}
+	} or {
+		Mov2AB(Boolean) from a[1..1] to b[1..1];
+		Mov2BC(Boolean) from b[1..1] to c[1..1];
+		choice at c {
+			Mov1CA(Int) from c[1..1] to a[1..1];
+			do t(a, b, c);
+		} or {
+			Mov2CA(Boolean) from c[1..1] to a[1..1];
+			do t(a, b, c);
+		}
+	}
+}
