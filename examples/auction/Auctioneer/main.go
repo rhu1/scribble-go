@@ -5,9 +5,9 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/nickng/scribble-go/examples/auction/Auction"
-	"github.com/nickng/scribble-go/runtime/session"
-	"github.com/nickng/scribble-go/runtime/transport/tcp"
+	"github.com/nickng/scribble-go-runtime/examples/auction/Auction"
+	"github.com/nickng/scribble-go-runtime/runtime/session"
+	"github.com/nickng/scribble-go-runtime/runtime/transport/tcp"
 )
 
 const nBidder = 1

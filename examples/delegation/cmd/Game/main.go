@@ -6,10 +6,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/nickng/scribble-go/examples/delegation/Game"
-	"github.com/nickng/scribble-go/runtime/session"
-	"github.com/nickng/scribble-go/runtime/transport"
-	"github.com/nickng/scribble-go/runtime/transport/shm"
+	"github.com/nickng/scribble-go-runtime/examples/delegation/Game"
+	"github.com/nickng/scribble-go-runtime/runtime/session"
+	"github.com/nickng/scribble-go-runtime/runtime/transport"
+	"github.com/nickng/scribble-go-runtime/runtime/transport/shm"
 )
 
 const (

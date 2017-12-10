@@ -16,8 +16,8 @@ global protocol scatter(role Server(n), role Worker(n)){
 
 import (
 	"fmt"
-	"github.com/nickng/scribble-go/runtime/session"
-	"github.com/nickng/scribble-go/runtime/transport"
+	"github.com/nickng/scribble-go-runtime/runtime/session"
+	"github.com/nickng/scribble-go-runtime/runtime/transport"
 	"log"
 )
 

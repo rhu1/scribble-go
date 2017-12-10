@@ -44,7 +44,7 @@ import (
 	"log"
 	"unsafe"
 
-	"github.com/nickng/scribble-go/runtime/transport"
+	"github.com/nickng/scribble-go-runtime/runtime/transport"
 )
 
 // ChannelNotReadyError is the kind of error where a channel
@@ -60,7 +60,7 @@ func (e ChannelNotReadyError) Error() string {
 	return fmt.Sprintf("transport/shm: channel not ready\n\t(has it been initialised with NewConnection()?)")
 }
 
-type t = interface{}
+type t interface{}
 
 // ConnCfg is a connection configuration, contains
 // the details required to establish a connection.

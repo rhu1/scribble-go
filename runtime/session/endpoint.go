@@ -3,7 +3,7 @@ package session
 import (
 	"sync"
 
-	"github.com/nickng/scribble-go/runtime/transport"
+	"github.com/nickng/scribble-go-runtime/runtime/transport"
 )
 
 type Endpoint struct {

@@ -41,10 +41,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/nickng/scribble-go/benchmarks/languagegame/spectral-norm-parallel/SN" // Protocol API
-	"github.com/nickng/scribble-go/runtime/session"
-	"github.com/nickng/scribble-go/runtime/transport"
-	"github.com/nickng/scribble-go/runtime/transport/shm"
+	"github.com/nickng/scribble-go-runtime/benchmarks/languagegame/spectral-norm-parallel/SN" // Protocol API
+	"github.com/nickng/scribble-go-runtime/runtime/session"
+	"github.com/nickng/scribble-go-runtime/runtime/transport"
+	"github.com/nickng/scribble-go-runtime/runtime/transport/shm"
 	"runtime"
 	"time"
 )

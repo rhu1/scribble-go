@@ -48,7 +48,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/nickng/scribble-go/runtime/transport"
+	"github.com/nickng/scribble-go-runtime/runtime/transport"
 )
 
 var (

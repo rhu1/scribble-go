@@ -2,20 +2,35 @@ package scatter
 
 import (
 	"fmt"
-	"github.com/nickng/scribble-go/runtime/session"
-	"github.com/nickng/scribble-go/runtime/transport"
-	"github.com/nickng/scribble-go/runtime/transport/tcp"
+	"github.com/nickng/scribble-go-runtime/runtime/session"
+	"github.com/nickng/scribble-go-runtime/runtime/transport"
+	"github.com/nickng/scribble-go-runtime/runtime/transport/tcp"
 	"log"
 )
 
 const Server = "server"
 const Worker = "worker"
 
+
+
+
+/*
+ * Session API
+ */
+
 type Server_1To1_Init struct {
 	session.LinearResource
 	ept *session.Endpoint
 }
 
+/*
+	nserver = 1 -- right index of Server[1..1]
+	nworker = n -- right index of Worker?
+
+	implicit pre: left index of both is 1 -- codegen can generalise this?
+
+	id = "self id" -- must be between left and right
+*/
 func NewServer(id, nserver, nworker int) (*Server_1To1_Init, error) {
 	if id > nserver || id < 1 {
 		return nil, fmt.Errorf("'server' id not in range [1, %d]", nserver)
@@ -23,12 +38,22 @@ func NewServer(id, nserver, nworker int) (*Server_1To1_Init, error) {
 	if nworker < 1 {
 		return nil, fmt.Errorf("Wrong number of participants of role 'worker': %d", nworker)
 	}
+
+	/*
+	e.g., key = "Server"
+	length of array for Server = n - left + 1
+	*/
 	conn := make(map[string][]transport.Channel)
 	conn[Worker] = make([]transport.Channel, nworker)
 
-	return &Server_1To1_Init{ept: session.NewEndpoint(id, nserver, conn)}, nil
+	// Server_1To1_Init is the "pre-state" before session proper -- used to do connect/accept
+	return &Server_1To1_Init{session.LinearResource{}, session.NewEndpoint(id, nserver, conn)}, nil
+	//return &Server_1To1_Init{ept: session.NewEndpoint(id, nserver, conn)}, nil
 }
 
+/*
+rolename[id] is the peer to accept from
+*/
 func (ini *Server_1To1_Init) Accept(rolename string, id int, addr, port string) error {
 	cn, ok := ini.ept.Conn[rolename]
 	if !ok {
@@ -37,6 +62,7 @@ func (ini *Server_1To1_Init) Accept(rolename string, id int, addr, port string) 
 	if id < 1 || id > len(cn) {
 		return fmt.Errorf("participant %d of role '%s' out of bounds", id, rolename)
 	}
+	// doing accept as goroutine
 	go func(i int, addr, port string) {
 		ini.ept.Conn[rolename][i-1] = tcp.NewConnection(addr, port).Accept().(*tcp.Conn)
 	}(id, addr, port)
@@ -50,7 +76,7 @@ type Server_1To1_1 struct {
 
 // Session hasn't started, so an error is returned if anything 'goes wrong'
 // For the server, wait until a connection for each participant is available.
-// FIXME: inefficient spinlock.
+// FIXME: inefficient spinlock. -- waiting for accept-goroutines to finish
 // TODO: Assumption, rolename and
 func (ini *Server_1To1_Init) Init() (*Server_1To1_1, error) {
 	ini.Use()
@@ -66,11 +92,22 @@ func (ini *Server_1To1_Init) Init() (*Server_1To1_1, error) {
 	return &Server_1To1_1{session.LinearResource{}, ini.ept}, nil
 }
 
+
+
+
+
+
+
+/*
+ * State Chan API
+ */
+
 type Server_1To1_End struct {
 }
 
 // Session has started, so if an error occurs, then a runtime error is produced
 // and the program exits
+// Current pre: len(pl) = n -- W[1..n]
 func (st1 *Server_1To1_1) SendAll(pl []int) *Server_1To1_End {
 	if len(pl) != len(st1.ept.Conn[Worker]) {
 		log.Fatalf("sending wrong number of arguments in 'st1': %d != %d", len(st1.ept.Conn[Worker]), len(pl))
@@ -86,7 +123,7 @@ func (st1 *Server_1To1_1) SendAll(pl []int) *Server_1To1_End {
 // Convenience to check that user implements the full protocol
 func (ini *Server_1To1_Init) Run(f func(*Server_1To1_1) *Server_1To1_End) {
 
-	st1, err := ini.Init()
+	st1, err := ini.Init()  // st1: Server_1To1_1
 
 	if err != nil {
 		log.Fatalf("failed to initialise the session: %s", err)

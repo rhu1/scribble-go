@@ -2,13 +2,18 @@ package main
 
 import (
 	"fmt"
-	"github.com/nickng/scribble-go/examples/dot_api/dot"
+	"github.com/nickng/scribble-go-runtime/examples/dot_api/dot"
 	"log"
 	"strconv"
 	"sync"
 	"time"
 )
 
+/*
+global protocol Foo(role A(n), role B(n) {
+	(int) dot A[1..n] to B[1..n]
+}
+*/
 func main() {
 	wg := new(sync.WaitGroup)
 	wg.Add(20)

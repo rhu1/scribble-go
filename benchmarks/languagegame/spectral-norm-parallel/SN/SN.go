@@ -2,7 +2,7 @@ package SN
 
 import (
 	"fmt"
-	"github.com/nickng/scribble-go/runtime/session"
+	"github.com/nickng/scribble-go-runtime/runtime/session"
 	"log"
 )
 
