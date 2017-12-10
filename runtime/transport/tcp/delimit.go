@@ -102,6 +102,7 @@ type sizeDelimWriter struct {
 // the encoded data to the underlying stream.
 func (sdw *sizeDelimWriter) Write(p []byte) (n int, err error) {
 	n, err = sdw.conn.bufw.Write(packSize(p))
+	n -= 8
 	sdw.conn.bufw.Flush()
 	return
 }
