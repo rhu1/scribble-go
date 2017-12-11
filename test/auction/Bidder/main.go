@@ -21,8 +21,12 @@ func main() {
 
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
+	args := os.Args[1:]
+	self := args[0]
+	k := args[1]
+
 	Proto := Proto.NewProto()
-	bidder := Proto.NewProto_Bidder_1Tok(1, 1)
+	bidder := Proto.NewProto_Bidder_1Tok(self, 1)
 	/*if err != nil {
 		log.Fatalf("Cannot create Bidder: %v", err)
 	}*/
@@ -56,7 +60,9 @@ BID_LOOP:
 		if giveUp {
 			b4 = b3.Send_Auctioneer_1To1_(-1, mydup)
 		} else {
-			b4 = b3.Send_Auctioneer_1To1_(highest+1, mydup)
+			raised := highest+1
+			b4 = b3.Send_Auctioneer_1To1_(raised, mydup)
+			fmt.Println("Raised bid:", raised)
 		}
 		select {
 		case b3 = <-b4.Recv_Auctioneer_1To1_highest(&highest):
