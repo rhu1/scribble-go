@@ -1,3 +1,7 @@
+//rhu@HZHL4 ~/code/go
+//$ go install github.com/rhu1/scribble-go-runtime/test/Auctioneer
+//$ bin/Auctioneer.exe
+
 package main
 
 import (
@@ -11,7 +15,7 @@ import (
 	"github.com/rhu1/scribble-go-runtime/test/auction/Auction/Proto"
 )
 
-type myintslice = []int
+//type myintslice = []int
 
 const nBidder = 1
 

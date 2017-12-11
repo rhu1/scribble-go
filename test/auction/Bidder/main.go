@@ -1,8 +1,12 @@
+//rhu@HZHL4 ~/code/go
+//$ go install github.com/rhu1/scribble-go-runtime/test/auction/Bidder
+//$ bin/Bidder.exe
+
 package main
 
 import (
 	"fmt"
-	//"log"
+	"log"
 	"strconv"
 
 	//"github.com/rhu1/scribble-go-runtime/runtime/session"
@@ -14,6 +18,9 @@ import (
 const nAuctioneer = 1
 
 func main() {
+
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
 	Proto := Proto.NewProto()
 	bidder := Proto.NewProto_Bidder_1Tok(1, 1)
 	/*if err != nil {
