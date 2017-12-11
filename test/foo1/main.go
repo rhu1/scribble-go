@@ -47,8 +47,6 @@ func serverCode(wg *sync.WaitGroup, n int) *Proto1.Proto1_S_1To1_End {
 		conns[i] = tcp.NewConnection("...", strconv.Itoa(PORT+i)) 
 	}
 
-	time.Sleep(100 * time.Millisecond)
-
 	P1 := Proto1.NewProto1()
 
 	S := P1.NewProto1_S_1To1(n, 1)
