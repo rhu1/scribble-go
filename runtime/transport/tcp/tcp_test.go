@@ -158,7 +158,7 @@ func TestConnectionSendMultiBytes(t *testing.T) {
 					t.Errorf("send failed: %v", err)
 				}
 				cSent += n1
-				n1, err = w.Write(p2[:n2])
+				n2, err = w.Write(p2[:n2])
 				if err != nil {
 					t.Errorf("send failed: %v", err)
 				}
