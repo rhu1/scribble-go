@@ -32,7 +32,7 @@ func main() {
 
 	go serverCode(wg, n)
 
-	time.Sleep(100 * time.Millisecond)  //2017/12/11 11:21:40 cannot connect to 127.0.0.1:8891: dial tcp 127.0.0.1:8891: connectex: No connection could be made because the target machine actively refused it.
+	time.Sleep(1000 * time.Millisecond)  //2017/12/11 11:21:40 cannot connect to 127.0.0.1:8891: dial tcp 127.0.0.1:8891: connectex: No connection could be made because the target machine actively refused it.
 
 	for i := 1; i <= n; i++ {
 		go clientCode(wg, n, i)
@@ -42,13 +42,19 @@ func main() {
 }
 
 func serverCode(wg *sync.WaitGroup, n int) *Proto1.Proto1_S_1To1_End {
+	conns :=  make([]tcp.ConnCfg, n)
+	for i := 0; i < n; i++ {
+		conns[i] = tcp.NewConnection("...", strconv.Itoa(PORT+i)) 
+	}
+
+	time.Sleep(100 * time.Millisecond)
+
 	P1 := Proto1.NewProto1()
 
 	S := P1.NewProto1_S_1To1(n, 1)
 	for i := 1; i <= n; i++ {
 		//S.Accept(P1.W, i, util.LOCALHOST, strconv.Itoa(PORT+i))
-		conn := tcp.NewConnection("...", strconv.Itoa(PORT+i)) 
-		err := session.Accept(S, P1.W.Name(), i, conn)
+		err := session.Accept(S, P1.W.Name(), i, conns[i-1])
 		if err != nil {
 			log.Fatalf("failed to create connection to W %d: %v", i, err)
 		}
