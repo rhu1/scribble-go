@@ -111,6 +111,7 @@ func (sdw *sizeDelimWriter) Write(p []byte) (n int, err error) {
 	//log.Println(">>", p)
 
 	n, err = sdw.conn.bufw.Write(packSize(p))
+	n -= 8
 	sdw.conn.bufw.Flush()
 	return
 }
