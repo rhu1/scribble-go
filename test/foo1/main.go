@@ -11,6 +11,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/nickng/scribble-go-runtime/runtime/session"
+	"github.com/nickng/scribble-go-runtime/runtime/transport/tcp"
+
 	"github.com/rhu1/scribble-go-runtime/test/foo1/Foo1/Proto1"
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
@@ -43,7 +46,12 @@ func serverCode(wg *sync.WaitGroup, n int) *Proto1.Proto1_S_1To1_End {
 
 	S := P1.NewProto1_S_1To1(n, 1)
 	for i := 1; i <= n; i++ {
-		S.Accept(P1.W, i, util.LOCALHOST, strconv.Itoa(PORT+i))
+		//S.Accept(P1.W, i, util.LOCALHOST, strconv.Itoa(PORT+i))
+		conn := tcp.NewConnection("...", strconv.Itoa(PORT+i)) 
+		err := session.Accept(S, P1.W.Name(), i, conn)
+		if err != nil {
+			log.Fatalf("failed to create connection to W %d: %v", i, err)
+		}
 	}
 	s1 := S.Init()
 	var end *Proto1.Proto1_S_1To1_End
@@ -59,7 +67,12 @@ func clientCode(wg *sync.WaitGroup, n int, self int) *Proto1.Proto1_W_1Ton_End {
 	P1 := Proto1.NewProto1()
 
 	W := P1.NewProto1_W_1Ton(n, self)
-	W.Connect(P1.S, 1, util.LOCALHOST, strconv.Itoa(PORT+self))
+	//W.Connect(P1.S, 1, util.LOCALHOST, strconv.Itoa(PORT+self))
+	conn := tcp.NewConnection(util.LOCALHOST, strconv.Itoa(PORT+self))
+	err := session.Connect(W, P1.S.Name(), self, conn)
+	if err != nil {
+		log.Fatalf("failed to create connection to Auctioneer: %v", err)
+	}
 	var w1 *Proto1.Proto1_W_1Ton_1 = W.Init()
 
 	var x int

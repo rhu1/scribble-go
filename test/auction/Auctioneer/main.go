@@ -1,37 +1,58 @@
 //rhu@HZHL4 ~/code/go
 //$ go install github.com/rhu1/scribble-go-runtime/test/Auctioneer
-//$ bin/Auctioneer.exe
+//$ bin/Auctioneer.exe 8888 2
 
 package main
 
 import (
 	"fmt"
-	//"log"
+	"log"
 	"strconv"
+	"sync"
+	"os"
 
-	//"github.com/nickng/scribble-go-runtime/runtime/session"
-	//"github.com/nickng/scribble-go-runtime/runtime/transport/tcp"
-
+	"github.com/rhu1/scribble-go-runtime/test/util"
 	"github.com/rhu1/scribble-go-runtime/test/auction/Auction/Proto"
 )
 
 //type myintslice = []int
 
-const nBidder = 1
 
 func main() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
+	args := os.Args[1:]
+	port, err := strconv.Atoi(args[0])
+	if err != nil {
+		log.Fatal(err)
+	}
+	k, err := strconv.Atoi(args[1])
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	Proto := Proto.NewProto()
-	auctioneer := Proto.NewProto_Auctioneer_1To1(1, 1)
+	auctioneer := Proto.NewProto_Auctioneer_1To1(k, 1)
 	/*if err != nil {
 		log.Fatalf("Cannot create Auctioneer: %v", err)
 	}*/
-	for i := 1; i <= nBidder; i++ {
+	wg := new(sync.WaitGroup)
+	wg.Add(k)
+	for i := 1; i <= k; i++ {
 		//err := //session.Accept(auctioneer, Auction.Bidder, i, conn)
-		auctioneer.Accept(Proto.Bidder, i, "127.0.0.1", strconv.Itoa(33333+i))
+		fmt.Println("foo")
+		go func() {
+			fmt.Println("Waiting:", (port+i))
+			
+auctioneer.Accept(Proto.Bidder, i, util.LOCALHOST, strconv.Itoa(port+i))
+			wg.Done()
+			fmt.Println("Done:", (port+i))
+		}()
 		/*if err != nil {
 			log.Fatalf("failed to create connection to Bidder %d: %v", i, err)
 		}*/
 	}
+	wg.Wait()
 
 	a1 := auctioneer.Init()
 	auctioneerFn(a1)
@@ -51,7 +72,7 @@ func auctioneerFn(st *Proto.Proto_Auctioneer_1To1_1) *Proto.Proto_Auctioneer_1To
 		}
 	}
 	// bids -> intGen
-	st3 := st2.Send_Bidder_1Tok_(highest, mydup)
+	st3 := st2.Send_Bidder_1Tok_(highest, util.Copy)
 BID_LOOP:
 	for {
 		var bidSkips []int
@@ -73,7 +94,7 @@ BID_LOOP:
 			break BID_LOOP
 		} else {
 			fmt.Println("Current highest bid:", highest, "bidding continues")
-			st3 = st4.Send_Bidder_1Tok_highest(highest, mydup)
+			st3 = st4.Send_Bidder_1Tok_highest(highest, util.Copy)
 		}
 	}
 	return end
@@ -94,18 +115,6 @@ func stringGen(v string, count int) []string {
 	}
 	return strs
 }*/
-
-func mysum(xs []int) int {
-	res := 0
-	for j := 0; j < len(xs); j++ {
-		res = res + xs[j]	
-	}
-	return res
-}
-
-func mydup(data int, i int) int {
-	return data
-}
 
 func mystrdup(data string, i int) string {
 	return data
