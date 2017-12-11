@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rhu1/scribble-go-runtime/test/foo6/Foo6/Proto1"
 	"github.com/rhu1/scribble-go-runtime/test/util"
+	"github.com/rhu1/scribble-go-runtime/test/foo6/Foo6/Proto1"
 )
 
 
@@ -22,7 +22,7 @@ const PORT = 8888
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	n := 1
+	n := 2
 
 	wg := new(sync.WaitGroup)
 	wg.Add(n + 1)
@@ -49,7 +49,6 @@ func serverCode(wg *sync.WaitGroup, n int) *Proto1.Proto1_S_1To1_End {
 	var end *Proto1.Proto1_S_1To1_End
 
 	var xs []int
-	var x int
 	for z := 0; z < 3; z++ {
 		s2 := s1.Send_W_1Ton_a(1, util.Copy)
 		s1 = s2.Send_W_1Ton_b(2, util.Copy).Recv_W_1Ton_c(&xs)
@@ -58,8 +57,9 @@ func serverCode(wg *sync.WaitGroup, n int) *Proto1.Proto1_S_1To1_End {
 	s4 := s1.Send_W_1Ton_a(1, util.Copy)
 	s5 := s4.Send_W_1Ton_d(4, util.Copy)
 	fmt.Println("S sent d:")
-	end = s5.Reduce_W_1Ton_e(&x, util.Sum)
-	fmt.Println("S got e:", x)
+
+	end = s5.Recv_W_1Ton_e(&xs)
+	fmt.Println("S got e:", xs)
 
 	wg.Done()
 	return end
