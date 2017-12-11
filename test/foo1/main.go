@@ -42,17 +42,18 @@ func main() {
 }
 
 func serverCode(wg *sync.WaitGroup, n int) *Proto1.Proto1_S_1To1_End {
-	conns :=  make([]tcp.ConnCfg, n)
+	/*conns :=  make([]tcp.ConnCfg, n)
 	for i := 0; i < n; i++ {
 		conns[i] = tcp.NewConnection("...", strconv.Itoa(PORT+i)) 
-	}
+	}*/
 
 	P1 := Proto1.NewProto1()
 
 	S := P1.NewProto1_S_1To1(n, 1)
 	for i := 1; i <= n; i++ {
 		//S.Accept(P1.W, i, util.LOCALHOST, strconv.Itoa(PORT+i))
-		err := session.Accept(S, P1.W.Name(), i, conns[i-1])
+		conn := tcp.NewConnection("...", strconv.Itoa(PORT+i)) 
+		err := session.Accept(S, P1.W.Name(), i, conn)
 		if err != nil {
 			log.Fatalf("failed to create connection to W %d: %v", i, err)
 		}
