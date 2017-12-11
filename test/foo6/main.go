@@ -80,6 +80,7 @@ func main() {
 				b = false
 			}
 		}
+
 		time.Sleep(1000 * time.Millisecond)
 		fmt.Println("W end:", i)
 

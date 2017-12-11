@@ -19,6 +19,9 @@ package tcp
 import (
 	"encoding/binary"
 	"io"
+
+	//"log"
+
 )
 
 // DelimitMethod defines the delimitation method for the messages passed
@@ -89,6 +92,9 @@ func (sdr *sizeDelimReader) Read(p []byte) (n int, err error) {
 	b := make([]byte, size)
 	n, err = sdr.conn.bufr.Read(b)
 	copy(p, b)
+
+	//log.Println("<<", p)
+
 	return n, err
 }
 
@@ -101,6 +107,9 @@ type sizeDelimWriter struct {
 // Write encodes p into a size-prefixed data stream and writes
 // the encoded data to the underlying stream.
 func (sdw *sizeDelimWriter) Write(p []byte) (n int, err error) {
+
+	//log.Println(">>", p)
+
 	n, err = sdw.conn.bufw.Write(packSize(p))
 	sdw.conn.bufw.Flush()
 	return
