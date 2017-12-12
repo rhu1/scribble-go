@@ -74,7 +74,7 @@ func clientCode(wg *sync.WaitGroup, n int, self int) *Proto1.Proto1_W_1Ton_End {
 	W := P1.NewProto1_W_1Ton(n, self)
 	//W.Connect(P1.S, 1, util.LOCALHOST, strconv.Itoa(PORT+self))
 	conn := tcp.NewConnection(util.LOCALHOST, strconv.Itoa(PORT+self))
-	err := session.Connect(W, P1.S.Name(), self, conn)
+	err := session.Connect(W, P1.S.Name(), 1, conn)
 	if err != nil {
 		log.Fatalf("failed to create connection to Auctioneer: %v", err)
 	}
