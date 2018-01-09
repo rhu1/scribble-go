@@ -22,7 +22,7 @@ aux global protocol MoreBid(role Auctioneer(k), role Bidder(k)) {
   (int) from Bidder[1..k] to Auctioneer[1..1];
 
   // Auctioneer reply with either new highest bid or declare winner.
-  choice at Auctioneer {
+  choice at Auctioneer[1] {
     highest(int) from Auctioneer[1..1] to Bidder[1..k];
     //do MoreBid(Auctioneer[1..1], Bidder[1..k]);
     do MoreBid(Auctioneer, Bidder);

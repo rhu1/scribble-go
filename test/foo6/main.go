@@ -41,7 +41,7 @@ func main() {
 func serverCode(wg *sync.WaitGroup, n int) *Proto1.Proto1_S_1To1_End {
 	P1 := Proto1.NewProto1()
 
-	S := P1.NewProto1_S_1To1(1, n)
+	S := P1.NewProto1_S_1To1(n, 1)
 	for i := 1; i <= n; i++ {
 		S.Accept(P1.W, i, util.LOCALHOST, strconv.Itoa(PORT+i))
 	}
@@ -68,7 +68,7 @@ func serverCode(wg *sync.WaitGroup, n int) *Proto1.Proto1_S_1To1_End {
 func clientCode(wg *sync.WaitGroup, n int, self int) *Proto1.Proto1_W_1Ton_End {
 	P1 := Proto1.NewProto1()
 
-	W := P1.NewProto1_W_1Ton(self, 1)
+	W := P1.NewProto1_W_1Ton(1, self)
 	W.Connect(P1.S, 1, "127.0.0.1", strconv.Itoa(PORT+self))
 	w1 := W.Init()
 	var end *Proto1.Proto1_W_1Ton_End

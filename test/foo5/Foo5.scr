@@ -13,7 +13,7 @@ type <go> "int" from "..." as int;
 
 global protocol Proto1(role S(n), role W(n))
 {
-	choice at S
+	choice at S[1]
 	{
 		a(int) from S[1..1] to W[1..n];
 		//do Proto1(S(n), W(n));  // FIXME

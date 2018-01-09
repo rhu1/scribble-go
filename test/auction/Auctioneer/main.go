@@ -1,6 +1,6 @@
 //rhu@HZHL4 ~/code/go
-//$ go install github.com/rhu1/scribble-go-runtime/test/Auctioneer
-//$ bin/Auctioneer.exe 8888 2
+//$ go install github.com/rhu1/scribble-go-runtime/test/auction/Auctioneer
+//$ bin/Auctioneer.exe 8888 1
 
 package main
 
@@ -40,14 +40,13 @@ func main() {
 	wg.Add(k)
 	for i := 1; i <= k; i++ {
 		//err := //session.Accept(auctioneer, Auction.Bidder, i, conn)
-		fmt.Println("foo")
-		go func() {
-			fmt.Println("Waiting:", (port+i))
-			
-auctioneer.Accept(Proto.Bidder, i, util.LOCALHOST, strconv.Itoa(port+i))
+		go func(j int) {
+			p := port+j-1
+			fmt.Println("Waiting:", p)
+			auctioneer.Accept(Proto.Bidder, j, util.LOCALHOST, strconv.Itoa(p))
 			wg.Done()
-			fmt.Println("Done:", (port+i))
-		}()
+			fmt.Println("Done:", p)
+		}(i)
 		/*if err != nil {
 			log.Fatalf("failed to create connection to Bidder %d: %v", i, err)
 		}*/

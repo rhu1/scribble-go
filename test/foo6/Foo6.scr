@@ -14,7 +14,7 @@ type <go> "int" from "..." as int;
 global protocol Proto1(role S(n), role W(n))
 {
 	a(int) from S[1..1] to W[1..n];
-	choice at S
+	choice at S[1]
 	{
 		b(int) from S[1..1] to W[1..n];
 		c(int) from W[1..n] to S[1..1];
