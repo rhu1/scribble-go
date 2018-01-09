@@ -11,16 +11,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/nickng/scribble-go-runtime/runtime/session"
-	"github.com/nickng/scribble-go-runtime/runtime/transport/tcp"
+	"github.com/rhu1/scribble-go-runtime/runtime/session"
+	"github.com/rhu1/scribble-go-runtime/runtime/transport/tcp"
 
 	"github.com/rhu1/scribble-go-runtime/test/foo1/Foo1/Proto1"
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 
-
 const PORT = 8888
-
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
@@ -28,11 +26,11 @@ func main() {
 	n := 3
 
 	wg := new(sync.WaitGroup)
-	wg.Add(n+1)
+	wg.Add(n + 1)
 
 	go serverCode(wg, n)
 
-	time.Sleep(1000 * time.Millisecond)  //2017/12/11 11:21:40 cannot connect to 127.0.0.1:8891: dial tcp 127.0.0.1:8891: connectex: No connection could be made because the target machine actively refused it.
+	time.Sleep(1000 * time.Millisecond) //2017/12/11 11:21:40 cannot connect to 127.0.0.1:8891: dial tcp 127.0.0.1:8891: connectex: No connection could be made because the target machine actively refused it.
 
 	for i := 1; i <= n; i++ {
 		go clientCode(wg, n, i)
@@ -44,7 +42,7 @@ func main() {
 func serverCode(wg *sync.WaitGroup, n int) *Proto1.Proto1_S_1To1_End {
 	/*conns :=  make([]tcp.ConnCfg, n)
 	for i := 0; i < n; i++ {
-		conns[i] = tcp.NewConnection("...", strconv.Itoa(PORT+i)) 
+		conns[i] = tcp.NewConnection("...", strconv.Itoa(PORT+i))
 	}*/
 
 	P1 := Proto1.NewProto1()
@@ -52,7 +50,7 @@ func serverCode(wg *sync.WaitGroup, n int) *Proto1.Proto1_S_1To1_End {
 	S := P1.NewProto1_S_1To1(n, 1)
 	for i := 1; i <= n; i++ {
 		//S.Accept(P1.W, i, util.LOCALHOST, strconv.Itoa(PORT+i))
-		conn := tcp.NewConnection("...", strconv.Itoa(PORT+i)) 
+		conn := tcp.NewConnection("...", strconv.Itoa(PORT+i))
 		err := session.Accept(S, P1.W.Name(), i, conn)
 		if err != nil {
 			log.Fatalf("failed to create connection to W %d: %v", i, err)

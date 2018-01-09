@@ -7,16 +7,15 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"sync"
-	"os"
 
-	"github.com/rhu1/scribble-go-runtime/test/util"
 	"github.com/rhu1/scribble-go-runtime/test/auction/Auction/Proto"
+	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 
 //type myintslice = []int
-
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
@@ -41,7 +40,7 @@ func main() {
 	for i := 1; i <= k; i++ {
 		//err := //session.Accept(auctioneer, Auction.Bidder, i, conn)
 		go func(j int) {
-			p := port+j-1
+			p := port + j - 1
 			fmt.Println("Waiting:", p)
 			auctioneer.Accept(Proto.Bidder, j, util.LOCALHOST, strconv.Itoa(p))
 			wg.Done()
@@ -67,7 +66,7 @@ func auctioneerFn(st *Proto.Proto_Auctioneer_1To1_1) *Proto.Proto_Auctioneer_1To
 	for i := range bids {
 		if bids[i] > highest {
 			highest = bids[i]
-			winnerID = i+1
+			winnerID = i + 1
 		}
 	}
 	// bids -> intGen
@@ -81,7 +80,7 @@ BID_LOOP:
 			if bs > -1 {
 				if bs > highest {
 					highest = bs
-					winnerID = i+1
+					winnerID = i + 1
 				}
 				bidCount++
 			}

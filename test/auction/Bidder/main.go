@@ -11,10 +11,9 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/rhu1/scribble-go-runtime/test/util"
 	"github.com/rhu1/scribble-go-runtime/test/auction/Auction/Proto"
+	"github.com/rhu1/scribble-go-runtime/test/util"
 )
-
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
@@ -42,9 +41,9 @@ func main() {
 			log.Fatalf("Cannot create Bidder: %v", err)
 		}*/
 
-		p := port+i-1
+		p := port + i - 1
 		fmt.Println("Requesting", (strconv.Itoa(i) + ":"), p)
-		//err := 
+		//err :=
 		bidder.Connect(Proto.Auctioneer, 1, util.LOCALHOST, strconv.Itoa(p))
 		/*if err != nil {
 			log.Fatalf("failed to create connection to Auctioneer: %v", err)
@@ -55,7 +54,6 @@ func main() {
 	}
 	wg.Wait()
 }
-
 
 func bidderFn(wg *sync.WaitGroup, st *Proto.Proto_Bidder_1Tok_1, self int, MAXBID int) *Proto.Proto_Bidder_1Tok_End {
 	fmt.Println(("(" + strconv.Itoa(self) + ")"), "bidderFn")
@@ -76,7 +74,7 @@ BID_LOOP:
 			b4 = b3.Send_Auctioneer_1To1_(-1, util.Copy)
 			fmt.Println(("(" + strconv.Itoa(self) + ")"), "Too high:", highest)
 		} else {
-			raised := highest+1
+			raised := highest + 1
 			b4 = b3.Send_Auctioneer_1To1_(raised, util.Copy)
 			fmt.Println(("(" + strconv.Itoa(self) + ")"), "Raised bid:", raised)
 		}

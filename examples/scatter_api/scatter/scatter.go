@@ -2,17 +2,14 @@ package scatter
 
 import (
 	"fmt"
-	"github.com/nickng/scribble-go-runtime/runtime/session"
-	"github.com/nickng/scribble-go-runtime/runtime/transport"
-	"github.com/nickng/scribble-go-runtime/runtime/transport/tcp"
+	"github.com/rhu1/scribble-go-runtime/runtime/session"
+	"github.com/rhu1/scribble-go-runtime/runtime/transport"
+	"github.com/rhu1/scribble-go-runtime/runtime/transport/tcp"
 	"log"
 )
 
 const Server = "server"
 const Worker = "worker"
-
-
-
 
 /*
  * Session API
@@ -40,8 +37,8 @@ func NewServer(id, nserver, nworker int) (*Server_1To1_Init, error) {
 	}
 
 	/*
-	e.g., key = "Server"
-	length of array for Server = n - left + 1
+		e.g., key = "Server"
+		length of array for Server = n - left + 1
 	*/
 	conn := make(map[string][]transport.Channel)
 	conn[Worker] = make([]transport.Channel, nworker)
@@ -92,12 +89,6 @@ func (ini *Server_1To1_Init) Init() (*Server_1To1_1, error) {
 	return &Server_1To1_1{session.LinearResource{}, ini.ept}, nil
 }
 
-
-
-
-
-
-
 /*
  * State Chan API
  */
@@ -123,7 +114,7 @@ func (st1 *Server_1To1_1) SendAll(pl []int) *Server_1To1_End {
 // Convenience to check that user implements the full protocol
 func (ini *Server_1To1_Init) Run(f func(*Server_1To1_1) *Server_1To1_End) {
 
-	st1, err := ini.Init()  // st1: Server_1To1_1
+	st1, err := ini.Init() // st1: Server_1To1_1
 
 	if err != nil {
 		log.Fatalf("failed to initialise the session: %s", err)

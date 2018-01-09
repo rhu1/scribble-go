@@ -2,8 +2,8 @@ package alltoall
 
 import (
 	"fmt"
-	"github.com/nickng/scribble-go-runtime/runtime/session"
-	"github.com/nickng/scribble-go-runtime/runtime/transport"
+	"github.com/rhu1/scribble-go-runtime/runtime/session"
+	"github.com/rhu1/scribble-go-runtime/runtime/transport"
 	"log"
 )
 

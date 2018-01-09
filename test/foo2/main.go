@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rhu1/scribble-go-runtime/test/util"
 	"github.com/rhu1/scribble-go-runtime/test/foo2/Foo2/Proto1"
+	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 
 const PORT = 8888

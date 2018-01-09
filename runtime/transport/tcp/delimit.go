@@ -19,9 +19,7 @@ package tcp
 import (
 	"encoding/binary"
 	"io"
-
 	//"log"
-
 )
 
 // DelimitMethod defines the delimitation method for the messages passed

@@ -9,12 +9,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rhu1/scribble-go-runtime/test/util"
 	"github.com/rhu1/scribble-go-runtime/test/benchmarks/nano/scatter/Scatter/Proto1"
+	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 
 const (
-	NCPU   = 7
+	NCPU = 7
 	//NCPU   = 2
 	NITERS = 100000
 	//NITERS = 1000
@@ -37,7 +37,7 @@ func main() {
 
 	//fmt.Println("1")
 
-	 ch := make(chan func() *Proto1.Proto1_S_1To1_End)
+	ch := make(chan func() *Proto1.Proto1_S_1To1_End)
 
 	//serverCode := func() (func() *Proto1.Proto1_S_1To1_End) {
 	serverCode := func() {
@@ -82,7 +82,7 @@ func main() {
 	//fmt.Println("2")
 
 	P1 := Proto1.NewProto1()
-	clientCode := func(i int) (func() *Proto1.Proto1_W_1Ton_End) {
+	clientCode := func(i int) func() *Proto1.Proto1_W_1Ton_End {
 
 		W := P1.NewProto1_W_1Ton(ncpu, i)
 		/*if err != nil {
@@ -116,7 +116,7 @@ func main() {
 
 	//fmt.Println("4")
 
-	serverf := <-ch	
+	serverf := <-ch
 
 	//fmt.Println("5")
 
@@ -130,7 +130,7 @@ func main() {
 	fmt.Println(Avg(run_endt.Sub(run_startt), niters))
 }
 
-func mkservmain(nw int) (func(st1 *Proto1.Proto1_S_1To1_1) *Proto1.Proto1_S_1To1_End) {
+func mkservmain(nw int) func(st1 *Proto1.Proto1_S_1To1_1) *Proto1.Proto1_S_1To1_End {
 	return func(st1 *Proto1.Proto1_S_1To1_1) *Proto1.Proto1_S_1To1_End {
 		for i := 0; i < niters; i++ {
 			st1 = st1.Send_W_1Ton_(42, splitFn0)
@@ -154,5 +154,5 @@ func mkworkermain(idx int) func(st1 *Proto1.Proto1_W_1Ton_1) *Proto1.Proto1_W_1T
 }
 
 func foo(xs []int) int {
-	return xs[0]	
+	return xs[0]
 }

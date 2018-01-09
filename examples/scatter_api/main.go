@@ -10,14 +10,12 @@ import (
 	"github.com/nickng/scribble-go-runtime/examples/scatter_api/scatter"
 )
 
-
 /*
 global protocol ScatterGather(role Server(n), role Worker(n))
 {
 	(int) from Server[1..1] to Worker[1..n];
 }
 */
-
 
 func main() {
 	wg := new(sync.WaitGroup)
@@ -37,7 +35,7 @@ func main() {
 		}
 
 		serverMain := mkservmain(10)
-		serverIni.Run(serverMain)  // serverMain: init -> end
+		serverIni.Run(serverMain) // serverMain: init -> end
 		wg.Done()
 	}
 

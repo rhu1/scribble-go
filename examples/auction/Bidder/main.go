@@ -6,8 +6,8 @@ import (
 	"strconv"
 
 	"github.com/nickng/scribble-go-runtime/examples/auction/Auction"
-	"github.com/nickng/scribble-go-runtime/runtime/session"
-	"github.com/nickng/scribble-go-runtime/runtime/transport/tcp"
+	"github.com/rhu1/scribble-go-runtime/runtime/session"
+	"github.com/rhu1/scribble-go-runtime/runtime/transport/tcp"
 )
 
 const nAuctioneer = 1

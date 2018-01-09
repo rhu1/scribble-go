@@ -9,10 +9,10 @@ import (
 	"sync"
 
 	"github.com/nickng/scribble-go-runtime/examples/httpget/httpget"
-	"github.com/nickng/scribble-go-runtime/runtime/session"
-	"github.com/nickng/scribble-go-runtime/runtime/transport"
 	"github.com/nickng/scribble-go-runtime/runtime/transport/shm"
-	"github.com/nickng/scribble-go-runtime/runtime/transport/tcp"
+	"github.com/rhu1/scribble-go-runtime/runtime/session"
+	"github.com/rhu1/scribble-go-runtime/runtime/transport"
+	"github.com/rhu1/scribble-go-runtime/runtime/transport/tcp"
 )
 
 const (
