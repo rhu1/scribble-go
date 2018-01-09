@@ -67,7 +67,7 @@ func auctioneerFn(st *Proto.Proto_Auctioneer_1To1_1) *Proto.Proto_Auctioneer_1To
 	for i := range bids {
 		if bids[i] > highest {
 			highest = bids[i]
-			winnerID = i
+			winnerID = i+1
 		}
 	}
 	// bids -> intGen
@@ -81,7 +81,7 @@ BID_LOOP:
 			if bs > -1 {
 				if bs > highest {
 					highest = bs
-					winnerID = i
+					winnerID = i+1
 				}
 				bidCount++
 			}

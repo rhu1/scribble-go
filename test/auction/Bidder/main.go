@@ -58,7 +58,7 @@ func main() {
 
 
 func bidderFn(wg *sync.WaitGroup, st *Proto.Proto_Bidder_1Tok_1, self int, MAXBID int) *Proto.Proto_Bidder_1Tok_End {
-	fmt.Println("bidderFn")
+	fmt.Println(("(" + strconv.Itoa(self) + ")"), "bidderFn")
 	var end *Proto.Proto_Bidder_1Tok_End
 	var highest int
 	var winner string
