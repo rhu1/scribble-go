@@ -42,6 +42,8 @@ type Transport interface {
 	//
 	// The caller of Connect is typically the client-side of a binary transport.
 	Connect() Channel
+
+	Request() Channel
 }
 
 // Channel is an abstract binary communication channel

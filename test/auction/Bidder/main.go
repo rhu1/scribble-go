@@ -11,6 +11,8 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/rhu1/scribble-go-runtime/runtime/transport/tcp"
+
 	"github.com/rhu1/scribble-go-runtime/test/auction/Auction/Proto"
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
@@ -44,7 +46,9 @@ func main() {
 		p := port + i - 1
 		fmt.Println("Requesting", (strconv.Itoa(i) + ":"), p)
 		//err :=
-		bidder.Connect(Proto.Auctioneer, 1, util.LOCALHOST, strconv.Itoa(p))
+		//bidder.Request(Proto.Auctioneer, 1, util.LOCALHOST, strconv.Itoa(p))
+		conn := tcp.NewConnection(util.LOCALHOST, strconv.Itoa(p))
+		bidder.Request(Proto.Auctioneer, 1, conn)
 		/*if err != nil {
 			log.Fatalf("failed to create connection to Auctioneer: %v", err)
 		}*/

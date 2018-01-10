@@ -11,6 +11,8 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/rhu1/scribble-go-runtime/runtime/transport/tcp"
+
 	"github.com/rhu1/scribble-go-runtime/test/auction/Auction/Proto"
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
@@ -42,7 +44,9 @@ func main() {
 		go func(j int) {
 			p := port + j - 1
 			fmt.Println("Waiting:", p)
-			auctioneer.Accept(Proto.Bidder, j, util.LOCALHOST, strconv.Itoa(p))
+			//auctioneer.Accept(Proto.Bidder, j, util.LOCALHOST, strconv.Itoa(p))
+			conn := tcp.NewAcceptor(strconv.Itoa(p))
+			auctioneer.Accept(Proto.Bidder, j, conn)
 			wg.Done()
 			fmt.Println("Done:", p)
 		}(i)

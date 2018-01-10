@@ -86,6 +86,10 @@ func NewConnection() ConnCfg {
 	return ConnCfg{chl: make(chan t), chr: make(chan t)}
 }
 
+func NewConnector() ConnCfg {
+	return NewConnection()
+}
+
 // NewBufferedConnection is a convenient wrapper for an in-memory connection
 // and can be used as either server-side or client-side.
 func NewBufferedConnection(n int) ConnCfg {
@@ -99,6 +103,10 @@ func (cfg ConnCfg) Connect() transport.Channel {
 		log.Fatalf("cannot connect: %v", ChannelNotReadyError{})
 	}
 	return &IOChan{chw: cfg.chr, chr: cfg.chl}
+}
+
+func (cfg ConnCfg) Request() transport.Channel {
+	return cfg.Connect()
 }
 
 // Accept listens for and accepts connection from a TCP socket using

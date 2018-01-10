@@ -95,6 +95,14 @@ func NewConnection(host, port string) ConnCfg {
 	return ConnCfg{Host: host, Port: port}
 }
 
+func NewAcceptor(port string) ConnCfg {
+	return NewConnection("__dummy", port)
+}
+
+func NewRequestor(host string, port string) ConnCfg {
+	return NewConnection(host, port)
+}
+
 func NewConnectionWithRetry(host, port string, retryWait time.Duration) ConnCfg {
 	return ConnCfg{Host: host, Port: port, retryWait: retryWait}
 }
@@ -129,6 +137,10 @@ func (cfg ConnCfg) Connect() transport.Channel {
 		log.Fatalf("cannot connect to %s: %v", addr, err)
 	}
 	return cfg.newConn(conn)
+}
+
+func (cfg ConnCfg) Request() transport.Channel {
+	return cfg.Connect()
 }
 
 func (cfg ConnCfg) newConn(rwc net.Conn) *Conn {
