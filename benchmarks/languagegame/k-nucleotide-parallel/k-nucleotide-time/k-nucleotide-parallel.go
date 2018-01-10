@@ -40,8 +40,9 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"github.com/nickng/scribble-go-runtime/benchmarks/languagegame/k-nucleotide-parallel/KNuc" // Protocol API
-	"github.com/nickng/scribble-go-runtime/runtime/transport/shm"
+	"github.com/rhu1/scribble-go-runtime/benchmarks/languagegame/k-nucleotide-parallel/KNuc" // Protocol API
+	"github.com/rhu1/scribble-go-runtime/runtime/transport/shm"
+
 	"github.com/rhu1/scribble-go-runtime/runtime/session"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport"
 	"io/ioutil"

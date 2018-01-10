@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/nickng/scribble-go-runtime/examples/scatter_rec_api/scatter"
+	"github.com/rhu1/scribble-go-runtime/examples/scatter_rec_api/scatter"
 	"log"
 	"os"
 	"runtime"
