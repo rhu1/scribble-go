@@ -60,11 +60,10 @@ func Fetcher(self int, conns []transport.Transport, wg *sync.WaitGroup) {
 			log.Fatalf("Cannot connect to %s[%d]: %v", HTTPget.Server, i, err)
 		}
 	}*/
-	Fetcher.Connect(P1.Server, 1, util.LOCALHOST, strconv.Itoa(8100))
+	conn := tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(8100))
+	Fetcher.Request(P1.Server, 1, conn)
 	/*svrConn.SerialiseMeth = tcp.SerialiseWithPassthru
 	svrConn.DelimMeth = tcp.DelimitByCRLF*/
-	f1 := Fetcher.Init()
-	//var end *Proto1.Proto1_W_1Ton_End
 
 	/*for i := 1; i <= nMaster; i++ {
 		if err := session.Connect(f, HTTPget.Master, i, conns[id-1]); err != nil { // id - 1
@@ -72,24 +71,30 @@ func Fetcher(self int, conns []transport.Transport, wg *sync.WaitGroup) {
 		}
 	}*/
 
-	f.Ept().CheckConnection()
+	//Fetcher.Ept().CheckConnection()
+	f1 := Fetcher.Init()
+	//var end *Proto1.Proto1_Fetcher_1Tok_End
+
 	var filepath string
-	if err := f.Ept().Conn[HTTPget.Master][0].Recv(&filepath); err != nil {
+	/*if err := Fetcher.Ept().Conn[Proto1.Master][0].Recv(&filepath); err != nil {
 		log.Fatalf("Cannot receive: %v", err)
-	}
+	}*/
+	f2 := f1.Reduce_Master_1To1_URL(&filepath, util.UnaryReduceString)
 
 	headCmd := fmt.Sprintf("HEAD %s HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: keep-alive", filepath)
-	if err := f.Ept().Conn[HTTPget.Server][0].Send(headCmd); err != nil {
+	/*if err := f.Ept().Conn[HTTPget.Server][0].Send(headCmd); err != nil {
 		log.Fatalf("Cannot send: %v", err)
-	}
+	}*/
+	f3 := f2.Send_Server_1To1_HEAD(headCmd, util.CopyString)
 
 	fmt.Printf("Request:\n%s\n\n", headCmd)
 
 	var fileSize int
 	reply := make([]byte, 4096)
-	if err := f.Ept().Conn[HTTPget.Server][0].Recv(&reply); err != nil {
+	/*if err := f.Ept().Conn[HTTPget.Server][0].Recv(&reply); err != nil {
 		log.Fatalf("Cannot recv: %v", err)
-	}
+	}*/
+	f4 := f3.Reduce_Server_1To1_response(&reply, util.UnaryReduce)
 	re := regexp.MustCompile(`Content-Length: (\d+)`)
 	if matches := re.FindSubmatch(reply); len(matches) > 0 {
 		i, err := strconv.Atoi(string(matches[1]))
@@ -102,36 +107,42 @@ func Fetcher(self int, conns []transport.Transport, wg *sync.WaitGroup) {
 	fmt.Printf("Response:\n%s\n\n", string(reply))
 
 	// Send filesize to Master.
-	f.Ept().Conn[HTTPget.Master][0].Send(fileSize)
+	//f.Ept().Conn[HTTPget.Master][0].Send(fileSize)
+	f5 := f4.Send_Master_1To1_FileSize(fileSize, util.Copy)
 
 	// Recv size range from Master.
 	var start, end int
-	f.Ept().Conn[HTTPget.Master][0].Recv(&start)
-	f.Ept().Conn[HTTPget.Master][0].Recv(&end)
+	/*f.Ept().Conn[HTTPget.Master][0].Recv(&start)
+	f.Ept().Conn[HTTPget.Master][0].Recv(&end)*/
+	f7 := f5.Reduce_Master_1To1_start(&start, util.UnaryReduce).Reduce_Master_1To1_end(&end, util.UnaryReduce)
 
 	getCmd := fmt.Sprintf("GET %s HTTP/1.1\r\nHost: 127.0.0.1\r\nRange: bytes=%d-%d", filepath, start, end)
-	if err := f.Ept().Conn[HTTPget.Server][0].Send(getCmd); err != nil {
+	/*if err := f.Ept().Conn[HTTPget.Server][0].Send(getCmd); err != nil {
 		log.Fatal("Cannot send:", err)
-	}
+	}*/
+	f8 := f7.Send_Server_1To1_GET(getCmd, util.CopyString)
 
 	fmt.Printf("Request:\n%s\n\n", getCmd)
 
 	replyHead := make([]byte, 4096)
-	if err := f.Ept().Conn[HTTPget.Server][0].Recv(&replyHead); err != nil {
+	/*if err := f.Ept().Conn[HTTPget.Server][0].Recv(&replyHead); err != nil {
 		log.Fatal("Cannot recv:", err)
-	}
+	}*/
+	f9 := f8.Reduce_Server_1To1_Response(&replyHead, util.UnaryReduce)
 
 	fmt.Printf("Response HEAD:\n%s\n\n", string(replyHead))
 
 	body := make([]byte, end-start)
-	if err := f.Ept().Conn[HTTPget.Server][0].Recv(&body); err != nil {
+	/*if err := f.Ept().Conn[HTTPget.Server][0].Recv(&body); err != nil {
 		log.Fatal("Cannot recv:", err)
-	}
+	}*/
+	f10 := f9.Reduce_Server_1To1_Body(&body, util.UnaryReduceString)
 
 	fmt.Printf("Response BODY:\n%d bytes\n\n", len(body))
 
 	// Send to master to merge.
-	f.Ept().Conn[HTTPget.Master][0].Send(string(body))
+	//f.Ept().Conn[HTTPget.Master][0].Send(string(body))
+	f10.Send_Master_1To1_merge(string(body), util.Copy)
 }
 
 func Master(conns []transport.Transport, wg *sync.WaitGroup) {

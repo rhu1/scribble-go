@@ -89,7 +89,7 @@ func clientCode(wg *sync.WaitGroup, n int, self int, conn transport.Transport) *
 	//W.Connect(P1.S, 1, "127.0.0.1", strconv.Itoa(PORT+self))
 	//conn := tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(PORT+self))
 	//conn := shm.NewConnector()
-	W.Connect(P1.S, 1, conn)
+	W.Request(P1.S, 1, conn)
 	w1 := W.Init()
 	var end *Proto1.Proto1_W_1Ton_End
 

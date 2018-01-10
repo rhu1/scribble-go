@@ -22,6 +22,8 @@ global protocol Proto1(role Fetcher(k), role Master(k), role Server(k)) {
   GET(string) from Fetcher[1..k] to Server[1..1];
   Response(string) from Server[1..1] to Fetcher[1..k];
 
+  Body(string) from Server[1..1] to Fetcher[1..k];
+
   // Merge all chunks
   merge(string) from Fetcher[1..k] to Master[1..1];
 }
