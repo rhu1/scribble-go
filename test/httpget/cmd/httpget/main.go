@@ -12,7 +12,8 @@ import (
 	"github.com/rhu1/scribble-go-runtime/runtime/transport"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport/shm"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport/tcp"
-	"github.com/rhu1/scribble-go-runtime/test/httpget/HTTPget"
+
+	"github.com/rhu1/scribble-go-runtime/test/httpget/HTTPget/Proto1"
 )
 
 const (

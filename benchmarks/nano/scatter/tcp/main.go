@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/nickng/scribble-go-runtime/benchmarks/nano/scatter/scatter"
+	"github.com/rhu1/scribble-go-runtime/benchmarks/nano/scatter/scatter"
 
 	"github.com/rhu1/scribble-go-runtime/runtime/session"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport/tcp"
