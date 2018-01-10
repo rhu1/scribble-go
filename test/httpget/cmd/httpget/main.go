@@ -13,12 +13,13 @@ import (
 	"github.com/rhu1/scribble-go-runtime/runtime/transport/shm"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport/tcp"
 
+	"github.com/rhu1/scribble-go-runtime/test/util"
 	"github.com/rhu1/scribble-go-runtime/test/httpget/HTTPget/Proto1"
 )
 
 const (
-	nServer  = 1
-	nMaster  = 1
+	/*nServer  = 1
+	nMaster  = 1*/
 	nFetcher = 2
 )
 
@@ -41,25 +42,35 @@ func main() {
 	wg.Wait()
 }
 
-func Fetcher(id int, conns []transport.Transport, wg *sync.WaitGroup) {
+func Fetcher(self int, conns []transport.Transport, wg *sync.WaitGroup) {
 	defer wg.Done()
-	f, err := HTTPget.NewFetcher(id, nFetcher, nMaster, nServer)
+	/*f, err := HTTPget.NewFetcher(id, nFetcher, nMaster, nServer)
 	if err != nil {
 		log.Fatalf("Cannot create new Fetcher: %v", err)
-	}
-	svrConn := tcp.NewConnection("127.0.0.1", "8100")
+	}*/
+
+	P1 := Proto1.NewProto1()
+	Fetcher := P1.NewProto1_Fetcher_1Tok(nFetcher, self)
+
+	/*svrConn := tcp.NewConnection("127.0.0.1", "8100")
 	svrConn.SerialiseMeth = tcp.SerialiseWithPassthru
 	svrConn.DelimMeth = tcp.DelimitByCRLF
 	for i := 1; i <= nServer; i++ {
 		if err := session.Connect(f, HTTPget.Server, i, svrConn); err != nil {
 			log.Fatalf("Cannot connect to %s[%d]: %v", HTTPget.Server, i, err)
 		}
-	}
-	for i := 1; i <= nMaster; i++ {
+	}*/
+	Fetcher.Connect(P1.Server, 1, util.LOCALHOST, strconv.Itoa(8100))
+	/*svrConn.SerialiseMeth = tcp.SerialiseWithPassthru
+	svrConn.DelimMeth = tcp.DelimitByCRLF*/
+	f1 := Fetcher.Init()
+	//var end *Proto1.Proto1_W_1Ton_End
+
+	/*for i := 1; i <= nMaster; i++ {
 		if err := session.Connect(f, HTTPget.Master, i, conns[id-1]); err != nil { // id - 1
 			log.Fatalf("Cannot connect to %s[%d]: %v", HTTPget.Master, i, err)
 		}
-	}
+	}*/
 
 	f.Ept().CheckConnection()
 	var filepath string
