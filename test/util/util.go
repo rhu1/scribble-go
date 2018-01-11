@@ -11,6 +11,12 @@ func CopyString(data string, i int) string {
 	return data
 }
 
+func CopyBates(data []byte, i int) []byte {
+	bs := make([]byte, len(data))
+	copy(bs, data)
+	return bs
+}
+
 func Sum(xs []int) int {
 	res := 0
 	for i := 0; i < len(xs); i++ {
@@ -24,5 +30,9 @@ func UnaryReduce(xs []int) int {
 }
 
 func UnaryReduceString(xs []string) string {
+	return xs[0]
+}
+
+func UnaryReduceBates(xs [][]byte) []byte {
 	return xs[0]
 }
