@@ -2,13 +2,12 @@ package main
 
 import (
 	"fmt"
-	"log"
+	//"log"
 	"regexp"
 	"strconv"
 	"strings"
 	"sync"
 
-	"github.com/rhu1/scribble-go-runtime/runtime/session"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport/shm"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport/tcp"
@@ -85,7 +84,7 @@ func Fetcher(self int, conns []transport.Transport, wg *sync.WaitGroup) {
 	/*if err := f.Ept().Conn[HTTPget.Server][0].Send(headCmd); err != nil {
 		log.Fatalf("Cannot send: %v", err)
 	}*/
-	f3 := f2.Send_Server_1To1_HEAD(headCmd, util.CopyString)
+	f3 := f2.Split_Server_1To1_HEAD(headCmd, util.CopyString)
 
 	fmt.Printf("Request:\n%s\n\n", headCmd)
 
@@ -94,7 +93,7 @@ func Fetcher(self int, conns []transport.Transport, wg *sync.WaitGroup) {
 	/*if err := f.Ept().Conn[HTTPget.Server][0].Recv(&reply); err != nil {
 		log.Fatalf("Cannot recv: %v", err)
 	}*/
-	f4 := f3.Reduce_Server_1To1_response(&reply, util.UnaryReduce)
+	f4 := f3.Reduce_Server_1To1_response(&reply, util.UnaryReduceBates)
 	re := regexp.MustCompile(`Content-Length: (\d+)`)
 	if matches := re.FindSubmatch(reply); len(matches) > 0 {
 		i, err := strconv.Atoi(string(matches[1]))
@@ -108,7 +107,7 @@ func Fetcher(self int, conns []transport.Transport, wg *sync.WaitGroup) {
 
 	// Send filesize to Master.
 	//f.Ept().Conn[HTTPget.Master][0].Send(fileSize)
-	f5 := f4.Send_Master_1To1_FileSize(fileSize, util.Copy)
+	f5 := f4.Split_Master_1To1_FileSize(fileSize, util.Copy)
 
 	// Recv size range from Master.
 	var start, end int
@@ -120,7 +119,7 @@ func Fetcher(self int, conns []transport.Transport, wg *sync.WaitGroup) {
 	/*if err := f.Ept().Conn[HTTPget.Server][0].Send(getCmd); err != nil {
 		log.Fatal("Cannot send:", err)
 	}*/
-	f8 := f7.Send_Server_1To1_GET(getCmd, util.CopyString)
+	f8 := f7.Split_Server_1To1_GET(getCmd, util.CopyString)
 
 	fmt.Printf("Request:\n%s\n\n", getCmd)
 
@@ -128,7 +127,7 @@ func Fetcher(self int, conns []transport.Transport, wg *sync.WaitGroup) {
 	/*if err := f.Ept().Conn[HTTPget.Server][0].Recv(&replyHead); err != nil {
 		log.Fatal("Cannot recv:", err)
 	}*/
-	f9 := f8.Reduce_Server_1To1_Response(&replyHead, util.UnaryReduce)
+	f9 := f8.Reduce_Server_1To1_Response(&replyHead, util.UnaryReduceBates)
 
 	fmt.Printf("Response HEAD:\n%s\n\n", string(replyHead))
 
@@ -136,60 +135,82 @@ func Fetcher(self int, conns []transport.Transport, wg *sync.WaitGroup) {
 	/*if err := f.Ept().Conn[HTTPget.Server][0].Recv(&body); err != nil {
 		log.Fatal("Cannot recv:", err)
 	}*/
-	f10 := f9.Reduce_Server_1To1_Body(&body, util.UnaryReduceString)
+	f10 := f9.Reduce_Server_1To1_Body(&body, util.UnaryReduceBates)
 
 	fmt.Printf("Response BODY:\n%d bytes\n\n", len(body))
 
 	// Send to master to merge.
 	//f.Ept().Conn[HTTPget.Master][0].Send(string(body))
-	f10.Send_Master_1To1_merge(string(body), util.Copy)
+	f10.Split_Master_1To1_merge(string(body), util.CopyString)
 }
 
 func Master(conns []transport.Transport, wg *sync.WaitGroup) {
 	defer wg.Done()
-	m, err := HTTPget.NewMaster(1, nFetcher, nMaster, nServer)
+	/*m, err := HTTPget.NewMaster(1, nFetcher, nMaster, nServer)
 	if err != nil {
 		log.Fatalf("Cannot create new Master: %v", err)
-	}
+	}*/
+	P1 := Proto1.NewProto1()
+	Master := P1.NewProto1_Master_1To1(nFetcher, 1)
+
 	for i := 1; i <= nFetcher; i++ {
-		if err := session.Accept(m, HTTPget.Fetcher, i, conns[i-1]); err != nil {
+		/*if err := session.Accept(m, HTTPget.Fetcher, i, conns[i-1]); err != nil {
 			log.Fatalf("Cannot connect to %s[%d]: %v", HTTPget.Fetcher, i, err)
-		}
+		}*/
+		Master.Accept(P1.Fetcher, i, conns[i])
 	}
 
-	m.Run(func(master *HTTPget.Master_1) *HTTPget.Master_End {
-		URLs := make([]string, nFetcher)
-		for i := 0; i < nFetcher; i++ {
-			URLs[i] = "/main.go"
+	m := Master.Init()
+	//var end *Proto1.Proto1_Master_1To1_End
+	
+	runMaster(m)
+}
+
+func runMaster(master *Proto1.Proto1_Master_1To1_1) *Proto1.Proto1_Master_1To1_End {
+	/*URLs := make([]string, nFetcher)
+	for i := 0; i < nFetcher; i++ {
+		URLs[i] = "/main.go"
+	}*/
+	var sizes []int
+	//sizes,
+	st3 := master.
+		/*SendAll_Fetcher_URL(URLs).
+		RecvAll_Fetcher_FileSize()*/
+		Split_Fetcher_1Tok_URL("/main.go", util.CopyString).
+		Recv_Fetcher_1Tok_FileSize(&sizes)
+	fileSize := sizes[0]
+	chunkSize := fileSize / nFetcher
+
+	start := make([]int, nFetcher)
+	end := make([]int, nFetcher)
+
+	fmt.Printf("Master: fileSize=%d\n", fileSize)
+
+	for i := 0; i < nFetcher; i++ {
+		start[i] = i * chunkSize
+		if i < nFetcher-1 {
+			end[i] = (i+1)*chunkSize - 1
+		} else {
+			end[i] = fileSize
 		}
-		sizes, st3 := master.
-			SendAll_Fetcher_URL(URLs).
-			RecvAll_Fetcher_FileSize()
-		fileSize := sizes[0]
-		chunkSize := fileSize / nFetcher
+		fmt.Printf("chunk %d: %d-%d\n", i, start[i], end[i])
+	}
 
-		start := make([]int, nFetcher)
-		end := make([]int, nFetcher)
+	var merges []string
+	//merges,
+	stEnd := st3.
+		/*SendAll_Fetcher_start(start).
+		SendAll_Fetcher_end(end).
+		RecvAll_Fetcher_merge()*/
+		Send_Fetcher_1Tok_start(start).
+		Send_Fetcher_1Tok_end(end).
+		Recv_Fetcher_1Tok_merge(&merges)
 
-		fmt.Printf("Master: fileSize=%d\n", fileSize)
+	fmt.Printf("\n-- merge --\n\n%v\n", strings.Join(merges, ""))
 
-		for i := 0; i < nFetcher; i++ {
-			start[i] = i * chunkSize
-			if i < nFetcher-1 {
-				end[i] = (i+1)*chunkSize - 1
-			} else {
-				end[i] = fileSize
-			}
-			fmt.Printf("chunk %d: %d-%d\n", i, start[i], end[i])
-		}
+	return stEnd
+}
 
-		merges, stEnd := st3.
-			SendAll_Fetcher_start(start).
-			SendAll_Fetcher_end(end).
-			RecvAll_Fetcher_merge()
-
-		fmt.Printf("\n-- merge --\n\n%v\n", strings.Join(merges, ""))
-
-		return stEnd
-	})
+func splitter(xs []int, i int) int {
+	return xs[i]	
 }

@@ -63,7 +63,7 @@ func serverCode(wg *sync.WaitGroup, n int, conns []transport.Transport) *Proto1.
 	var end *Proto1.Proto1_S_1To1_End
 
 	var bs []byte
-	s2 := s1.Send_W_1Ton_norman(make([]byte, 4), util.CopyBates)
+	s2 := s1.Split_W_1Ton_norman(make([]byte, 4), util.CopyBates)
 	end = s2.Reduce_W_1Ton_mum(&bs, foo)
 	fmt.Println("S received:", bs)
 
@@ -94,7 +94,7 @@ func clientCode(wg *sync.WaitGroup, n int, self int, conn transport.Transport) *
 	var bs []byte
 	w2 := w1.Reduce_S_1To1_norman(&bs, util.UnaryReduceBates)
 	fmt.Println("W" + strconv.Itoa(self) + ":", bs)
-	end = w2.Send_S_1To1_mum([]byte{1, 2, 3, 4}, util.CopyBates)	
+	end = w2.Split_S_1To1_mum([]byte{1, 2, 3, 4}, util.CopyBates)	
 
 	wg.Done()
 	return end
