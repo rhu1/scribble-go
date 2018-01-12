@@ -66,7 +66,7 @@ func bidderFn(wg *sync.WaitGroup, st *Proto.Proto_Bidder_1Tok_1, self int, MAXBI
 	var winner string
 
 	var bids []int
-	b3 := st.Send_Auctioneer_1To1_(10, util.Copy).Recv_Auctioneer_1To1_(&bids)
+	b3 := st.Split_Auctioneer_1To1_(10, util.Copy).Recv_Auctioneer_1To1_(&bids)
 	highest = bids[0]
 
 BID_LOOP:
@@ -75,11 +75,11 @@ BID_LOOP:
 		var b4 *Proto.Proto_Bidder_1Tok_4
 		giveUp := (highest > MAXBID)
 		if giveUp {
-			b4 = b3.Send_Auctioneer_1To1_(-1, util.Copy)
+			b4 = b3.Split_Auctioneer_1To1_(-1, util.Copy)
 			fmt.Println(("(" + strconv.Itoa(self) + ")"), "Too high:", highest)
 		} else {
 			raised := highest + 1
-			b4 = b3.Send_Auctioneer_1To1_(raised, util.Copy)
+			b4 = b3.Split_Auctioneer_1To1_(raised, util.Copy)
 			fmt.Println(("(" + strconv.Itoa(self) + ")"), "Raised bid:", raised)
 		}
 		select {

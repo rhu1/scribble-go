@@ -74,7 +74,7 @@ func auctioneerFn(st *Proto.Proto_Auctioneer_1To1_1) *Proto.Proto_Auctioneer_1To
 		}
 	}
 	// bids -> intGen
-	st3 := st2.Send_Bidder_1Tok_(highest, util.Copy)
+	st3 := st2.Split_Bidder_1Tok_(highest, util.Copy)
 BID_LOOP:
 	for {
 		var bidSkips []int
@@ -92,11 +92,11 @@ BID_LOOP:
 		hasWinner := (bidCount == 1)
 		if hasWinner {
 			fmt.Println("Current highest bid:", highest, "bidding ends")
-			st4.Send_Bidder_1Tok_winner(strconv.Itoa(winnerID), mystrdup)
+			st4.Split_Bidder_1Tok_winner(strconv.Itoa(winnerID), mystrdup)
 			break BID_LOOP
 		} else {
 			fmt.Println("Current highest bid:", highest, "bidding continues")
-			st3 = st4.Send_Bidder_1Tok_highest(highest, util.Copy)
+			st3 = st4.Split_Bidder_1Tok_highest(highest, util.Copy)
 		}
 	}
 	return end
