@@ -14,10 +14,10 @@ type Endpoint struct {
 
 	// guards Conn
 	ConnMu sync.RWMutex
-	Conn   map[string][]transport.Channel
+	Conn   map[string]map[int]transport.Channel
 }
 
-func NewEndpoint(roleId, numRoles int, conn map[string][]transport.Channel) *Endpoint {
+func NewEndpoint(roleId, numRoles int, conn map[string]map[int]transport.Channel) *Endpoint {
 	return &Endpoint{
 		Id:       roleId,
 		NumRoles: numRoles,
