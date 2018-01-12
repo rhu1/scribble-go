@@ -26,22 +26,28 @@ func main() {
 	// Shared memory connections.
 	connsMu := new(sync.Mutex)
 	connsMu.Lock()
-	sharedConns := make([]transport.Transport, nFetcher)
+	shmConns := make([]transport.Transport, nFetcher)
 	for i := 0; i < nFetcher; i++ {
-		sharedConns[i] = shm.NewConnection()
+		shmConns[i] = shm.NewConnection()
 	}
 	connsMu.Unlock()
 
 	wg := new(sync.WaitGroup)
 	wg.Add(3)
 
-	go Master(sharedConns, wg)
-	go Fetcher(1, sharedConns, wg)
-	go Fetcher(2, sharedConns, wg)
+	go Master(shmConns, wg)
+
+	ch := make(chan interface{})
+	go Fetcher_1(shmConns[0], wg, ch)
+	<-ch
+
+	for i := 1; i < nFetcher; i++ {
+		go Fetcher_2Ton(i+1, shmConns[i], wg)
+	}
 	wg.Wait()
 }
 
-func Fetcher(self int, conns []transport.Transport, wg *sync.WaitGroup) {
+func Fetcher_1(mastConn transport.Transport, wg *sync.WaitGroup, ch chan interface{}) {
 	defer wg.Done()
 	/*f, err := HTTPget.NewFetcher(id, nFetcher, nMaster, nServer)
 	if err != nil {
@@ -49,18 +55,17 @@ func Fetcher(self int, conns []transport.Transport, wg *sync.WaitGroup) {
 	}*/
 
 	P1 := Proto1.NewProto1()
-	Fetcher := P1.NewProto1_Fetcher_1Tok(nFetcher, self)
+	Fetcher := P1.NewProto1_Fetcher_1To1and1Tok(nFetcher, 1)
 
-	/*svrConn := tcp.NewConnection("127.0.0.1", "8100")
-	svrConn.SerialiseMeth = tcp.SerialiseWithPassthru
-	svrConn.DelimMeth = tcp.DelimitByCRLF
-	for i := 1; i <= nServer; i++ {
+	/*for i := 1; i <= nServer; i++ {
 		if err := session.Connect(f, HTTPget.Server, i, svrConn); err != nil {
 			log.Fatalf("Cannot connect to %s[%d]: %v", HTTPget.Server, i, err)
 		}
 	}*/
-	conn := tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(8100))
-	Fetcher.Request(P1.Server, 1, conn)
+	servConn := tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(8100))
+	servConn.SerialiseMeth = tcp.SerialiseWithPassthru
+	servConn.DelimMeth = tcp.DelimitByCRLF
+	Fetcher.Request(P1.Server, 1, servConn)
 	/*svrConn.SerialiseMeth = tcp.SerialiseWithPassthru
 	svrConn.DelimMeth = tcp.DelimitByCRLF*/
 
@@ -69,6 +74,8 @@ func Fetcher(self int, conns []transport.Transport, wg *sync.WaitGroup) {
 			log.Fatalf("Cannot connect to %s[%d]: %v", HTTPget.Master, i, err)
 		}
 	}*/
+	Fetcher.Request(P1.Master, 1, mastConn)
+	ch <- nil
 
 	//Fetcher.Ept().CheckConnection()
 	f1 := Fetcher.Init()
@@ -144,6 +151,58 @@ func Fetcher(self int, conns []transport.Transport, wg *sync.WaitGroup) {
 	f10.Split_Master_1To1_merge(string(body), util.CopyString)
 }
 
+func Fetcher_2Ton(self int, mastConn transport.Transport, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	P1 := Proto1.NewProto1()
+	Fetcher := P1.NewProto1_Fetcher_1Tok_not_1To1(nFetcher, self)
+
+	servConn := tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(8100))
+	servConn.SerialiseMeth = tcp.SerialiseWithPassthru
+	servConn.DelimMeth = tcp.DelimitByCRLF
+	Fetcher.Request(P1.Server, 1, servConn)
+
+	Fetcher.Request(P1.Master, 1, mastConn)
+
+	f1 := Fetcher.Init()
+	//var end *Proto1.Proto1_Fetcher_1Tok_End
+
+	var filepath string
+	f2 := f1.Reduce_Master_1To1_URL(&filepath, util.UnaryReduceString)
+
+	headCmd := fmt.Sprintf("HEAD %s HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: keep-alive", filepath)
+	f3 := f2.Split_Server_1To1_HEAD(headCmd, util.CopyString)
+
+	fmt.Printf("Request:\n%s\n\n", headCmd)
+
+	reply := make([]byte, 4096)
+	f4 := f3.Reduce_Server_1To1_response(&reply, util.UnaryReduceBates)
+
+	fmt.Printf("Response:\n%s\n\n", string(reply))
+
+	// Recv size range from Master.
+	var start, end int
+	f5 := f4.Reduce_Master_1To1_start(&start, util.UnaryReduce).Reduce_Master_1To1_end(&end, util.UnaryReduce)
+
+	getCmd := fmt.Sprintf("GET %s HTTP/1.1\r\nHost: 127.0.0.1\r\nRange: bytes=%d-%d", filepath, start, end)
+	f6 := f5.Split_Server_1To1_GET(getCmd, util.CopyString)
+
+	fmt.Printf("Request:\n%s\n\n", getCmd)
+
+	replyHead := make([]byte, 4096)
+	f7 := f6.Reduce_Server_1To1_Response(&replyHead, util.UnaryReduceBates)
+
+	fmt.Printf("Response HEAD:\n%s\n\n", string(replyHead))
+
+	body := make([]byte, end-start)
+	f8 := f7.Reduce_Server_1To1_Body(&body, util.UnaryReduceBates)
+
+	fmt.Printf("Response BODY:\n%d bytes\n\n", len(body))
+
+	// Send to master to merge.
+	f8.Split_Master_1To1_merge(string(body), util.CopyString)
+}
+
 func Master(conns []transport.Transport, wg *sync.WaitGroup) {
 	defer wg.Done()
 	/*m, err := HTTPget.NewMaster(1, nFetcher, nMaster, nServer)
@@ -177,7 +236,7 @@ func runMaster(master *Proto1.Proto1_Master_1To1_1) *Proto1.Proto1_Master_1To1_E
 		/*SendAll_Fetcher_URL(URLs).
 		RecvAll_Fetcher_FileSize()*/
 		Split_Fetcher_1Tok_URL("/main.go", util.CopyString).
-		Recv_Fetcher_1Tok_FileSize(&sizes)
+		Recv_Fetcher_1To1_FileSize(&sizes)
 	fileSize := sizes[0]
 	chunkSize := fileSize / nFetcher
 

@@ -44,7 +44,7 @@ func main() {
 	time.Sleep(100 * time.Millisecond)
 
 	conn := tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(PORT+1))
-	go W_1_Code(wg, n, 1, conn)
+	go W_1_Code(wg, n, conn)
 
 	for i := 2; i <= n; i++ {
 		conn = tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(PORT+i))
@@ -74,19 +74,19 @@ func serverCode(wg *sync.WaitGroup, n int, conns []transport.Transport) *Proto1.
 	return end
 }
 
-func W_1_Code(wg *sync.WaitGroup, n int, self int, conn transport.Transport) *Proto1.Proto1_W_1To1and1Ton_End {
+func W_1_Code(wg *sync.WaitGroup, n int, conn transport.Transport) *Proto1.Proto1_W_1To1and1Ton_End {
 	P1 := Proto1.NewProto1()
 
-	W := P1.NewProto1_W_1To1and1Ton(1, self)
+	W := P1.NewProto1_W_1To1and1Ton(1, 1)
 	W.Request(P1.S, 1, conn)
 	w1 := W.Init()
 	var end *Proto1.Proto1_W_1To1and1Ton_End
 
 	var x int
 	w2 := w1.Reduce_S_1To1_a(&x, util.UnaryReduce)
-	fmt.Println("W" + strconv.Itoa(self) + ":", x)
+	fmt.Println("W" + strconv.Itoa(1) + ":", x)
 	end = w2.Reduce_S_1To1_b(&x, util.UnaryReduce)
-	fmt.Println("W" + strconv.Itoa(self) + ":", x)
+	fmt.Println("W" + strconv.Itoa(1) + ":", x)
 
 	wg.Done()
 	return end

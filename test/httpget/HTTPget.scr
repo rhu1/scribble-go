@@ -9,15 +9,13 @@ type <go> "string" from "..." as string;
 type <go> "..." from "..." as bates;
 
 global protocol Proto1(role Fetcher(k), role Master(k), role Server(k)) {
-  //URL(string) from Master[1..1] to Fetcher[1..1]; // Get URL metadata.
   URL(string) from Master[1..1] to Fetcher[1..k]; // Get URL metadata.
   HEAD(string) from Fetcher[1..k] to Server[1..1];
   //response(string) from Server[1..1] to Fetcher[1..k]; // Metadata including size.
   response(bates) from Server[1..1] to Fetcher[1..k]; // Metadata including size.
 
   // Setup chunk boundaries.
-  //FileSize(int) from Fetcher[1..1] to Master[1..1]; // Full file size.
-  FileSize(int) from Fetcher[1..k] to Master[1..1]; // Full file size.
+  FileSize(int) from Fetcher[1..1] to Master[1..1]; // Full file size.
   start(int) from Master[1..1] to Fetcher[1..k]; // byte range start.
   end(int) from Master[1..1] to Fetcher[1..k]; // byte range end.
 
