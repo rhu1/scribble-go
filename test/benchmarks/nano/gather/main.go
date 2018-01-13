@@ -46,7 +46,7 @@ func main() {
 	servConns := make([]transport.Transport, ncpu)
 	cliConns := make([]transport.Transport, ncpu)
 	for j := 0; j < ncpu; j++ {
-		//*
+		/*
 		port := strconv.Itoa(33333+j)
 		servConns[j] = tcp.NewAcceptor(port)	
 		cliConns[j] = tcp.NewRequestor(util.LOCALHOST, port)

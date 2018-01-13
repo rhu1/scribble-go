@@ -1,0 +1,15 @@
+//Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/benchmarks/nano/alltoall/AllToAll.scr -d test/benchmarks/nano/alltoall -param Proto1 -param-api S
+
+
+module AllToAll;
+
+
+type <go> "int" from "..." as int;
+
+
+global protocol Proto1(role S(m, n), role W(m, n))
+{
+	(int) from S[1..m] to W[1..n];
+	do Proto1(S, W);
+}

@@ -22,10 +22,13 @@ func NewServer(id, nserver, nworker int) (*Server_1Ton_Init, error) {
 	if nworker < 1 {
 		return nil, fmt.Errorf("Wrong number of participants of role 'worker': %d", nworker)
 	}
-	conn := make(map[string][]transport.Channel)
-	conn[Worker] = make([]transport.Channel, nworker)
+	/*conn := make(map[string][]transport.Channel)
+	conn[Worker] = make([]transport.Channel, nworker)*/
+	conn := make(map[string]map[int]transport.Channel)
+	conn[Worker] = make(map[int]transport.Channel)
 
-	return &Server_1Ton_Init{session.LinearResource{}, session.NewEndpoint(id, nserver, conn)}, nil
+	//return &Server_1Ton_Init{session.LinearResource{}, session.NewEndpoint(id, nserver, conn)}, nil
+	return &Server_1Ton_Init{session.LinearResource{}, session.NewEndpoint(id, conn)}, nil
 }
 
 func (ini *Server_1Ton_Init) Ept() *session.Endpoint { return ini.ept }
@@ -95,10 +98,13 @@ func NewWorker(id, nworker, nserver int) (*Worker_1Ton_Init, error) {
 	if nserver < 1 {
 		return nil, fmt.Errorf("Wrong number of participants of role 'server': %d", nserver)
 	}
-	conn := make(map[string][]transport.Channel)
-	conn[Server] = make([]transport.Channel, nserver)
+	/*conn := make(map[string][]transport.Channel)
+	conn[Server] = make([]transport.Channel, nserver)*/
+	conn := make(map[string]map[int]transport.Channel)
+	conn[Server] = make(map[int]transport.Channel, nserver)
 
-	return &Worker_1Ton_Init{session.LinearResource{}, session.NewEndpoint(id, nworker, conn)}, nil
+	//return &Worker_1Ton_Init{session.LinearResource{}, session.NewEndpoint(id, nworker, conn)}, nil
+	return &Worker_1Ton_Init{session.LinearResource{}, session.NewEndpoint(id, conn)}, nil
 }
 
 func (ini *Worker_1Ton_Init) Ept() *session.Endpoint { return ini.ept }
