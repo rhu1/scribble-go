@@ -1,0 +1,15 @@
+//Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/benchmarks/nano/gather/Gather.scr -d test/benchmarks/nano/gather -param Proto1 -param-api S
+
+
+module Gather;
+
+
+type <go> "int" from "..." as int;
+
+
+global protocol Proto1(role S(n), role W(n))
+{
+	(int) from W[1..n] to S[1..1];
+	do Proto1(S, W);
+}
