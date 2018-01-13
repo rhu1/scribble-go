@@ -1,5 +1,5 @@
 //rhu@HZHL4 ~/code/go
-//$ go install github.com/rhu1/scribble-go-runtime/test/foo1
+//$ go install github.com/rhu1/scribble-go-runtime/test/foo/foo1
 //$ bin/foo1.exe
 
 package main
@@ -14,7 +14,7 @@ import (
 	//"github.com/rhu1/scribble-go-runtime/runtime/session"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport/tcp"
 
-	"github.com/rhu1/scribble-go-runtime/test/foo1/Foo1/Proto1"
+	"github.com/rhu1/scribble-go-runtime/test/foo/foo1/Foo1/Proto1"
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 

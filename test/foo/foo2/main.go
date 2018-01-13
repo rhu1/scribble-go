@@ -1,6 +1,6 @@
 //rhu@HZHL4 ~/code/go
-//$ go install github.com/rhu1/scribble-go-runtime/test/foo3
-//$ bin/foo3.exe
+//$ go install github.com/rhu1/scribble-go-runtime/test/foo/foo2
+//$ bin/foo2.exe
 
 package main
 
@@ -13,7 +13,7 @@ import (
 
 	"github.com/rhu1/scribble-go-runtime/runtime/transport/tcp"
 
-	"github.com/rhu1/scribble-go-runtime/test/foo3/Foo3/Proto1"
+	"github.com/rhu1/scribble-go-runtime/test/foo/foo2/Foo2/Proto1"
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 
@@ -22,7 +22,7 @@ const PORT = 8888
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	n := 3
+	n := 2
 
 	wg := new(sync.WaitGroup)
 	wg.Add(n + 1)
@@ -49,11 +49,11 @@ func serverCode(wg *sync.WaitGroup, n int) *Proto1.Proto1_S_1To1_End {
 	s1 := S.Init()
 	var end *Proto1.Proto1_S_1To1_End
 
-	if 2 < 1 {
-		end = s1.Split_W_1Ton_a(1234, util.Copy)
-	} else {
-		end = s1.Split_W_1Ton_b(5678, util.Copy)
-	}
+	s2 := s1.Split_W_1Ton_a(1234, util.Copy)
+
+	var xs []int
+	end = s2.Recv_W_1Ton_b(&xs)
+	fmt.Println("S Received:", xs)
 
 	wg.Done()
 	return end
@@ -65,16 +65,13 @@ func clientCode(wg *sync.WaitGroup, n int, self int) *Proto1.Proto1_W_1Ton_End {
 	W := P1.NewProto1_W_1Ton(n, self)
 	conn := tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(PORT+self))
 	W.Request(P1.S, 1, conn)
-	w1 := W.Init()
-	var end *Proto1.Proto1_W_1Ton_End
+	var w1 *Proto1.Proto1_W_1Ton_1 = W.Init()
 
 	var x int
-	select {
-	case end = <-w1.Recv_S_1To1_a(&x):
-		fmt.Println("W got a:", self, x)
-	case end = <-w1.Recv_S_1To1_b(&x):
-		fmt.Println("W got b:", self, x)
-	}
+	w2 := w1.Reduce_S_1To1_a(&x, util.Sum)
+	fmt.Println("W Received: ", self, x)
+
+	end := w2.Split_S_1To1_b(self*100, util.Copy)
 
 	wg.Done()
 	return end
