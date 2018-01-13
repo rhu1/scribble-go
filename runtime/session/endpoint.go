@@ -8,7 +8,7 @@ import (
 
 type Endpoint struct {
 	Id       int
-	NumRoles int
+	//NumRoles int
 
 	connWg sync.WaitGroup // Counts initiated connections from this Endpoint.
 
@@ -17,10 +17,10 @@ type Endpoint struct {
 	Conn   map[string]map[int]transport.Channel
 }
 
-func NewEndpoint(roleId, numRoles int, conn map[string]map[int]transport.Channel) *Endpoint {
+//func NewEndpoint(roleId, numRoles int, conn map[string]map[int]transport.Channel) *Endpoint {
+func NewEndpoint(roleId int, conn map[string]map[int]transport.Channel) *Endpoint {
 	return &Endpoint{
 		Id:       roleId,
-		NumRoles: numRoles,
 		Conn:     conn,
 	}
 }

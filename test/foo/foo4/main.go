@@ -13,7 +13,7 @@ import (
 
 	"github.com/rhu1/scribble-go-runtime/runtime/transport/tcp"
 
-	"github.com/rhu1/scribble-go-runtime/test/foo4/Foo4/Proto1"
+	"github.com/rhu1/scribble-go-runtime/test/foo/foo4/Foo4/Proto1"
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 
