@@ -1,5 +1,7 @@
 package util
 
+import "sort"
+
 const LOCALHOST = "127.0.0.1"
 
 func Copy(data int, i int) int {
@@ -35,4 +37,57 @@ func UnaryReduceString(xs []string) string {
 
 func UnaryReduceBates(xs [][]byte) []byte {
 	return xs[0]
+}
+
+//func GetValues(m map[int] int) []int {
+func GetValues(m map[int] interface{}) []interface{} {
+	xs := make([]interface{}, len(m))
+	keys := make([]int, 0)
+	for k, _ := range m {
+		keys = append(keys, k)
+	}
+	sort.Ints(keys)
+	for i, k := range keys {
+		xs[i] = m[k]
+	}
+	return xs
+}
+
+func GetValuesInt(m map[int] int) []int {
+	xs := make([]int, len(m))
+	keys := make([]int, 0)
+	for k, _ := range m {
+		keys = append(keys, k)
+	}
+	sort.Ints(keys)
+	for i, k := range keys {
+		xs[i] = m[k]
+	}
+	return xs
+}
+
+func GetValuesString(m map[int] string) []string {
+	xs := make([]string, len(m))
+	keys := make([]int, 0)
+	for k, _ := range m {
+		keys = append(keys, k)
+	}
+	sort.Ints(keys)
+	for i, k := range keys {
+		xs[i] = m[k]
+	}
+	return xs
+}
+
+func GetValuesBates(m map[int] []byte) [][]byte {
+	xs := make([][]byte, len(m))
+	keys := make([]int, 0)
+	for k, _ := range m {
+		keys = append(keys, k)
+	}
+	sort.Ints(keys)
+	for i, k := range keys {
+		xs[i] = m[k]
+	}
+	return xs
 }

@@ -30,7 +30,7 @@ func main() {
 
 	go serverCode(wg, n)
 
-	time.Sleep(1000 * time.Millisecond) //2017/12/11 11:21:40 cannot connect to 127.0.0.1:8891: dial tcp 127.0.0.1:8891: connectex: No connection could be made because the target machine actively refused it.
+	time.Sleep(100 * time.Millisecond) //2017/12/11 11:21:40 cannot connect to 127.0.0.1:8891: dial tcp 127.0.0.1:8891: connectex: No connection could be made because the target machine actively refused it.
 
 	for i := 1; i <= n; i++ {
 		go clientCode(wg, n, i)
