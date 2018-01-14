@@ -11,13 +11,16 @@ type ParamRole struct {
 	Param int
 }
 
-func NewConn(roles []ParamRole) (map[string][]transport.Channel, error) {
-	conn := make(map[string][]transport.Channel)
+//func NewConn(roles []ParamRole) (map[string][]transport.Channel, error) {
+func NewConn(roles []ParamRole) (map[string]map[int]transport.Channel, error) {
+	//conn := make(map[string][]transport.Channel)
+	conn := make(map[string]map[int]transport.Channel)
 	for _, r := range roles {
 		if r.Param < 1 {
 			return nil, fmt.Errorf("Invalid parameter of role '%s': '%d'", r.Name, r.Param)
 		}
-		conn[r.Name] = make([]transport.Channel, r.Param)
+		//conn[r.Name] = make([]transport.Channel, r.Param)
+		conn[r.Name] = make(map[int]transport.Channel)
 	}
 	return conn, nil
 }

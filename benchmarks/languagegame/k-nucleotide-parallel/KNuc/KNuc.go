@@ -35,7 +35,8 @@ func NewA(id, numA, numS, numB int) (*A_Init, error) {
 		return nil, err
 	}
 
-	return &A_Init{session.LinearResource{}, session.NewEndpoint(id, numA, conn)}, nil
+	//return &A_Init{session.LinearResource{}, session.NewEndpoint(id, numA, conn)}, nil
+	return &A_Init{session.LinearResource{}, session.NewEndpoint(id, conn)}, nil
 }
 
 type A_1 struct {
@@ -155,7 +156,8 @@ func NewB(id, numB, numA int) (*B_Init, error) {
 		return nil, err
 	}
 
-	return &B_Init{session.LinearResource{}, session.NewEndpoint(id, numB, conn)}, nil
+	//return &B_Init{session.LinearResource{}, session.NewEndpoint(id, numB, conn)}, nil
+	return &B_Init{session.LinearResource{}, session.NewEndpoint(id, conn)}, nil
 }
 
 type B_1 struct {
@@ -232,7 +234,8 @@ func NewS(id, numS, numA int) (*S_Init, error) {
 		return nil, err
 	}
 
-	return &S_Init{session.LinearResource{}, session.NewEndpoint(id, numS, conn)}, nil
+	//return &S_Init{session.LinearResource{}, session.NewEndpoint(id, numS, conn)}, nil
+	return &S_Init{session.LinearResource{}, session.NewEndpoint(id, conn)}, nil
 }
 
 type S_1 struct {

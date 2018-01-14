@@ -80,7 +80,8 @@ func NewA(id, numA, numB int) (*A_Init, error) {
 		return nil, err
 	}
 
-	return &A_Init{session.LinearResource{}, session.NewEndpoint(id, numA, conn)}, nil
+	//return &A_Init{session.LinearResource{}, session.NewEndpoint(id, numA, conn)}, nil
+	return &A_Init{session.LinearResource{}, session.NewEndpoint(id, conn)}, nil
 }
 
 func (ini *A_Init) Init() (*A_1, error) {
@@ -239,7 +240,8 @@ func NewB(id, numB, numA int) (*B_Init, error) {
 		return nil, err
 	}
 
-	return &B_Init{session.LinearResource{}, session.NewEndpoint(id, numB, conn)}, nil
+	//return &B_Init{session.LinearResource{}, session.NewEndpoint(id, numB, conn)}, nil
+	return &B_Init{session.LinearResource{}, session.NewEndpoint(id, conn)}, nil
 }
 
 type B_1 struct {
