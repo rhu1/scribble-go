@@ -1,6 +1,6 @@
 package util
 
-import "sort"
+//import "sort"
 
 const LOCALHOST = "127.0.0.1"
 
@@ -39,7 +39,7 @@ func UnaryReduceBates(xs [][]byte) []byte {
 	return xs[0]
 }
 
-//func GetValues(m map[int] int) []int {
+/*//func GetValues(m map[int] int) []int {
 func GetValues(m map[int] interface{}) []interface{} {
 	xs := make([]interface{}, len(m))
 	keys := make([]int, 0)
@@ -90,4 +90,4 @@ func GetValuesBates(m map[int] []byte) [][]byte {
 		xs[i] = m[k]
 	}
 	return xs
-}
+}*/

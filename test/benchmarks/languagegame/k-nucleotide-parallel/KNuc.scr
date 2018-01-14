@@ -3,15 +3,14 @@
 
 module KNuc;
 
-type <go> "int"     from "..." as int;
-//type <go> "[]string" from "..." as strings;  // FIXME
-type <go> "..." from "..." as strangs;
+type <go> "int" from "..." as int;
+type <go> "[]string" from "..." as strings;
 
 global protocol Proto(role A(k), role B(k), role S)
 {
   sort(int)       from A[1..1] to S[1..2];
-  match(strangs)  from A[1..1] to B[1..k];
+  match(strings)  from A[1..1] to B[1..k];
   done(int)       from S[1..2] to A[1..1];
-  gather(strangs) from B[1..k] to A[1..1];
+  gather(strings) from B[1..k] to A[1..1];
 }
 

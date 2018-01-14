@@ -8,7 +8,7 @@
 module Foo9;
 
 
-type <go> "..." from "..." as int;
+type <go> "int" from "..." as int;
 
 
 global protocol Proto1(role W)
