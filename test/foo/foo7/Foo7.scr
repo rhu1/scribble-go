@@ -8,6 +8,7 @@
 module Foo7;
 
 
+//type <go> "[]byte from "..." as bytes;  // FIXME
 type <go> "..." from "..." as bates;
 
 

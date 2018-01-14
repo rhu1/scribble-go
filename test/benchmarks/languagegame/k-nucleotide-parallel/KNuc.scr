@@ -1,0 +1,17 @@
+//Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/benchmarks/languagegame/k-nucleotide-parallel/KNuc.scr -d test/benchmarks/languagegame/k-nucleotide-parallel -param Proto -param-api A
+
+module KNuc;
+
+type <go> "int"     from "..." as int;
+//type <go> "[]string" from "..." as strings;  // FIXME
+type <go> "..." from "..." as strangs;
+
+global protocol Proto(role A(k), role B(k), role S)
+{
+  sort(int)       from A[1..1] to S[1..2];
+  match(strangs)  from A[1..1] to B[1..k];
+  done(int)       from S[1..2] to A[1..1];
+  gather(strangs) from B[1..k] to A[1..1];
+}
+
