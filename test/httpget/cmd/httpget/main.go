@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	//"log"
 	"regexp"
@@ -16,13 +17,16 @@ import (
 	"github.com/rhu1/scribble-go-runtime/test/httpget/HTTPget/Proto1"
 )
 
-const (
-	/*nServer  = 1
-	nMaster  = 1*/
-	nFetcher = 2
+var (
+	nFetcher int
 )
 
+func init() {
+	flag.IntVar(&nFetcher, "fetcher", 2, "Number of Fetchers")
+}
+
 func main() {
+	flag.Parse()
 	// Shared memory connections.
 	connsMu := new(sync.Mutex)
 	connsMu.Lock()
