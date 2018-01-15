@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	//"log"
 	"regexp"
@@ -16,13 +17,16 @@ import (
 	"github.com/rhu1/scribble-go-runtime/test/httpget/HTTPget/Proto1"
 )
 
-const (
-	/*nServer  = 1
-	nMaster  = 1*/
-	nFetcher = 2
+var (
+	nFetcher int
 )
 
+func init() {
+	flag.IntVar(&nFetcher, "fetcher", 2, "Number of Fetchers")
+}
+
 func main() {
+	flag.Parse()
 	// Shared memory connections.
 	connsMu := new(sync.Mutex)
 	connsMu.Lock()
@@ -212,10 +216,7 @@ func Master(conns []transport.Transport, wg *sync.WaitGroup) {
 	P1 := Proto1.NewProto1()
 	Master := P1.NewProto1_Master_1To1(nFetcher, 1)
 
-	for i := 1; i <= nFetcher; i++ {
-		/*if err := session.Accept(m, HTTPget.Fetcher, i, conns[i-1]); err != nil {
-			log.Fatalf("Cannot connect to %s[%d]: %v", HTTPget.Fetcher, i, err)
-		}*/
+	for i := 1; i < nFetcher; i++ {
 		Master.Accept(P1.Fetcher, i, conns[i])
 	}
 
