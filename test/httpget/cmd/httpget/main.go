@@ -216,10 +216,7 @@ func Master(conns []transport.Transport, wg *sync.WaitGroup) {
 	P1 := Proto1.NewProto1()
 	Master := P1.NewProto1_Master_1To1(nFetcher, 1)
 
-	for i := 1; i <= nFetcher; i++ {
-		/*if err := session.Accept(m, HTTPget.Fetcher, i, conns[i-1]); err != nil {
-			log.Fatalf("Cannot connect to %s[%d]: %v", HTTPget.Fetcher, i, err)
-		}*/
+	for i := 1; i < nFetcher; i++ {
 		Master.Accept(P1.Fetcher, i, conns[i])
 	}
 
