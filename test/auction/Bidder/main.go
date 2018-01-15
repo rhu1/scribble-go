@@ -47,7 +47,7 @@ func main() {
 		fmt.Println("Requesting", (strconv.Itoa(i) + ":"), p)
 		//err :=
 		//bidder.Request(Proto.Auctioneer, 1, util.LOCALHOST, strconv.Itoa(p))
-		conn := tcp.NewConnection(util.LOCALHOST, strconv.Itoa(p))
+		conn := tcp.NewReqestor(util.LOCALHOST, strconv.Itoa(p))
 		bidder.Request(Proto.Auctioneer, 1, conn)
 		/*if err != nil {
 			log.Fatalf("failed to create connection to Auctioneer: %v", err)
