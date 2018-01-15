@@ -1,0 +1,19 @@
+//Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/foo/foo10/Foo10.scr -d test/foo/foo10/ -param Proto1 -param-api S
+
+
+// http://sandbox.kidstrythisathome.com/erdos/
+
+
+module Foo10;
+
+
+type <go> "int" from "..." as MyInt;
+//type <go> "string" from "..." as String;
+//type <go> "[]byte" from "..." as String;
+
+
+global protocol Proto1(role S, role W)
+{
+	a(MyInt) from S[1..1] to W[1..1];
+}
