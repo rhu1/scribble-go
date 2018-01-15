@@ -47,7 +47,7 @@ func main() {
 	wg.Wait()
 }
 
-func Fetcher_1(mastConn transport.Transport, wg *sync.WaitGroup, ch chan interface{}) {
+func Fetcher_1(mastConn transport.Transport, wg *sync.WaitGroup, ch chan interface{}) *Proto1.Proto1_Fetcher_1To1and1Tok_End {
 	defer wg.Done()
 	/*f, err := HTTPget.NewFetcher(id, nFetcher, nMaster, nServer)
 	if err != nil {
@@ -148,10 +148,10 @@ func Fetcher_1(mastConn transport.Transport, wg *sync.WaitGroup, ch chan interfa
 
 	// Send to master to merge.
 	//f.Ept().Conn[HTTPget.Master][0].Send(string(body))
-	f10.Split_Master_1To1_merge(string(body), util.CopyString)
+	return f10.Split_Master_1To1_merge(string(body), util.CopyString)
 }
 
-func Fetcher_2Ton(self int, mastConn transport.Transport, wg *sync.WaitGroup) {
+func Fetcher_2Ton(self int, mastConn transport.Transport, wg *sync.WaitGroup) *Proto1.Proto1_Fetcher_1Tok_not_1To1_End {
 	defer wg.Done()
 
 	P1 := Proto1.NewProto1()
@@ -200,10 +200,10 @@ func Fetcher_2Ton(self int, mastConn transport.Transport, wg *sync.WaitGroup) {
 	fmt.Printf("Response BODY:\n%d bytes\n\n", len(body))
 
 	// Send to master to merge.
-	f8.Split_Master_1To1_merge(string(body), util.CopyString)
+	return f8.Split_Master_1To1_merge(string(body), util.CopyString)
 }
 
-func Master(conns []transport.Transport, wg *sync.WaitGroup) {
+func Master(conns []transport.Transport, wg *sync.WaitGroup) *Proto1.Proto1_Master_1To1_End {
 	defer wg.Done()
 	/*m, err := HTTPget.NewMaster(1, nFetcher, nMaster, nServer)
 	if err != nil {
@@ -222,7 +222,7 @@ func Master(conns []transport.Transport, wg *sync.WaitGroup) {
 	m := Master.Init()
 	//var end *Proto1.Proto1_Master_1To1_End
 	
-	runMaster(m)
+	return runMaster(m)
 }
 
 func runMaster(master *Proto1.Proto1_Master_1To1_1) *Proto1.Proto1_Master_1To1_End {
