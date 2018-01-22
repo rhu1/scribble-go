@@ -1,6 +1,6 @@
 //rhu@HZHL4 ~/code/go
-//$ go install github.com/rhu1/scribble-go-runtime/test/foo/foo1
-//$ bin/foo1.exe
+//$ go install github.com/rhu1/scribble-go-runtime/test/foo/foo10
+//$ bin/foo10.exe
 
 package main
 
