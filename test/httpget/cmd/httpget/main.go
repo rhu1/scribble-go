@@ -14,7 +14,7 @@ import (
 	"github.com/rhu1/scribble-go-runtime/runtime/transport/tcp"
 
 	"github.com/rhu1/scribble-go-runtime/test/util"
-	"github.com/rhu1/scribble-go-runtime/test/httpget/HTTPget/Proto1"
+	"github.com/rhu1/scribble-go-runtime/test/httpget/HTTPget/Proto2"
 )
 
 var (
@@ -51,15 +51,15 @@ func main() {
 	wg.Wait()
 }
 
-func Fetcher_1(mastConn transport.Transport, wg *sync.WaitGroup, ch chan interface{}) *Proto1.Proto1_Fetcher_1To1and1Tok_End {
+func Fetcher_1(mastConn transport.Transport, wg *sync.WaitGroup, ch chan interface{}) *Proto2.Proto2_Fetcher_1To1and1Tok_End {
 	defer wg.Done()
 	/*f, err := HTTPget.NewFetcher(id, nFetcher, nMaster, nServer)
 	if err != nil {
 		log.Fatalf("Cannot create new Fetcher: %v", err)
 	}*/
 
-	P1 := Proto1.NewProto1()
-	Fetcher := P1.NewProto1_Fetcher_1To1and1Tok(nFetcher, 1)
+	P1 := Proto2.NewProto2()
+	Fetcher := P1.NewProto2_Fetcher_1To1and1Tok(nFetcher, 1)
 
 	/*for i := 1; i <= nServer; i++ {
 		if err := session.Connect(f, HTTPget.Server, i, svrConn); err != nil {
@@ -83,10 +83,10 @@ func Fetcher_1(mastConn transport.Transport, wg *sync.WaitGroup, ch chan interfa
 
 	//Fetcher.Ept().CheckConnection()
 	f1 := Fetcher.Init()
-	//var end *Proto1.Proto1_Fetcher_1Tok_End
+	//var end *Proto2.Proto2_Fetcher_1Tok_End
 
 	var filepath string
-	/*if err := Fetcher.Ept().Conn[Proto1.Master][0].Recv(&filepath); err != nil {
+	/*if err := Fetcher.Ept().Conn[Proto2.Master][0].Recv(&filepath); err != nil {
 		log.Fatalf("Cannot receive: %v", err)
 	}*/
 	f2 := f1.Reduce_Master_1To1_URL(&filepath, util.UnaryReduceString)
@@ -95,7 +95,7 @@ func Fetcher_1(mastConn transport.Transport, wg *sync.WaitGroup, ch chan interfa
 	/*if err := f.Ept().Conn[HTTPget.Server][0].Send(headCmd); err != nil {
 		log.Fatalf("Cannot send: %v", err)
 	}*/
-	f3 := f2.Split_Server_1To1_HEAD(headCmd, util.CopyString)
+	f3 := f2.Split_Server_1To1_(headCmd, util.CopyString)
 
 	fmt.Printf("Request:\n%s\n\n", headCmd)
 
@@ -104,7 +104,7 @@ func Fetcher_1(mastConn transport.Transport, wg *sync.WaitGroup, ch chan interfa
 	/*if err := f.Ept().Conn[HTTPget.Server][0].Recv(&reply); err != nil {
 		log.Fatalf("Cannot recv: %v", err)
 	}*/
-	f4 := f3.Reduce_Server_1To1_response(&reply, util.UnaryReduceBates)
+	f4 := f3.Reduce_Server_1To1_(&reply, util.UnaryReduceBates)
 	re := regexp.MustCompile(`Content-Length: (\d+)`)
 	if matches := re.FindSubmatch(reply); len(matches) > 0 {
 		i, err := strconv.Atoi(string(matches[1]))
@@ -130,7 +130,7 @@ func Fetcher_1(mastConn transport.Transport, wg *sync.WaitGroup, ch chan interfa
 	/*if err := f.Ept().Conn[HTTPget.Server][0].Send(getCmd); err != nil {
 		log.Fatal("Cannot send:", err)
 	}*/
-	f8 := f7.Split_Server_1To1_GET(getCmd, util.CopyString)
+	f8 := f7.Split_Server_1To1_(getCmd, util.CopyString)
 
 	fmt.Printf("Request:\n%s\n\n", getCmd)
 
@@ -138,7 +138,7 @@ func Fetcher_1(mastConn transport.Transport, wg *sync.WaitGroup, ch chan interfa
 	/*if err := f.Ept().Conn[HTTPget.Server][0].Recv(&replyHead); err != nil {
 		log.Fatal("Cannot recv:", err)
 	}*/
-	f9 := f8.Reduce_Server_1To1_Response(&replyHead, util.UnaryReduceBates)
+	f9 := f8.Reduce_Server_1To1_(&replyHead, util.UnaryReduceBates)
 
 	fmt.Printf("Response HEAD:\n%s\n\n", string(replyHead))
 
@@ -146,7 +146,7 @@ func Fetcher_1(mastConn transport.Transport, wg *sync.WaitGroup, ch chan interfa
 	/*if err := f.Ept().Conn[HTTPget.Server][0].Recv(&body); err != nil {
 		log.Fatal("Cannot recv:", err)
 	}*/
-	f10 := f9.Reduce_Server_1To1_Body(&body, util.UnaryReduceBates)
+	f10 := f9.Reduce_Server_1To1_(&body, util.UnaryReduceBates)
 
 	fmt.Printf("Response BODY:\n%d bytes\n\n", len(body))
 
@@ -155,11 +155,11 @@ func Fetcher_1(mastConn transport.Transport, wg *sync.WaitGroup, ch chan interfa
 	return f10.Split_Master_1To1_merge(string(body), util.CopyString)
 }
 
-func Fetcher_2Ton(self int, mastConn transport.Transport, wg *sync.WaitGroup) *Proto1.Proto1_Fetcher_1Tok_not_1To1_End {
+func Fetcher_2Ton(self int, mastConn transport.Transport, wg *sync.WaitGroup) *Proto2.Proto2_Fetcher_1Tok_not_1To1_End {
 	defer wg.Done()
 
-	P1 := Proto1.NewProto1()
-	Fetcher := P1.NewProto1_Fetcher_1Tok_not_1To1(nFetcher, self)
+	P1 := Proto2.NewProto2()
+	Fetcher := P1.NewProto2_Fetcher_1Tok_not_1To1(nFetcher, self)
 
 	servConn := tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(8100))
 	servConn.SerialiseMeth = tcp.SerialiseWithPassthru
@@ -169,18 +169,18 @@ func Fetcher_2Ton(self int, mastConn transport.Transport, wg *sync.WaitGroup) *P
 	Fetcher.Request(P1.Master, 1, mastConn)
 
 	f1 := Fetcher.Init()
-	//var end *Proto1.Proto1_Fetcher_1Tok_End
+	//var end *Proto2.Proto2_Fetcher_1Tok_End
 
 	var filepath string
 	f2 := f1.Reduce_Master_1To1_URL(&filepath, util.UnaryReduceString)
 
 	headCmd := fmt.Sprintf("HEAD %s HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: keep-alive", filepath)
-	f3 := f2.Split_Server_1To1_HEAD(headCmd, util.CopyString)
+	f3 := f2.Split_Server_1To1_(headCmd, util.CopyString)
 
 	fmt.Printf("Request:\n%s\n\n", headCmd)
 
 	reply := make([]byte, 4096)
-	f4 := f3.Reduce_Server_1To1_response(&reply, util.UnaryReduceBates)
+	f4 := f3.Reduce_Server_1To1_(&reply, util.UnaryReduceBates)
 
 	fmt.Printf("Response:\n%s\n\n", string(reply))
 
@@ -189,17 +189,17 @@ func Fetcher_2Ton(self int, mastConn transport.Transport, wg *sync.WaitGroup) *P
 	f5 := f4.Reduce_Master_1To1_start(&start, util.UnaryReduce).Reduce_Master_1To1_end(&end, util.UnaryReduce)
 
 	getCmd := fmt.Sprintf("GET %s HTTP/1.1\r\nHost: 127.0.0.1\r\nRange: bytes=%d-%d", filepath, start, end)
-	f6 := f5.Split_Server_1To1_GET(getCmd, util.CopyString)
+	f6 := f5.Split_Server_1To1_(getCmd, util.CopyString)
 
 	fmt.Printf("Request:\n%s\n\n", getCmd)
 
 	replyHead := make([]byte, 4096)
-	f7 := f6.Reduce_Server_1To1_Response(&replyHead, util.UnaryReduceBates)
+	f7 := f6.Reduce_Server_1To1_(&replyHead, util.UnaryReduceBates)
 
 	fmt.Printf("Response HEAD:\n%s\n\n", string(replyHead))
 
 	body := make([]byte, end-start)
-	f8 := f7.Reduce_Server_1To1_Body(&body, util.UnaryReduceBates)
+	f8 := f7.Reduce_Server_1To1_(&body, util.UnaryReduceBates)
 
 	fmt.Printf("Response BODY:\n%d bytes\n\n", len(body))
 
@@ -207,26 +207,26 @@ func Fetcher_2Ton(self int, mastConn transport.Transport, wg *sync.WaitGroup) *P
 	return f8.Split_Master_1To1_merge(string(body), util.CopyString)
 }
 
-func Master(conns []transport.Transport, wg *sync.WaitGroup) *Proto1.Proto1_Master_1To1_End {
+func Master(conns []transport.Transport, wg *sync.WaitGroup) *Proto2.Proto2_Master_1To1_End {
 	defer wg.Done()
 	/*m, err := HTTPget.NewMaster(1, nFetcher, nMaster, nServer)
 	if err != nil {
 		log.Fatalf("Cannot create new Master: %v", err)
 	}*/
-	P1 := Proto1.NewProto1()
-	Master := P1.NewProto1_Master_1To1(nFetcher, 1)
+	P1 := Proto2.NewProto2()
+	Master := P1.NewProto2_Master_1To1(nFetcher, 1)
 
 	for i := 1; i < nFetcher; i++ {
 		Master.Accept(P1.Fetcher, i, conns[i])
 	}
 
 	m := Master.Init()
-	//var end *Proto1.Proto1_Master_1To1_End
+	//var end *Proto2.Proto2_Master_1To1_End
 	
-	return runMaster(m)
+	return runMaster2(m)
 }
 
-func runMaster(master *Proto1.Proto1_Master_1To1_1) *Proto1.Proto1_Master_1To1_End {
+func runMaster2(master *Proto2.Proto2_Master_1To1_1) *Proto2.Proto2_Master_1To1_End {
 	/*URLs := make([]string, nFetcher)
 	for i := 0; i < nFetcher; i++ {
 		URLs[i] = "/main.go"
