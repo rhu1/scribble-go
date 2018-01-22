@@ -9,15 +9,15 @@ type <go> "..." from "..." as Int;
 type <go> "..." from "..." as String;
 
 /*global protocol ClientA(role p, role q) {
-  PlayA(Game@a) from q to p;
+  PlayA(Game@a) from q[1..1] to p[1..1];
 }
 
 global protocol ClientB(role p, role q) {
-  PlayB(Game@b) from q to p;
+  PlayB(Game@b) from q[1..1] to p[1..1];
 }
 
 global protocol ClientC(role p, role q) {
-  PlayC(Game@c) from q to p;
+  PlayC(Game@c) from q[1..1] to p[1..1];
 }*/
 
 global protocol Game(role a, role b, role c) {
