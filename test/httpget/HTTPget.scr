@@ -32,14 +32,14 @@ global protocol Proto1(role Fetcher(k), role Master(k), role Server(k)) {
 
 
 global protocol Proto2(role Fetcher(k), role Master(k), role Server(k)) {
-  URL(string) from Master[1..1] to Fetcher[1..k];        // Get URL metadata
-  (string) from Fetcher[1..k] to Server[1..1];
+  URL(string) from Master[1..1] to Fetcher[1..k];
+  (string) from Fetcher[1..k] to Server[1..1];           // HEAD
   (bates) from Server[1..1] to Fetcher[1..k];            // response
 
   // Setup chunk boundaries.
-  FileSize(int) from Fetcher[1..1] to Master[1..1];      // Full file size
-  start(int) from Master[1..1] to Fetcher[1..k];         // byte range start
-  end(int) from Master[1..1] to Fetcher[1..k];           // byte range end
+  FileSize(int) from Fetcher[1..1] to Master[1..1];
+  start(int) from Master[1..1] to Fetcher[1..k];
+  end(int) from Master[1..1] to Fetcher[1..k];
 
   // GET chunks
   (string) from Fetcher[1..k] to Server[1..1];           // GET
