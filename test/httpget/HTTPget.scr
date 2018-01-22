@@ -29,3 +29,24 @@ global protocol Proto1(role Fetcher(k), role Master(k), role Server(k)) {
   // Merge all chunks
   merge(string) from Fetcher[1..k] to Master[1..1];
 }
+
+
+global protocol Proto2(role Fetcher(k), role Master(k), role Server(k)) {
+  URL(string) from Master[1..1] to Fetcher[1..k];        // Get URL metadata
+  (string) from Fetcher[1..k] to Server[1..1];
+  (bates) from Server[1..1] to Fetcher[1..k];            // response
+
+  // Setup chunk boundaries.
+  FileSize(int) from Fetcher[1..1] to Master[1..1];      // Full file size
+  start(int) from Master[1..1] to Fetcher[1..k];         // byte range start
+  end(int) from Master[1..1] to Fetcher[1..k];           // byte range end
+
+  // GET chunks
+  (string) from Fetcher[1..k] to Server[1..1];           // GET
+  (bates) from Server[1..1] to Fetcher[1..k];            // Response
+
+  (bates) from Server[1..1] to Fetcher[1..k];            // Body
+
+  // Merge all chunks
+  merge(string) from Fetcher[1..k] to Master[1..1];
+}
