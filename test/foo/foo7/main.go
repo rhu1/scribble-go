@@ -37,6 +37,8 @@ func main() {
 	as := make([]transport.Transport, n)
 	for i := 1; i <= n; i++ {
 		as[i-1] = tcp.NewAcceptor(strconv.Itoa(PORT+i))
+		/*x := as[i-1].(tcp.ConnCfg)
+		x.SerialiseMeth = tcp.SerialiseWithPassthru*/
 		//as[i-1] = shm.NewConnector()
 	}
 	go serverCode(wg, n, as)
@@ -45,6 +47,7 @@ func main() {
 
 	for i := 1; i <= n; i++ {
 		conn := tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(PORT+i))
+		/*conn.SerialiseMeth = tcp.SerialiseWithPassthru*/
 		//conn := as[i-1]
 		go clientCode(wg, n, i, conn)
 	}
@@ -63,7 +66,7 @@ func serverCode(wg *sync.WaitGroup, n int, conns []transport.Transport) *Proto1.
 	var end *Proto1.Proto1_S_1To1_End
 
 	var bs []byte
-	s2 := s1.Split_W_1Ton_norman(make([]byte, 4), util.CopyBates)
+	s2 := s1.Split_W_1Ton_norman([]byte {5,6,7,8}, util.CopyBates)
 	end = s2.Reduce_W_1Ton_mum(&bs, foo)
 	fmt.Println("S received:", bs)
 
