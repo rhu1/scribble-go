@@ -14,7 +14,7 @@ type <go> "int" from "..." as int;
 //type <go> "Proto2.Proto2_W_1To1_1"
 deleg <go>
 		"Proto2.Proto2_W_1To1_1"
-		//"*Proto2.Proto2_W_1To1_1"  // Not compatible with receive API gen
+		//"*Proto2.Proto2_W_1To1_1"  // Currently not compatible with receive API gen
 		//from "Foo12/Proto2/Proto2_W_1To1_1.go"
 		from "github.com/rhu1/scribble-go-runtime/test/foo/foo12/Foo12/Proto2"
 		as W_1;
