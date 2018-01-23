@@ -36,6 +36,7 @@ func main() {
 	go runB(wg, wgSW)
 
 	wg.Wait()
+	wgSW.Wait()
 }
 
 func runB(wg *sync.WaitGroup, wgSW *sync.WaitGroup) (*Proto1.Proto1_B_1To1_End, *Proto2.Proto2_W_1To1_End) {

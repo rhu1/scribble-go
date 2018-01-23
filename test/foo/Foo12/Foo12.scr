@@ -12,17 +12,22 @@ type <go> "int" from "..." as int;
 
 // FIXME?
 //type <go> "Proto2.Proto2_W_1To1_1"
+
 deleg <go>
-		"Proto2.Proto2_W_1To1_1"
+		"Proto2.Proto2_W_1To1_1"   // The name of the type in Go
+
 		//"*Proto2.Proto2_W_1To1_1"  // Currently not compatible with receive API gen
 		//from "Foo12/Proto2/Proto2_W_1To1_1.go"
-		from "github.com/rhu1/scribble-go-runtime/test/foo/foo12/Foo12/Proto2"
+
+		from "github.com/rhu1/scribble-go-runtime/test/foo/foo12/Foo12/Proto2"   // The import for that type
+
 		as W_1;
 
 
 global protocol Proto1(role A, role B)
 {
 	//a(Proto2@S[?..?]) from A[1..1] to B[1..1];  // TODO
+
 	a(W_1) from A[1..1] to B[1..1];
 }
 
