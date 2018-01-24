@@ -29,22 +29,24 @@ func main() {
 	wgSW := new(sync.WaitGroup)
 	wgSW.Add(2)
 
-	go runA(wg, wgSW)
+	// Sets up shared memory connection between A and B.
+	connAB := shm.NewConnector()
+	go runA(connAB, wg, wgSW)
 
 	time.Sleep(200 * time.Millisecond) //2017/12/11 11:21:40 cannot connect to 127.0.0.1:8891: dial tcp 127.0.0.1:8891: connectex: No connection could be made because the target machine actively refused it.
 
-	go runB(wg, wgSW)
+	go runB(connAB, wg, wgSW)
 
 	wg.Wait()
 	wgSW.Wait()
 }
 
-func runB(wg *sync.WaitGroup, wgSW *sync.WaitGroup) (*Proto1.Proto1_B_1To1_End, *Proto2.Proto2_W_1To1_End) {
+func runB(conn shm.ConnCfg, wg *sync.WaitGroup, wgSW *sync.WaitGroup) (*Proto1.Proto1_B_1To1_End, *Proto2.Proto2_W_1To1_End) {
 	P1 := Proto1.NewProto1()
 
 	B := P1.NewProto1_B_1To1(1)
 	//conn := tcp.NewAcceptor(strconv.Itoa(PORT))  // FIXME: check shm for deleg
-	conn := shm.NewConnector()  // FIXME: check shm for deleg
+	// FIXME: check shm for deleg
 	/*if err != nil {
 		log.Fatalf("failed to create connection to W %d: %v", i, err)
 	}*/
@@ -69,13 +71,17 @@ func runB(wg *sync.WaitGroup, wgSW *sync.WaitGroup) (*Proto1.Proto1_B_1To1_End, 
 	return endB, endW
 }
 
-func runA(wg *sync.WaitGroup, wgSW *sync.WaitGroup) *Proto1.Proto1_A_1To1_End {
-	go runS(wgSW)
+func runA(conn shm.ConnCfg, wg *sync.WaitGroup, wgSW *sync.WaitGroup) *Proto1.Proto1_A_1To1_End {
+	// Sets up connection between W and S.
+	connWS := shm.NewConnector()
+
+	// connWS (endpoint S) is passed to S spawned here
+	// At this point connWS is dangling - not connected to W nor S.
+	go runS(connWS, wgSW)
 
 	P2 := Proto2.NewProto2()
 
 	W := P2.NewProto2_W_1To1(1)
-	connWS := shm.NewConnector()
 	W.Request(P2.S, 1, connWS)
 	var w1 *Proto2.Proto2_W_1To1_1 = W.Init()
 
@@ -84,7 +90,6 @@ func runA(wg *sync.WaitGroup, wgSW *sync.WaitGroup) *Proto1.Proto1_A_1To1_End {
 	P1 := Proto1.NewProto1()
 
 	A := P1.NewProto1_A_1To1(1)
-	conn := shm.NewConnector()
 	A.Request(P1.B, 1, conn)
 	/*if err != nil {
 		log.Fatalf("failed to create connection to Auctioneer: %v", err)
@@ -101,11 +106,10 @@ func runA(wg *sync.WaitGroup, wgSW *sync.WaitGroup) *Proto1.Proto1_A_1To1_End {
 	return end
 }
 
-func runS(wgSW *sync.WaitGroup) (*Proto2.Proto2_S_1To1_End) {
+func runS(conn shm.ConnCfg, wgSW *sync.WaitGroup) *Proto2.Proto2_S_1To1_End {
 	P2 := Proto2.NewProto2()
 
 	S := P2.NewProto2_S_1To1(1)
-	conn := shm.NewConnector()
 	/*if err != nil {
 		log.Fatalf("failed to create connection to W %d: %v", i, err)
 	}*/
