@@ -203,7 +203,11 @@ func runMaster2(master *Proto2.Proto2_Master_1To1_1) *Proto2.Proto2_Master_1To1_
 
 	start, end := make([]int, nFetcher), make([]int, nFetcher)
 	for i := 0; i < nFetcher; i++ {
-		start[i] = i * chunkSize
+		if i == 0 {
+			start[i] = i * chunkSize
+		} else {
+			start[i] = i*chunkSize - 1
+		}
 		if i < nFetcher-1 {
 			end[i] = (i+1)*chunkSize - 1
 		} else {
