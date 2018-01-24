@@ -46,7 +46,7 @@ func main() {
 	connsMu.Unlock()
 
 	wg := new(sync.WaitGroup)
-	wg.Add(3)
+	wg.Add(nFetcher + 1)
 
 	go Master(shmConns, wg)
 
