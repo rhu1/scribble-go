@@ -6,6 +6,7 @@ import (
 	"github.com/rhu1/scribble-go-runtime/runtime/transport"
 )
 
+ // FIXME: deprecate -- use Endpoint type directly in state chans again
 type ParamEndpoint interface {
 	Ept() *Endpoint
 	Params() map[string]int
