@@ -6,6 +6,13 @@ import (
 	"github.com/rhu1/scribble-go-runtime/runtime/transport"
 )
 
+type ParamEndpoint interface {
+	Ept() *Endpoint
+	Params() map[string]int
+	//IsParamEndpoint()
+}
+
+
 type Endpoint struct {
 	Id       int
 	//NumRoles int
