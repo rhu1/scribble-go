@@ -95,6 +95,10 @@ func NewConnection(host, port string) ConnCfg {
 	return ConnCfg{Host: host, Port: port}
 }
 
+func Listen(port string) ConnCfg {
+	return NewConnection("__dummy", port)
+}
+
 func NewAcceptor(port string) ConnCfg {
 	return NewConnection("__dummy", port)
 }
@@ -112,7 +116,7 @@ func NewConnectionWithRetry(host, port string, retryWait time.Duration) ConnCfg 
 //
 // Accept blocks while waiting for connection to be accepted.
 func (cfg ConnCfg) Accept() transport.Channel {
-	ln, err := net.Listen("tcp", fmt.Sprintf(":%s", cfg.Port))
+	ln, err := net.Listen("tcp", fmt.Sprintf(":%s", cfg.Port))  // FIXME: port should be opened on Listen, not Accept
 	if err != nil {
 		log.Fatalf("cannot listen at :%s: %v", cfg.Port, err)
 	}
