@@ -13,12 +13,18 @@ type <go> "int" from "..." as int;
 type <go> "TwoBuyer.Address" from "scrib/twobuyer/TwoBuyer/TwoBuyer/types.go" as Address;
 type <go> "TwoBuyer.Date" from "scrib/twobuyer/TwoBuyer/TwoBuyer/types.go" as Date;*/
 
-// scrib surface syntax
+// scrib surface syntax -- done
 // internalise dial/accept peers
-// remove proto sig param decls
+// remove proto sig param decls -- done
+// endpoint params as fields -- done
+// (extra Run/Foreach args?)
+
+// foreach
+// deleg
+// Pget
 
 
-global protocol Proto1(role S(n), role W(n))
+global protocol Proto1(role S, role W)
 {
-	A(int) from S[1..1] to W[1..n];
+	A(int) from S[1,1] to W[1,N];  // Captial 'N' for Go accessibility
 }

@@ -16,7 +16,7 @@ import (
 
 	"github.com/rhu1/scribble-go-runtime/test/foo/foo01/Foo1/Proto1"
 	"github.com/rhu1/scribble-go-runtime/test/foo/foo01/Foo1/Proto1/S_1To1"
-	"github.com/rhu1/scribble-go-runtime/test/foo/foo01/Foo1/Proto1/W_1Ton"
+	"github.com/rhu1/scribble-go-runtime/test/foo/foo01/Foo1/Proto1/W_1ToN"
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 
@@ -67,17 +67,17 @@ func serverCode(wg *sync.WaitGroup, n int) *S_1To1.End {
 
 func runS(s *S_1To1.Init) S_1To1.End {
 	data := []int { 2, 3, 5, 7, 11, 13 }
-	n := s.Ept.Params["n"]  // Good API?
+	n := s.Ept.N  // Good API? -- generate param values as direct fields? (instead of generic map)
 	pay := data[0:n]
-	end := s.Scatter_W_1Ton_A(pay)
+	end := s.Scatter_W_1ToN_A(pay)
 	fmt.Println("S scattered A:", pay)
 	return *end
 }
 
-func clientCode(wg *sync.WaitGroup, n int, self int) *W_1Ton.End {
+func clientCode(wg *sync.WaitGroup, n int, self int) *W_1ToN.End {
 	P1 := Proto1.New()
 
-	W := P1.New_W_1Ton(n, self)
+	W := P1.New_W_1ToN(n, self)  // Endpoint needs n to check self
 	conn := tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(PORT+self))
 	W.Dial("S", 1, conn)
 	/*err := session.Connect(W, P1.S.Name(), 1, conn)
@@ -89,7 +89,7 @@ func clientCode(wg *sync.WaitGroup, n int, self int) *W_1Ton.End {
 	return end
 }
 
-func runW(w *W_1Ton.Init) W_1Ton.End {
+func runW(w *W_1ToN.Init) W_1ToN.End {
 	data := make([]int, 1)
 	end := w.Gather_S_1To1_A(data)
 	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") gathered:", data)
