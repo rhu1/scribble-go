@@ -57,13 +57,13 @@ func server(wg *sync.WaitGroup, K int) *S_1To1.End {
 }
 
 func runS(s *S_1To1.Init) S_1To1.End {
-	s1 := rand.NewSource(time.Now().UnixNano())
-    r1 := rand.New(s1)
+	seed := rand.NewSource(time.Now().UnixNano())
+    rnd := rand.New(seed)
 
 	var end *S_1To1.End
 	data := []int{ 2, 3, 5, 7, 11 }
 	pay := data[0:s.Ept.K]
-	if r1.Intn(2) < 1 {
+	if rnd.Intn(2) < 1 {
 		end = s.W_1ToK_Scatter_A(pay)
 		fmt.Println("S scattered A:", pay)
 	} else {
