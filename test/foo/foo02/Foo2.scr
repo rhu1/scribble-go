@@ -1,5 +1,5 @@
 //Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
-//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/foo/foo2/Foo2.scr -d test/foo/foo2/ -param Proto1 -param-api S
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/foo/foo02/Foo2.scr -d test/foo/foo02/ -param Proto1 -param-api github.com/rhu1/scribble-go-runtime/test/foo/foo02/Foo2 S
 
 
 // http://sandbox.kidstrythisathome.com/erdos/
@@ -11,8 +11,8 @@ module Foo2;
 type <go> "int" from "..." as int;
 
 
-global protocol Proto1(role S(n), role W(n))
+global protocol Proto1(role S, role W)
 {
-	a(int) from S[1..1] to W[1..n];
-	b(int) from W[1..n] to S[1..1];
+	A(int) from S[1,1] to W[1,K];
+	B(int) from W[1,K] to S[1,1];
 }

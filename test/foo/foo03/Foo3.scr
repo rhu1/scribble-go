@@ -1,5 +1,6 @@
 //Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
-//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/foo/foo3/Foo3.scr -d test/foo/foo3/ -param Proto1 -param-api S
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/foo/foo03/Foo3.scr -d test/foo/foo03/ -param Proto1 -param-api github.com/rhu1/scribble-go-runtime/test/foo/foo03/Foo3 S
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/foo/foo03/Foo3.scr -d test/foo/foo03/ -param Proto1 -param-api github.com/rhu1/scribble-go-runtime/test/foo/foo03/Foo3 W -param-select
 
 
 // http://sandbox.kidstrythisathome.com/erdos/
@@ -11,15 +12,14 @@ module Foo3;
 type <go> "int" from "..." as int;
 
 
-global protocol Proto1(role S(n), role W(n))
+global protocol Proto1(role S, role W)
 {
-	//choice at S[1..1]  // FIXME
-	choice at S
+	choice at S[1]
 	{
-		a(int) from S[1..1] to W[1..n];
+		A(int) from S[1,1] to W[1,K];
 	}
 	or
 	{
-		b(int) from S[1..1] to W[1..n];
+		B(int) from S[1,1] to W[1,K];
 	}
 }

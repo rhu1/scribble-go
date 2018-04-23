@@ -17,7 +17,7 @@ type <go> "TwoBuyer.Date" from "scrib/twobuyer/TwoBuyer/TwoBuyer/types.go" as Da
 // internalise dial/accept peers -- part done -- TODO: full "nested" API
 // remove proto sig param decls -- done
 // endpoint params as fields -- done
-// (extra Run/Foreach args?)
+// (extra Run/Foreach args?  e.g., "context", foreach indices, etc.) -- cf. Pget, req.Head()
 
 // foreach
 // deleg
@@ -26,5 +26,5 @@ type <go> "TwoBuyer.Date" from "scrib/twobuyer/TwoBuyer/TwoBuyer/types.go" as Da
 
 global protocol Proto1(role S, role W)
 {
-	A(int) from S[1,1] to W[1,N];  // Captial 'N' for Go accessibility
+	A(int) from S[1,1] to W[1,K];  // Captial 'K' for Go accessibility
 }
