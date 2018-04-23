@@ -1,6 +1,6 @@
 //rhu@HZHL4 ~/code/go
-//$ go install github.com/rhu1/scribble-go-runtime/test/foo/foo1
-//$ bin/foo1.exe
+//$ go install github.com/rhu1/scribble-go-runtime/test/foo/foo01
+//$ bin/foo01.exe
 
 package main
 
@@ -14,7 +14,9 @@ import (
 	//"github.com/rhu1/scribble-go-runtime/runtime/session"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport/tcp"
 
-	"github.com/rhu1/scribble-go-runtime/test/foo/foo1/Foo1/Proto1"
+	"github.com/rhu1/scribble-go-runtime/test/foo/foo01/Foo1/Proto1"
+	"github.com/rhu1/scribble-go-runtime/test/foo/foo01/Foo1/Proto1/S_1To1"
+	"github.com/rhu1/scribble-go-runtime/test/foo/foo01/Foo1/Proto1/W_1Ton"
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 
@@ -39,49 +41,57 @@ func main() {
 	wg.Wait()
 }
 
-func serverCode(wg *sync.WaitGroup, n int) *Proto1.Proto1_S_1To1_End {
+func serverCode(wg *sync.WaitGroup, n int) *S_1To1.End {
 	/*conns :=  make([]tcp.ConnCfg, n)
 	for i := 0; i < n; i++ {
 		conns[i] = tcp.NewConnection("...", strconv.Itoa(PORT+i))
 	}*/
 
-	P1 := Proto1.NewProto1()
-
-	S := P1.NewProto1_S_1To1(n, 1)
+	P1 := Proto1.New()
+	S := P1.New_S_1To1(n, 1)
+	as := make([]tcp.ConnCfg, n)
 	for i := 1; i <= n; i++ {
-		conn := tcp.NewAcceptor(strconv.Itoa(PORT+i))
+		as[i-1] = tcp.NewAcceptor(strconv.Itoa(PORT+i))
+	}
+	for i := 1; i <= n; i++ {
 		/*err := session.Accept(S, P1.W.Name(), i, conn)
 		if err != nil {
 			log.Fatalf("failed to create connection to W %d: %v", i, err)
 		}*/
-		S.Accept(P1.W, i, conn)
+		S.Accept("W", i, as[i-1])
 	}
-	s1 := S.Init()
-	var end *Proto1.Proto1_S_1To1_End
-
-	end = s1.Split_W_1Ton_a(1234, util.Copy)
-	fmt.Println("S sent:", 1234)
-
+	end := S.Run(runS)
 	wg.Done()
 	return end
 }
 
-func clientCode(wg *sync.WaitGroup, n int, self int) *Proto1.Proto1_W_1Ton_End {
-	P1 := Proto1.NewProto1()
+func runS(s *S_1To1.Init) S_1To1.End {
+	data := []int { 2, 3, 5, 7, 11, 13 }
+	n := s.Ept.Params["n"]  // Good API?
+	pay := data[0:n]
+	end := s.Scatter_W_1Ton_A(pay)
+	fmt.Println("S scattered A:", pay)
+	return *end
+}
 
-	W := P1.NewProto1_W_1Ton(n, self)
-	conn := tcp.NewConnection(util.LOCALHOST, strconv.Itoa(PORT+self))
-	W.Request(P1.S, 1, conn)
+func clientCode(wg *sync.WaitGroup, n int, self int) *W_1Ton.End {
+	P1 := Proto1.New()
+
+	W := P1.New_W_1Ton(n, self)
+	conn := tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(PORT+self))
+	W.Dial("S", 1, conn)
 	/*err := session.Connect(W, P1.S.Name(), 1, conn)
 	if err != nil {
 		log.Fatalf("failed to create connection to Auctioneer: %v", err)
 	}*/
-	var w1 *Proto1.Proto1_W_1Ton_1 = W.Init()
-
-	var x int
-	end := w1.Reduce_S_1To1_a(&x, util.Sum)
-	fmt.Println("W received:", self, x)
-
+	end := W.Run(runW)
 	wg.Done()
 	return end
+}
+
+func runW(w *W_1Ton.Init) W_1Ton.End {
+	data := make([]int, 1)
+	end := w.Gather_S_1To1_A(data)
+	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") gathered:", data)
+	return *end
 }
