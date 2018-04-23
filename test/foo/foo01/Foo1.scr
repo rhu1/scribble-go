@@ -14,7 +14,7 @@ type <go> "TwoBuyer.Address" from "scrib/twobuyer/TwoBuyer/TwoBuyer/types.go" as
 type <go> "TwoBuyer.Date" from "scrib/twobuyer/TwoBuyer/TwoBuyer/types.go" as Date;*/
 
 // scrib surface syntax -- done
-// internalise dial/accept peers
+// internalise dial/accept peers -- part done -- TODO: full "nested" API
 // remove proto sig param decls -- done
 // endpoint params as fields -- done
 // (extra Run/Foreach args?)

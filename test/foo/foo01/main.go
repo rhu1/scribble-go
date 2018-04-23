@@ -58,7 +58,7 @@ func serverCode(wg *sync.WaitGroup, n int) *S_1To1.End {
 		if err != nil {
 			log.Fatalf("failed to create connection to W %d: %v", i, err)
 		}*/
-		S.Accept("W", i, as[i-1])
+		S.W_1ToN_Accept(i, as[i-1])
 	}
 	end := S.Run(runS)
 	wg.Done()
@@ -79,7 +79,7 @@ func clientCode(wg *sync.WaitGroup, n int, self int) *W_1ToN.End {
 
 	W := P1.New_W_1ToN(n, self)  // Endpoint needs n to check self
 	conn := tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(PORT+self))
-	W.Dial("S", 1, conn)
+	W.S_1To1_Dial(1, conn)
 	/*err := session.Connect(W, P1.S.Name(), 1, conn)
 	if err != nil {
 		log.Fatalf("failed to create connection to Auctioneer: %v", err)
