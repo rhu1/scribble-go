@@ -16,8 +16,8 @@ import (
 	"github.com/rhu1/scribble-go-runtime/runtime/transport/shm"
 
 	"github.com/rhu1/scribble-go-runtime/test/foo/foo06/Foo6/Proto1"
-	"github.com/rhu1/scribble-go-runtime/test/foo/foo06/Foo6/Proto1/S_1To1"
-	"github.com/rhu1/scribble-go-runtime/test/foo/foo06/Foo6/Proto1/W_1ToK"
+	S_1 "github.com/rhu1/scribble-go-runtime/test/foo/foo06/Foo6/Proto1/S_1to1"
+	"github.com/rhu1/scribble-go-runtime/test/foo/foo06/Foo6/Proto1/W_1toK"
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 
@@ -47,76 +47,76 @@ func main() {
 	wg.Wait()
 }
 
-func server(wg *sync.WaitGroup, K int) *S_1To1.End {
+func server(wg *sync.WaitGroup, K int) *S_1.End {
 	P1 := Proto1.New()
-	S := P1.New_S_1To1(K, 1)
+	S := P1.New_S_1to1(K, 1)
 	as := make([]tcp.ConnCfg, K)
 	for j := 1; j <= K; j++ {
 		as[j-1] = tcp.NewAcceptor(strconv.Itoa(PORT+j))
 	}
 	for j := 1; j <= K; j++ {
-		S.W_1ToK_Accept(j, as[j-1])
+		S.W_1toK_Accept(j, as[j-1])
 	}
 	end := S.Run(runS)
 	wg.Done()
 	return end
 }
 
-func runS(s *S_1To1.Init) S_1To1.End {
+func runS(s *S_1.Init) S_1.End {
 	data := []int{ 2, 3, 5, 7, 11, 13, 17, 19, 23 }
 	pay := data[0:s.Ept.K]
 
 	for z := 0; z < 3; z++ {
-		s = s.W_1ToK_Scatter_A(pay).
-		      W_1ToK_Scatter_B(pay).
-		      W_1ToK_Gather_C(pay)
+		s = s.W_1toK_Scatter_A(pay).
+		      W_1toK_Scatter_B(pay).
+		      W_1toK_Gather_C(pay)
 		fmt.Println("S gathered C:", pay)
 	}
-	s4 := s.W_1ToK_Scatter_A(pay).
-	        W_1ToK_Scatter_D(pay)
+	s4 := s.W_1toK_Scatter_A(pay).
+	        W_1toK_Scatter_D(pay)
 	fmt.Println("S scattered D:", pay)
 
-	end := s4.W_1ToK_Gather_E(pay)
+	end := s4.W_1toK_Gather_E(pay)
 	fmt.Println("S gathered E:", pay)
 	return *end
 }
 
-func client(wg *sync.WaitGroup, K int, self int) *W_1ToK.End {
+func client(wg *sync.WaitGroup, K int, self int) *W_1toK.End {
 	P1 := Proto1.New()
-	W := P1.New_W_1ToK(K, self)
+	W := P1.New_W_1toK(K, self)
 	req := tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(PORT+self))
-	W.S_1To1_Dial(1, req)
+	W.S_1to1_Dial(1, req)
 	end := W.Run(runW)
 	wg.Done()
 	return end
 }
 
-func runW(w *W_1ToK.Init) W_1ToK.End {
+func runW(w *W_1toK.Init) W_1toK.End {
 	pay := make([]int, 1)
 	var x int
 	for {
-		w2 := w.S_1To1_Gather_A(pay)
+		w2 := w.S_1to1_Gather_A(pay)
 
 		/*
 		select {
-		case w3 := <-w2.S_1To1_Recv_B(&x):
+		case w3 := <-w2.S_1to1_Recv_B(&x):
 			fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received B:", x)
-			w = w3.S_1To1_Scatter_C(pay)
-		case w4 := <-w2.S_1To1_Recv_D(&x):
+			w = w3.S_1to1_Scatter_C(pay)
+		case w4 := <-w2.S_1to1_Recv_D(&x):
 			fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received D:", x)
-			end := w4.S_1To1_Scatter_E(pay)
+			end := w4.S_1to1_Scatter_E(pay)
 			return *end
 		}
 		/*/
-		switch c := w2.S_1To1_Branch().(type) {
-		case *W_1ToK.B: 
+		switch c := w2.S_1to1_Branch().(type) {
+		case *W_1toK.B: 
 			w3 := c.Recv_B(&x)
 			fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received B:", x)
-			w = w3.S_1To1_Scatter_C(pay)
-		case *W_1ToK.D: 
+			w = w3.S_1to1_Scatter_C(pay)
+		case *W_1toK.D: 
 			w4 := c.Recv_D(&x)
 			fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received D:", x)
-			end := w4.S_1To1_Scatter_E(pay) 
+			end := w4.S_1to1_Scatter_E(pay) 
 			return *end
 		}
 		//*/

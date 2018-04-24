@@ -19,9 +19,15 @@ type <go> "TwoBuyer.Date" from "scrib/twobuyer/TwoBuyer/TwoBuyer/types.go" as Da
 // endpoint params as fields -- done
 // (extra Run/Foreach args?  e.g., "context", foreach indices, etc.) -- cf. Pget, req.Head()
 
+// sig
 // foreach
 // deleg
 // Pget
+// families
+// pair/pipe
+// Ring
+// multidim
+// Mesh
 
 
 global protocol Proto1(role S, role W)

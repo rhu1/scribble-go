@@ -14,6 +14,8 @@ import (
 	"github.com/rhu1/scribble-go-runtime/runtime/transport/tcp"
 
 	"github.com/rhu1/scribble-go-runtime/test/foo/foo10/Foo10/Proto1"
+	S_1 "github.com/rhu1/scribble-go-runtime/test/foo/foo10/Foo10/Proto1/S_1to1"
+	W_1 "github.com/rhu1/scribble-go-runtime/test/foo/foo10/Foo10/Proto1/W_1to1"
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 
@@ -25,49 +27,47 @@ func main() {
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
 
-	go serverCode(wg)
+	go server(wg)
 
-	time.Sleep(100 * time.Millisecond) //2017/12/11 11:21:40 cannot connect to 127.0.0.1:8891: dial tcp 127.0.0.1:8891: connectex: No connection could be made because the target machine actively refused it.
+	time.Sleep(100 * time.Millisecond)
 
-	go clientCode(wg)
+	go client(wg)
 
 	wg.Wait()
 }
 
-func serverCode(wg *sync.WaitGroup) *Proto1.Proto1_S_1To1_End {
-	P1 := Proto1.NewProto1()
-
-	S := P1.NewProto1_S_1To1(1)
-	conn := tcp.NewAcceptor(strconv.Itoa(PORT))
-	/*if err != nil {
-		log.Fatalf("failed to create connection to W %d: %v", i, err)
-	}*/
-	S.Accept(P1.W, 1, conn)
-	s1 := S.Init()
-	var end *Proto1.Proto1_S_1To1_End
-
-	end = s1.Split_W_1To1_a(1234, util.Copy)
-	fmt.Println("S sent:", 1234)
-
+func server(wg *sync.WaitGroup) *S_1.End {
+	P1 := Proto1.New()
+	S := P1.New_S_1to1(1)
+	acc := tcp.NewAcceptor(strconv.Itoa(PORT))
+	S.W_1to1_Accept(1, acc)
+	end := S.Run(runS)
 	wg.Done()
 	return end
 }
 
-func clientCode(wg *sync.WaitGroup) *Proto1.Proto1_W_1To1_End {
-	P1 := Proto1.NewProto1()
+func runS(s *S_1.Init) S_1.End {
+	//pay := []string{"abc"}
+	pay := [][]string{[]string{"abc", "def"}}
+	end := s.W_1to1_Scatter_A(pay)
+	fmt.Println("S scattered:", pay)
+	return *end
+}
 
-	W := P1.NewProto1_W_1To1(1)
-	conn := tcp.NewConnection(util.LOCALHOST, strconv.Itoa(PORT))
-	W.Request(P1.S, 1, conn)
-	/*if err != nil {
-		log.Fatalf("failed to create connection to Auctioneer: %v", err)
-	}*/
-	var w1 *Proto1.Proto1_W_1To1_1 = W.Init()
-
-	var x int
-	end := w1.Reduce_S_1To1_a(&x, util.Sum)
-	fmt.Println("W received:", x)
-
+func client(wg *sync.WaitGroup) *W_1.End {
+	P1 := Proto1.New()
+	W := P1.New_W_1to1(1)
+	req := tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(PORT))
+	W.S_1to1_Dial(1, req)
+	end := W.Run(runW)
 	wg.Done()
 	return end
+}
+
+func runW(w *W_1.Init) W_1.End {
+	//pay := make([]string, 1)	
+	pay := make([][]string, 1)	
+	end := w.S_1to1_Gather_A(pay)
+	fmt.Println("W gathered:", pay)
+	return *end
 }
