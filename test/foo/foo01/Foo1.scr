@@ -19,13 +19,20 @@ type <go> "TwoBuyer.Date" from "scrib/twobuyer/TwoBuyer/TwoBuyer/types.go" as Da
 // endpoint params as fields -- done
 // (extra Run/Foreach args?  e.g., "context", foreach indices, etc.) -- cf. Pget, req.Head()
 
-// sig
+// sig -- custom message formatting
 // foreach
 // deleg
 // Pget
 // families
+
+// errors
+// linearity
+
 // pair/pipe
 // Ring
+
+// state chan prealloc/reuse
+
 // multidim
 // Mesh
 
