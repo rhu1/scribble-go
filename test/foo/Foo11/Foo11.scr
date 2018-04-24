@@ -11,8 +11,19 @@ module Foo11;
 type <go> "int" from "..." as int;
 
 
+// TODO
 global protocol Proto1(role S, role W)
 {
-	(int) from S[1,1] to W[1,K];  // XXX -- Go API gen needs message ID with uppercase first letter
-	(int) from W[1,K] to S[1,1];
+	//(int) from S[1,1] to W[1,K];  // XXX -- Go API gen needs message ID with uppercase first letter
+
+	A() from S[1,1] to W[1,K];
+	B() from W[1,K] to S[1,1];
+	choice at A
+	{
+		C() from S[1,1] to W[1,K];
+	}	
+	or
+	{
+		D() from S[1,1] to W[1,K];
+	}
 }
