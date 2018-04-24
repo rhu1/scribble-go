@@ -79,15 +79,15 @@ func client(wg *sync.WaitGroup, K int, self int) *W_1ToK.End {
 func runW(w *W_1ToK.Init) W_1ToK.End {
 	var x int
 	for {
-		
-		/*select {
-		case w1 = <-w1.Recv_S_1To1_a(&x):
-			fmt.Println("W got a:", self, x)
-		case end := <-w1.Recv_S_1To1_b(&x):
-			fmt.Println("W got b:", self, x)
-			return end
-		}*/
-
+		//*
+		select {
+		case w = <-w.S_1To1_Recv_A(&x):
+			fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received A:", x)
+		case end := <-w.S_1To1_Recv_B(&x):
+			fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received B:", x)
+			return *end
+		}
+		/*/
 		switch c := w.S_1To1_Branch().(type) {
 		case *W_1ToK.A: 
 			w = c.Recv_A(&x)
@@ -97,5 +97,6 @@ func runW(w *W_1ToK.Init) W_1ToK.End {
 			fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received B:", x)
 			return *end
 		}
+		//*/
 	}
 }

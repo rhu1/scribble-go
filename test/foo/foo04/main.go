@@ -90,16 +90,16 @@ func client(wg *sync.WaitGroup, K int, self int) *W_1ToK.End {
 
 func runW(w *W_1ToK.Init) W_1ToK.End {
 	var end *W_1ToK.End
-	data := make([]int, 1)
-	w2 := w.S_1To1_Gather_A(data)
-	//fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received A:", data)
+	pay := make([]int, 1)
+	w2 := w.S_1To1_Gather_A(pay)
+	//fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received A:", pay)
 
 	var x int 
 	switch c := w2.S_1To1_Branch().(type) {
 	case *W_1ToK.B: 
 		w3 := c.Recv_B(&x)
 		fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received B:", x)
-		end = w3.S_1To1_Scatter_C(data)
+		end = w3.S_1To1_Scatter_C(pay)
 	case *W_1ToK.D: 
 		end = c.Recv_D(&x)
 		fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received D:", x)

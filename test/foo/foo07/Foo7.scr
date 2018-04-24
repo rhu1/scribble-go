@@ -1,5 +1,5 @@
 //Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
-//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/foo/foo7/Foo7.scr -d test/foo/foo7/ -param Proto1 -param-api S
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/foo/foo07/Foo7.scr -d test/foo/foo07/ -param Proto1 -param-api github.com/rhu1/scribble-go-runtime/test/foo/foo07/Foo7 S
 
 
 // http://sandbox.kidstrythisathome.com/erdos/
@@ -11,8 +11,8 @@ module Foo7;
 type <go> "[]byte" from "..." as bates;
 
 
-global protocol Proto1(role S(n), role W(n))
+global protocol Proto1(role S, role W)
 {
-	norman(bates) from S[1..1] to W[1..n];
-	mum(bates) from W[1..n] to S[1..1];
+	Norman(bates) from S[1,1] to W[1,K];
+	Mother(bates) from W[1,K] to S[1,1];
 }

@@ -88,8 +88,8 @@ func clientCode(wg *sync.WaitGroup, K int, self int) *W_1ToK.End {
 }
 
 func runW(w *W_1ToK.Init) W_1ToK.End {
-	data := make([]int, 1)
-	end := w.S_1To1_Gather_A(data)
-	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") gathered:", data)
+	pay := make([]int, 1)
+	end := w.S_1To1_Gather_A(pay)
+	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") gathered:", pay)
 	return *end
 }

@@ -1,6 +1,6 @@
 //rhu@HZHL4 ~/code/go
-//$ go install github.com/rhu1/scribble-go-runtime/test/foo/foo6
-//$ bin/foo6.exe
+//$ go install github.com/rhu1/scribble-go-runtime/test/foo/foo06
+//$ bin/foo06.exe
 
 package main
 
@@ -11,11 +11,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rhu1/scribble-go-runtime/runtime/transport"
+	//"github.com/rhu1/scribble-go-runtime/runtime/transport"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport/tcp"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport/shm"
 
-	"github.com/rhu1/scribble-go-runtime/test/foo/foo6/Foo6/Proto1"
+	"github.com/rhu1/scribble-go-runtime/test/foo/foo06/Foo6/Proto1"
+	"github.com/rhu1/scribble-go-runtime/test/foo/foo06/Foo6/Proto1/S_1To1"
+	"github.com/rhu1/scribble-go-runtime/test/foo/foo06/Foo6/Proto1/W_1ToK"
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 
@@ -29,87 +31,94 @@ const PORT = 8888
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	n := 2
+	K := 3
 
 	wg := new(sync.WaitGroup)
-	wg.Add(n + 1)
+	wg.Add(K + 1)
 
-	as := make([]transport.Transport, n)
-	for i := 1; i <= n; i++ {
-		as[i-1] = tcp.NewAcceptor(strconv.Itoa(PORT+i))
-		//as[i-1] = shm.NewConnector()
-	}
-	go serverCode(wg, n, as)
+	go server(wg, K)
 
 	time.Sleep(100 * time.Millisecond)
 
-	for i := 1; i <= n; i++ {
-		conn := tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(PORT+i))
-		//conn := as[i-1]
-		go clientCode(wg, n, i, conn)
+	for j := 1; j <= K; j++ {
+		go client(wg, K, j)
 	}
 
 	wg.Wait()
 }
 
-func serverCode(wg *sync.WaitGroup, n int, conns []transport.Transport) *Proto1.Proto1_S_1To1_End {
-	P1 := Proto1.NewProto1()
-
-	S := P1.NewProto1_S_1To1(n, 1)
-	for i := 1; i <= n; i++ {
-		//S.Accept(P1.W, i, util.LOCALHOST, strconv.Itoa(PORT+i))
-		//conn := tcp.NewAcceptor(strconv.Itoa(PORT+i))
-		//conn := shm.NewConnector()
-		S.Accept(P1.W, i, conns[i-1])
+func server(wg *sync.WaitGroup, K int) *S_1To1.End {
+	P1 := Proto1.New()
+	S := P1.New_S_1To1(K, 1)
+	as := make([]tcp.ConnCfg, K)
+	for j := 1; j <= K; j++ {
+		as[j-1] = tcp.NewAcceptor(strconv.Itoa(PORT+j))
 	}
-	s1 := S.Init()
-	var end *Proto1.Proto1_S_1To1_End
-
-	var xs []int
-	for z := 0; z < 3; z++ {
-		s2 := s1.Split_W_1Ton_a(1, util.Copy)
-		s1 = s2.Split_W_1Ton_b(2, util.Copy).Recv_W_1Ton_c(&xs)
-		fmt.Println("S got c:", xs)
+	for j := 1; j <= K; j++ {
+		S.W_1ToK_Accept(j, as[j-1])
 	}
-	s4 := s1.Split_W_1Ton_a(1, util.Copy)
-	s5 := s4.Split_W_1Ton_d(4, util.Copy)
-	fmt.Println("S sent d:")
-
-	end = s5.Recv_W_1Ton_e(&xs)
-	fmt.Println("S got e:", xs)
-
+	end := S.Run(runS)
 	wg.Done()
 	return end
 }
 
-func clientCode(wg *sync.WaitGroup, n int, self int, conn transport.Transport) *Proto1.Proto1_W_1Ton_End {
-	P1 := Proto1.NewProto1()
+func runS(s *S_1To1.Init) S_1To1.End {
+	data := []int{ 2, 3, 5, 7, 11, 13, 17, 19, 23 }
+	pay := data[0:s.Ept.K]
 
-	W := P1.NewProto1_W_1Ton(1, self)
-	//W.Connect(P1.S, 1, "127.0.0.1", strconv.Itoa(PORT+self))
-	//conn := tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(PORT+self))
-	//conn := shm.NewConnector()
-	W.Request(P1.S, 1, conn)
-	w1 := W.Init()
-	var end *Proto1.Proto1_W_1Ton_End
-
-	var xs []int
-	var x int
-	for b := true; b; {
-		w2 := w1.Recv_S_1To1_a(&xs)
-		select {
-		case w3 := <-w2.Recv_S_1To1_b(&x):
-			fmt.Println("W got b:", self, x)
-			w1 = w3.Split_S_1To1_c(3, util.Copy)
-		case w5 := <-w2.Recv_S_1To1_d(&x):
-			fmt.Println("W got d:", self, x)
-			end = w5.Split_S_1To1_e(5, util.Copy)
-			fmt.Println("W sent e:", self)
-			b = false
-		}
+	for z := 0; z < 3; z++ {
+		s = s.W_1ToK_Scatter_A(pay).
+		      W_1ToK_Scatter_B(pay).
+		      W_1ToK_Gather_C(pay)
+		fmt.Println("S gathered C:", pay)
 	}
-	fmt.Println("W end:", self)
+	s4 := s.W_1ToK_Scatter_A(pay).
+	        W_1ToK_Scatter_D(pay)
+	fmt.Println("S scattered D:", pay)
 
+	end := s4.W_1ToK_Gather_E(pay)
+	fmt.Println("S gathered E:", pay)
+	return *end
+}
+
+func client(wg *sync.WaitGroup, K int, self int) *W_1ToK.End {
+	P1 := Proto1.New()
+	W := P1.New_W_1ToK(K, self)
+	req := tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(PORT+self))
+	W.S_1To1_Dial(1, req)
+	end := W.Run(runW)
 	wg.Done()
 	return end
+}
+
+func runW(w *W_1ToK.Init) W_1ToK.End {
+	pay := make([]int, 1)
+	var x int
+	for {
+		w2 := w.S_1To1_Gather_A(pay)
+
+		/*
+		select {
+		case w3 := <-w2.S_1To1_Recv_B(&x):
+			fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received B:", x)
+			w = w3.S_1To1_Scatter_C(pay)
+		case w4 := <-w2.S_1To1_Recv_D(&x):
+			fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received D:", x)
+			end := w4.S_1To1_Scatter_E(pay)
+			return *end
+		}
+		/*/
+		switch c := w2.S_1To1_Branch().(type) {
+		case *W_1ToK.B: 
+			w3 := c.Recv_B(&x)
+			fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received B:", x)
+			w = w3.S_1To1_Scatter_C(pay)
+		case *W_1ToK.D: 
+			w4 := c.Recv_D(&x)
+			fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received D:", x)
+			end := w4.S_1To1_Scatter_E(pay) 
+			return *end
+		}
+		//*/
+	}
 }

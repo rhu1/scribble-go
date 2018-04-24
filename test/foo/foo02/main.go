@@ -76,10 +76,10 @@ func client(wg *sync.WaitGroup, K int, self int) *W_1ToK.End {
 }
 
 func runW(w *W_1ToK.Init) W_1ToK.End {
-	data := make([]int, 1)
-	w2 := w.S_1To1_Gather_A(data)
-	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") gathered: ", data)
-	end := w2.S_1To1_Scatter_B(data[0:1])
-	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") scattered: ", data)
+	pay := make([]int, 1)
+	w2 := w.S_1To1_Gather_A(pay)
+	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") gathered: ", pay)
+	end := w2.S_1To1_Scatter_B(pay[0:1])
+	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") scattered: ", pay)
 	return *end
 }

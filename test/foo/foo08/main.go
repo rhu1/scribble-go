@@ -1,6 +1,6 @@
 //rhu@HZHL4 ~/code/go
-//$ go install github.com/rhu1/scribble-go-runtime/test/foo8
-//$ bin/foo8.exe
+//$ go install github.com/rhu1/scribble-go-runtime/test/foo08
+//$ bin/foo08.exe
 
 package main
 
@@ -11,11 +11,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rhu1/scribble-go-runtime/runtime/transport"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport/tcp"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport/shm"
 
-	"github.com/rhu1/scribble-go-runtime/test/foo/foo8/Foo8/Proto1"
+	"github.com/rhu1/scribble-go-runtime/test/foo/foo08/Foo8/Proto1"
+	S_1    "github.com/rhu1/scribble-go-runtime/test/foo/foo08/Foo8/Proto1/S_1to1"
+	W_1    "github.com/rhu1/scribble-go-runtime/test/foo/foo08/Foo8/Proto1/W_1to1and1toK"
+	W_2toK "github.com/rhu1/scribble-go-runtime/test/foo/foo08/Foo8/Proto1/W_1toK_not_1to1"
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 
@@ -29,81 +31,78 @@ const PORT = 8888
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	n := 3
+	K := 3
 
 	wg := new(sync.WaitGroup)
-	wg.Add(n + 1)
+	wg.Add(K + 1)
 
-	as := make([]transport.Transport, n)
-	for i := 1; i <= n; i++ {
-		as[i-1] = tcp.NewAcceptor(strconv.Itoa(PORT+i))
-		//as[i-1] = shm.NewConnector()
-	}
-	go serverCode(wg, n, as)
+	go server(wg, K)
 
 	time.Sleep(100 * time.Millisecond)
 
-	conn := tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(PORT+1))
-	go W_1_Code(wg, n, conn)
-
-	for i := 2; i <= n; i++ {
-		conn = tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(PORT+i))
-		//conn := as[i-1]
-		go W_2Ton_Code(wg, n, i, conn)
+	go W1(wg, K, 1)
+	for j := 2; j <= K; j++ {
+		go W2K(wg, K, j)
 	}
 
 	wg.Wait()
 }
 
-func serverCode(wg *sync.WaitGroup, n int, conns []transport.Transport) *Proto1.Proto1_S_1To1_End {
-	P1 := Proto1.NewProto1()
-
-	S := P1.NewProto1_S_1To1(n, 1)
-	for i := 1; i <= n; i++ {
-		S.Accept(P1.W, i, conns[i-1])
+func server(wg *sync.WaitGroup, K int) *S_1.End {
+	P1 := Proto1.New()
+	S := P1.New_S_1to1(K, 1)
+	as := make([]tcp.ConnCfg, K)
+	for j := 1; j <= K; j++ {
+		as[j-1] = tcp.NewAcceptor(strconv.Itoa(PORT+j))
 	}
-	s1 := S.Init()
-	var end *Proto1.Proto1_S_1To1_End
-
-	//var bs []byte
-	s2 := s1.Split_W_1To1_a(1234, util.Copy)
-	end = s2.Split_W_1Ton_b(5678, util.Copy)
-	//fmt.Println("S received:", bs)
-
+	S.W_1to1and1toK_Accept(1, as[0])
+	for j := 2; j <= K; j++ {
+		S.W_1toK_not_1to1_Accept(j, as[j-1])
+	}
+	end := S.Run(runS)
 	wg.Done()
 	return end
 }
 
-func W_1_Code(wg *sync.WaitGroup, n int, conn transport.Transport) *Proto1.Proto1_W_1To1and1Ton_End {
-	P1 := Proto1.NewProto1()
+func runS(s *S_1.Init) S_1.End {
+	data := []int{ 2, 3, 5, 7, 11, 13, 17, 19, 23, 29 }
+	end := s.W_1to1_Scatter_A(data[0:1]).
+	         W_1toK_Scatter_B(data[1:s.Ept.K+1])
+	return *end
+}
 
-	W := P1.NewProto1_W_1To1and1Ton(1, 1)
-	W.Request(P1.S, 1, conn)
-	w1 := W.Init()
-	var end *Proto1.Proto1_W_1To1and1Ton_End
-
-	var x int
-	w2 := w1.Reduce_S_1To1_a(&x, util.UnaryReduce)
-	fmt.Println("W" + strconv.Itoa(1) + ":", x)
-	end = w2.Reduce_S_1To1_b(&x, util.UnaryReduce)
-	fmt.Println("W" + strconv.Itoa(1) + ":", x)
-
+func W1(wg *sync.WaitGroup, K int, self int) *W_1.End {
+	P1 := Proto1.New()
+	W := P1.New_W_1to1and1toK(K, self)
+	req := tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(PORT+self))
+	W.S_1to1_Dial(1, req)
+	end := W.Run(runW1)
 	wg.Done()
 	return end
 }
 
-func W_2Ton_Code(wg *sync.WaitGroup, n int, self int, conn transport.Transport) *Proto1.Proto1_W_1Ton_not_1To1_End {
-	P1 := Proto1.NewProto1()
+func runW1(w *W_1.Init) W_1.End {
+	pay := make([]int, 1)
+	w2 := w.S_1to1_Gather_A(pay)
+	fmt.Println("W(" + strconv.Itoa(1) + ") gathered:", pay)
+	end := w2.S_1to1_Gather_B(pay)
+	fmt.Println("W(" + strconv.Itoa(1) + ") gathered:", pay)
+	return *end
+}
 
-	W := P1.NewProto1_W_1Ton_not_1To1(1, self)
-	W.Request(P1.S, 1, conn)
-	w1 := W.Init()
-	var end *Proto1.Proto1_W_1Ton_not_1To1_End
-
-	var x int
-	end = w1.Reduce_S_1To1_b(&x, util.UnaryReduce)
-	fmt.Println("W" + strconv.Itoa(self) + ":", x)
-
+func W2K(wg *sync.WaitGroup, K int, self int) *W_2toK.End {
+	P1 := Proto1.New()
+	W := P1.New_W_1toK_not_1to1(K, self)
+	req := tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(PORT+self))
+	W.S_1to1_Dial(1, req)
+	end := W.Run(runW2K)
 	wg.Done()
 	return end
+}
+
+func runW2K(w *W_2toK.Init) W_2toK.End {
+	pay := make([]int, 1)
+	end := w.S_1to1_Gather_B(pay)
+	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") gathered:", pay)
+	return *end
 }

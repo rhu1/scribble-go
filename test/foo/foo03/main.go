@@ -85,23 +85,23 @@ func client(wg *sync.WaitGroup, K int, self int) *W_1ToK.End {
 
 func runW(w *W_1ToK.Init) W_1ToK.End {
 	var end *W_1ToK.End
-	var data int
+	var x int
 
 	/*/
 	select {
-	case end = <-w.S_1To1_Recv_A(&data):
-		fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received A:", data)
-	case end = <-w.S_1To1_Recv_B(&data):
-		fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received B:", data)
+	case end = <-w.S_1To1_Recv_A(&x):
+		fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received A:", x)
+	case end = <-w.S_1To1_Recv_B(&x):
+		fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received B:", x)
 	}
 	/*/
 	switch c := w.S_1To1_Branch().(type) {
 	case *W_1ToK.A: 
-		end = c.Recv_A(&data)
-		fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received A:", data)
+		end = c.Recv_A(&x)
+		fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received A:", x)
 	case *W_1ToK.B: 
-		end = c.Recv_B(&data)
-		fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received B:", data)
+		end = c.Recv_B(&x)
+		fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received B:", x)
 	}
 	//*/
 
