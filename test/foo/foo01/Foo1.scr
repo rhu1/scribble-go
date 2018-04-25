@@ -14,12 +14,12 @@ type <go> "TwoBuyer.Address" from "scrib/twobuyer/TwoBuyer/TwoBuyer/types.go" as
 type <go> "TwoBuyer.Date" from "scrib/twobuyer/TwoBuyer/TwoBuyer/types.go" as Date;*/
 
 // scrib surface syntax -- done
-// internalise dial/accept peers -- part done -- TODO: full "nested" API
+// internalise dial/accept peers -- partly done -- TODO: full "nested" API (as an extra option)
 // remove proto sig param decls -- done
 // endpoint params as fields -- done
 // (extra Run/Foreach args?  e.g., "context", foreach indices, etc.) -- cf. Pget, req.Head()
 
-// sig -- custom message formatting
+// sig -- partly done -- TODO: custom message formatting (bypass default deserialization type problems)
 // foreach
 // deleg
 // Pget

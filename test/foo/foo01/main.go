@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	//"github.com/rhu1/scribble-go-runtime/runtime/session"
+	"github.com/rhu1/scribble-go-runtime/runtime/session"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport/tcp"
 
 	"github.com/rhu1/scribble-go-runtime/test/foo/foo01/Foo1/Proto1"
@@ -57,7 +57,7 @@ func serverCode(wg *sync.WaitGroup, K int) *S_1.End {
 		if err != nil {
 			log.Fatalf("failed to create connection to W %d: %v", i, err)
 		}*/
-		S.W_1toK_Accept(j, as[j-1])
+		S.W_1toK_Accept(j, as[j-1], new(session.ScribDefaultFormatter))
 	}
 	end := S.Run(runS)
 	wg.Done()
@@ -77,7 +77,7 @@ func clientCode(wg *sync.WaitGroup, K int, self int) *W_1toK.End {
 	P1 := Proto1.New()
 	W := P1.New_W_1toK(K, self)  // Endpoint needs n to check self
 	req := tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(PORT+self))
-	W.S_1to1_Dial(1, req)
+	W.S_1to1_Dial(1, req, new(session.ScribDefaultFormatter))
 	/*err := session.Connect(W, P1.S.Name(), 1, conn)
 	if err != nil {
 		log.Fatalf("failed to create connection to Auctioneer: %v", err)

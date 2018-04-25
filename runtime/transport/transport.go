@@ -51,6 +51,9 @@ type Transport interface {
 type Channel interface {
 	io.Closer
 
+	ScribWrite(bs []byte) error
+	ScribRead(bs *[]byte) error
+
 	// Send sends a value val to the channel.
 	// The value is transformed and transmitted over the Transport.
 	Send(val interface{}) error

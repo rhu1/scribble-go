@@ -221,6 +221,14 @@ func (c *Conn) Write(p []byte) (n int, err error) {
 	return n, err
 }
 
+func (c *Conn) ScribWrite(bs []byte) error {
+	return nil
+}
+
+func (c *Conn) ScribRead(bs *[]byte) error {
+	return nil	
+}
+
 // Close closes the underlying TCP connection.
 func (c *Conn) Close() error {
 	if c.bufw.Available() > 0 {

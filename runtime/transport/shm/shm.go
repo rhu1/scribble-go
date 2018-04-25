@@ -222,6 +222,14 @@ func (c *IOChan) Recv(ptr interface{}) error {
 	return nil
 }
 
+func (c *IOChan) ScribWrite(bs []byte) error {
+	return nil	
+}
+
+func (c *IOChan) ScribRead(bs *[]byte) error {
+	return nil	
+}
+
 // ifaceToConcrete converts an interface to its concrete (pointer) value
 // based on the internals of the Go interface implementation.
 // This conversion skips the first 1-word of iftable and

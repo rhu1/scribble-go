@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	//"github.com/rhu1/scribble-go-runtime/runtime/transport"
+	"github.com/rhu1/scribble-go-runtime/runtime/session"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport/tcp"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport/shm"
 
@@ -55,7 +55,7 @@ func server(wg *sync.WaitGroup, K int) *S_1.End {
 		as[j-1] = tcp.NewAcceptor(strconv.Itoa(PORT+j))
 	}
 	for j := 1; j <= K; j++ {
-		S.W_1toK_Accept(j, as[j-1])
+		S.W_1toK_Accept(j, as[j-1], new(session.ScribDefaultFormatter))
 	}
 	end := S.Run(runS)
 	wg.Done()
@@ -85,7 +85,7 @@ func client(wg *sync.WaitGroup, K int, self int) *W_1toK.End {
 	P1 := Proto1.New()
 	W := P1.New_W_1toK(K, self)
 	req := tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(PORT+self))
-	W.S_1to1_Dial(1, req)
+	W.S_1to1_Dial(1, req, new(session.ScribDefaultFormatter))
 	end := W.Run(runW)
 	wg.Done()
 	return end
