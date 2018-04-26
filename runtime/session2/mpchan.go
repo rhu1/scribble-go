@@ -41,6 +41,44 @@ func NewMPChan(self int, rolenames []string) *MPChan {
 	}
 }
 
+func (ep *MPChan) ISend(rolename string, i int, msg interface{}) error {
+	return ep.MSend(rolename, i, wrapper{Msg:msg})
+}
+
+func (ep *MPChan) IRecv(rolename string, i int, msg *interface{}) error {
+	var w ScribMessage
+	err := ep.MRecv(rolename, i, &w)
+	if err == nil {
+		*msg = w.(wrapper).Msg
+	}
+	return err
+}
+
+func (ep *MPChan) MSend(rolename string, i int, msg ScribMessage) error {
+	return ep.Fmts[rolename][i].Serialize(msg)
+}
+
+func (ep *MPChan) MRecv(rolename string, i int, msg *ScribMessage) error {
+	err := ep.Fmts[rolename][i].Deserialize(msg)
+	return err
+}
+
+func (e *MPChan) Close() error {
+	var err error
+	for _, cs := range e.Conns {
+		for _, c := range cs {
+			if e := c.Close(); err == nil && e != nil {
+				err = e	
+			}
+		}
+	}
+	return err
+}
+
+func (e *MPChan) CheckConnection() {
+	//...TODO
+}
+
 /*// Or could make ScribMessage wrappers...
 func (ep *MPChan) SendString(rolename string, i int, msg string) error {
 	return ep.SendBytes(rolename, i, []byte(msg))
@@ -79,41 +117,3 @@ func (ep *MPChan) RecvBytes(rolename string, i int, bs *[]byte) error {
 	}
 	return err
 }*/
-
-func (ep *MPChan) ISend(rolename string, i int, msg interface{}) error {
-	return ep.MSend(rolename, i, wrapper{Msg:msg})
-}
-
-func (ep *MPChan) IRecv(rolename string, i int, msg *interface{}) error {
-	var w ScribMessage
-	err := ep.MRecv(rolename, i, &w)
-	if err == nil {
-		*msg = w.(wrapper).Msg
-	}
-	return err
-}
-
-func (ep *MPChan) MSend(rolename string, i int, msg ScribMessage) error {
-	return ep.Fmts[rolename][i].Serialize(msg)
-}
-
-func (ep *MPChan) MRecv(rolename string, i int, msg *ScribMessage) error {
-	err := ep.Fmts[rolename][i].Deserialize(msg)
-	return err
-}
-
-func (e *MPChan) Close() error {
-	var err error
-	for _, cs := range e.Conns {
-		for _, c := range cs {
-			if e := c.Close(); err == nil && e != nil {
-				err = e	
-			}
-		}
-	}
-	return err
-}
-
-func (e *MPChan) CheckConnection() {
-	//...TODO
-}

@@ -67,12 +67,13 @@ func runS(s *S_1.Init) S_1.End {
 	rnd := rand.New(seed)
 
 	var end *S_1.End
-	data := []int{ 2, 3, 5, 7, 11 }
-	pay := data[0:s.Ept.K]
+	data := []int{ 2, 3, 5, 7, 11, 13, 17, 19, 23 }
 	if rnd.Intn(2) < 1 {
+		pay := data[0:s.Ept.K]
 		end = s.W_1toK_Scatter_A(pay)
 		fmt.Println("S scattered A:", pay)
 	} else {
+		pay := data[s.Ept.K:s.Ept.K+s.Ept.K]
 		end = s.W_1toK_Scatter_B(pay)
 		fmt.Println("S scattered B:", pay)
 	}
