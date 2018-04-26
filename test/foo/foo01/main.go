@@ -55,6 +55,7 @@ func serverCode(wg *sync.WaitGroup, K int) *S_1.End {
 		if err != nil {
 			panic(err)
 		}
+		defer as[j-1].Close()
 	}
 	for j := 1; j <= K; j++ {
 		/*err := session.Accept(S, P1.W.Name(), i, conn)

@@ -80,6 +80,18 @@ func (ep *Endpoint) Recv(rolename string, i int, msg *ScribMessage) error {
 	return err
 }
 
+func (e *Endpoint) Close() error {
+	var err error
+	for _, cs := range e.Conns {
+		for _, c := range cs {
+			if e := c.Close(); err == nil && e != nil {
+				err = e	
+			}
+		}
+	}
+	return err
+}
+
 func (e *Endpoint) CheckConnection() {
 	//...TODO
 }
