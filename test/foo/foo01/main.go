@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/rhu1/scribble-go-runtime/runtime/session2"
+	"github.com/rhu1/scribble-go-runtime/runtime/transport2/shm"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2/tcp"
 
 	"github.com/rhu1/scribble-go-runtime/test/foo/foo01/Foo1/Proto1"
@@ -20,12 +21,15 @@ import (
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 
+var _ = shm.Dial
+var _ = tcp.Dial
+
 const PORT = 8888
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	K := 3
+	K := 1
 
 	wg := new(sync.WaitGroup)
 	wg.Add(K + 1)
@@ -45,20 +49,24 @@ func serverCode(wg *sync.WaitGroup, K int) *S_1.End {
 	var err error
 	P1 := Proto1.New()
 	S := P1.New_S_1to1(K, 1)
-	as := make([]*tcp.TcpListener, K)
+	//as := make([]*tcp.TcpListener, K)
+	as := make([]*shm.ShmListener, K)
 	for j := 1; j <= K; j++ {
-		as[j-1], err = tcp.Listen(PORT+j)
+		as[j-1], err = shm.Listen(PORT+j)
 		if err != nil {
 			panic(err)
 		}
 		defer as[j-1].Close()
 	}
 	for j := 1; j <= K; j++ {
-		err := S.W_1toK_Accept(j, as[j-1], new(session2.GobFormatter))
+		err := S.W_1toK_Accept(j, as[j-1], 
+			//new(session2.GobFormatter))
+			new(session2.PassByPointer))
 		if err != nil {
 			panic(err)
 		}
 	}
+	fmt.Println("S ready to run")
 	end := S.Run(runS)
 	wg.Done()
 	return end
@@ -76,10 +84,13 @@ func runS(s *S_1.Init) S_1.End {
 func clientCode(wg *sync.WaitGroup, K int, self int) *W_1toK.End {
 	P1 := Proto1.New()
 	W := P1.New_W_1toK(K, self)  // Endpoint needs n to check self
-	err := W.S_1to1_Dial(1, util.LOCALHOST, PORT+self, tcp.Dial, new(session2.GobFormatter))
+	err := W.S_1to1_Dial(1, util.LOCALHOST, PORT+self,
+			//tcp.Dial, new(session2.GobFormatter))
+			shm.Dial, new(session2.PassByPointer))
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println("W(" + strconv.Itoa(W.Self) + ") ready to run")
 	end := W.Run(runW)
 	wg.Done()
 	return end

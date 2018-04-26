@@ -5,7 +5,7 @@ import (
 	//"bufio"
 	//"errors"
 	"fmt"
-	//"io"
+	"io"
 	//"log"
 	"net"
 	"strconv"
@@ -64,11 +64,18 @@ type TcpChannel struct {
 	conn net.Conn 	
 }
 
-func (c *TcpChannel) GetConn() net.Conn {
+/*func (c *TcpChannel) GetConn() net.Conn {
+	return c.conn
+}*/
+func (c *TcpChannel) GetReader() io.Reader {
 	return c.conn
 }
 
-func (c *TcpChannel) Write(bs []byte) error {
+func (c *TcpChannel) GetWriter() io.Writer {
+	return c.conn
+}
+
+/*func (c *TcpChannel) Write(bs []byte) error {
 	n, err := c.conn.Write(bs)
 	if len(bs) != n {
 		panic("[tcp] FIXME: write fully: ")	
@@ -83,7 +90,7 @@ func (c *TcpChannel) Read(bs []byte) error {
 		panic("[tcp] FIXME: read fully: ")	
 	}
 	return err
-}
+}*/
 
 func (c *TcpChannel) Close() error {
 	return c.conn.Close()

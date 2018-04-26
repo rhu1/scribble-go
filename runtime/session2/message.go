@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2"
+	"github.com/rhu1/scribble-go-runtime/runtime/transport2/shm"
 )
 
 var _ = fmt.Print
@@ -41,8 +42,8 @@ type GobFormatter struct {
 
 func (f *GobFormatter) Wrap(c transport2.BinChannel) {
 	f.c = c
-	f.enc = gob.NewEncoder(c.GetConn())
-	f.dec = gob.NewDecoder(c.GetConn())
+	f.enc = gob.NewEncoder(c.GetWriter())
+	f.dec = gob.NewDecoder(c.GetReader())
 }	
 
 func (f *GobFormatter) Serialize(m ScribMessage) error {
@@ -52,6 +53,28 @@ func (f *GobFormatter) Serialize(m ScribMessage) error {
 func (f *GobFormatter) Deserialize(m *ScribMessage) (error) {
   err := f.dec.Decode(m)  // Decode *ScribMessage
 	return err
+}
+
+type PassByPointer struct {
+	c *shm.ShmChannel
+}
+
+func (f *PassByPointer) Wrap(c transport2.BinChannel) {
+	f.c = c.(*shm.ShmChannel)
+}	
+
+func (f *PassByPointer) Serialize(m ScribMessage) error {
+	f.c.WritePointer(&m)
+	fmt.Println("Serialized: ", m)
+	return nil
+}
+
+func (f *PassByPointer) Deserialize(m *ScribMessage) (error) {
+	var ptr interface{}	
+	f.c.ReadPointer(&ptr)
+	m = ptr.(*ScribMessage)
+	fmt.Println("Deserialized: ", m, *m)
+	return nil
 }
 
 /*func (f *GobFormatter) EncodeInt(m int) error {
