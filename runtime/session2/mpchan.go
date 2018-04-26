@@ -3,6 +3,7 @@ package session2
 import (
 	"fmt"
 	//"sync"
+	"strconv"
 
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2"
 )
@@ -27,50 +28,56 @@ func NewMPChan(self int, rolenames []string) *MPChan {
 	}
 }
 
+// Or could make ScribMessage wrappers...
 func (ep *MPChan) SendString(rolename string, i int, msg string) error {
-	return ep.Fmts[rolename][i].EncodeString(msg)
+	//return ep.Fmts[rolename][i].EncodeString(msg)
+	return ep.SendBytes(rolename, i, []byte(msg))
 }
 
 func (ep *MPChan) RecvString(rolename string, i int, msg *string) error {
-	tmp, err := ep.Fmts[rolename][i].DecodeString()
+	/*tmp, err := ep.Fmts[rolename][i].DecodeString()
 	if err == nil {
 		*msg = tmp
+	}
+	return err*/
+	var bs []byte
+	err := ep.RecvBytes(rolename, i, &bs)
+	if err == nil {
+		*msg = string(bs)
 	}
 	return err
 }
 
 func (ep *MPChan) SendInt(rolename string, i int, msg int) error {
-	return ep.Fmts[rolename][i].EncodeInt(msg)
+	return ep.SendString(rolename, i, strconv.Itoa(msg))
 }
 
 func (ep *MPChan) RecvInt(rolename string, i int, msg *int) error {
-	tmp, err := ep.Fmts[rolename][i].DecodeInt()
+	var tmp string
+	err := ep.RecvString(rolename, i, &tmp)
 	if err == nil {
-		*msg = tmp
+		*msg, _ = strconv.Atoi(tmp)
+	}
+	return err
+}
+
+func (ep *MPChan) SendBytes(rolename string, i int, bs []byte) error {
+	return ep.Fmts[rolename][i].EncodeBytes(bs)
+}
+
+func (ep *MPChan) RecvBytes(rolename string, i int, bs *[]byte) error {
+	tmp, err := ep.Fmts[rolename][i].DecodeBytes()
+	if err == nil {
+		*bs = tmp
 	}
 	return err
 }
 
 func (ep *MPChan) Send(rolename string, i int, msg ScribMessage) error {
-	/*bs, err := ep.Fmts[rolename][i].ToBytes(msg)
-	if err != nil {
-		return err	
-	}
-	err = ep.Conns[rolename][i].Write(bs)
-	return err*/
 	return ep.Fmts[rolename][i].Serialize(msg)
 }
 
 func (ep *MPChan) Recv(rolename string, i int, msg *ScribMessage) error {
-	/*var bs []byte
-	var tmp *ScribMessage 
-	var err error
-	for tmp == nil && err == nil {
-		ep.Conns[rolename][i].Read(bs)
-		tmp, err = ep.Fmts[rolename][i].FromBytes(bs)
-	}
-	*msg = *tmp
-	return err*/
 	tmp, err := ep.Fmts[rolename][i].Deserialize()
 	if err == nil {
 		*msg = tmp

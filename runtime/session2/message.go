@@ -23,12 +23,12 @@ type ScribMessage interface {
 // cf. org.scribble.runtime.net.ScribMessageFormatter
 type ScribMessageFormatter interface {
 	Wrap(transport2.BinChannel) 	
-	EncodeInt(int) error
+	/*EncodeInt(int) error
 	DecodeInt() (int, error)
 	EncodeString(string) error
-	DecodeString() (string, error)
-	/*EncodeBytes([]byte) error
-	DecodeBytes() []byte, error*/
+	DecodeString() (string, error)*/
+	EncodeBytes([]byte) error
+	DecodeBytes() ([]byte, error)
 	Serialize(ScribMessage) error
 	Deserialize() (ScribMessage, error)
 	
@@ -61,7 +61,7 @@ func (f *GobFormatter) Wrap(c transport2.BinChannel) {
 	X int
 }*/
 
-func (f *GobFormatter) EncodeInt(m int) error {
+/*func (f *GobFormatter) EncodeInt(m int) error {
 	return f.enc.Encode(&m)
 }
 
@@ -79,21 +79,23 @@ func (f *GobFormatter) DecodeString() (string, error) {
 	var m string
 	err := f.dec.Decode(&m)
 	return m, err
+}*/
+
+func (f *GobFormatter) EncodeBytes(m []byte) error {
+	return f.enc.Encode(&m)
+}
+
+func (f *GobFormatter) DecodeBytes() ([]byte, error) {
+	var m []byte
+	err := f.dec.Decode(&m)
+	return m, err
 }
 
 func (f *GobFormatter) Serialize(m ScribMessage) error {
 	return f.enc.Encode(&m)  // Encode *ScribMessage
-	//return f.enc.Encode(wrapper{Msg:m})
-	//return f.enc.Encode(wrapper{Msg:&m, X:456})
 }
 
 func (f *GobFormatter) Deserialize() (ScribMessage, error) {
-  //w := new(wrapper)
-  /*w := &wrapper{}
-  err := f.dec.Decode(w)
-	fmt.Println("1111:", w.Msg, w.X)
-	return *w.Msg, err*/
-
 	var m ScribMessage
   err := f.dec.Decode(&m)  // Decode *ScribMessage
 	return m, err
