@@ -12,6 +12,7 @@ import (
 
 type ScribListener interface {
 	Accept() (BinChannel, error)
+	Close() error
 }
 
 type BinChannel interface {

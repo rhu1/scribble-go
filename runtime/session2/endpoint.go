@@ -29,6 +29,30 @@ func NewEndpoint(self int, rolenames []string) *Endpoint {
 	}
 }
 
+func (ep *Endpoint) SendString(rolename string, i int, msg string) error {
+	return ep.Fmts[rolename][i].EncodeString(msg)
+}
+
+func (ep *Endpoint) RecvString(rolename string, i int, msg *string) error {
+	tmp, err := ep.Fmts[rolename][i].DecodeString()
+	if err == nil {
+		*msg = tmp
+	}
+	return err
+}
+
+func (ep *Endpoint) SendInt(rolename string, i int, msg int) error {
+	return ep.Fmts[rolename][i].EncodeInt(msg)
+}
+
+func (ep *Endpoint) RecvInt(rolename string, i int, msg *int) error {
+	tmp, err := ep.Fmts[rolename][i].DecodeInt()
+	if err == nil {
+		*msg = tmp
+	}
+	return err
+}
+
 func (ep *Endpoint) Send(rolename string, i int, msg ScribMessage) error {
 	/*bs, err := ep.Fmts[rolename][i].ToBytes(msg)
 	if err != nil {
