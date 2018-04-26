@@ -55,7 +55,9 @@ func server(wg *sync.WaitGroup, K int) *S_1.End {
 		defer as[j-1].Close()
 	}
 	for j := 1; j <= K; j++ {
-		S.W_1toK_Accept(j, as[j-1], new(session2.GobFormatter))
+		if err = S.W_1toK_Accept(j, as[j-1], new(session2.GobFormatter)); err != nil {
+			panic(err)
+		}
 	}
 	end := S.Run(runS)
 	wg.Done()
