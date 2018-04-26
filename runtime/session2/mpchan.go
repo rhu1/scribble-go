@@ -1,14 +1,27 @@
 package session2
 
 import (
+	"encoding/gob"
 	"fmt"
 	//"sync"
-	"strconv"
+	//"strconv"
 
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2"
 )
 
 var _ = fmt.Print
+
+func init() {
+	gob.Register(wrapper{})	
+}
+
+type wrapper struct {
+	Msg interface{}
+}
+
+func (wrapper) GetOp() string {
+	return "_wrapper"	
+}
 
 type MPChan struct {
 	Fmts    map[string](map[int]ScribMessageFormatter)
@@ -28,18 +41,12 @@ func NewMPChan(self int, rolenames []string) *MPChan {
 	}
 }
 
-// Or could make ScribMessage wrappers...
+/*// Or could make ScribMessage wrappers...
 func (ep *MPChan) SendString(rolename string, i int, msg string) error {
-	//return ep.Fmts[rolename][i].EncodeString(msg)
 	return ep.SendBytes(rolename, i, []byte(msg))
 }
 
 func (ep *MPChan) RecvString(rolename string, i int, msg *string) error {
-	/*tmp, err := ep.Fmts[rolename][i].DecodeString()
-	if err == nil {
-		*msg = tmp
-	}
-	return err*/
 	var bs []byte
 	err := ep.RecvBytes(rolename, i, &bs)
 	if err == nil {
@@ -71,17 +78,27 @@ func (ep *MPChan) RecvBytes(rolename string, i int, bs *[]byte) error {
 		*bs = tmp
 	}
 	return err
+}*/
+
+func (ep *MPChan) ISend(rolename string, i int, msg interface{}) error {
+	return ep.MSend(rolename, i, wrapper{Msg:msg})
 }
 
-func (ep *MPChan) Send(rolename string, i int, msg ScribMessage) error {
+func (ep *MPChan) IRecv(rolename string, i int, msg *interface{}) error {
+	var w ScribMessage
+	err := ep.MRecv(rolename, i, &w)
+	if err == nil {
+		*msg = w.(wrapper).Msg
+	}
+	return err
+}
+
+func (ep *MPChan) MSend(rolename string, i int, msg ScribMessage) error {
 	return ep.Fmts[rolename][i].Serialize(msg)
 }
 
-func (ep *MPChan) Recv(rolename string, i int, msg *ScribMessage) error {
-	tmp, err := ep.Fmts[rolename][i].Deserialize()
-	if err == nil {
-		*msg = tmp
-	}
+func (ep *MPChan) MRecv(rolename string, i int, msg *ScribMessage) error {
+	err := ep.Fmts[rolename][i].Deserialize(msg)
 	return err
 }
 

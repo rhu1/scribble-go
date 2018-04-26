@@ -42,10 +42,6 @@ func main() {
 }
 
 func serverCode(wg *sync.WaitGroup, K int) *S_1.End {
-	/*conns :=  make([]tcp.ConnCfg, n)
-	for i := 0; i < n; i++ {
-		conns[i] = tcp.NewConnection("...", strconv.Itoa(PORT+i))
-	}*/
 	var err error
 	P1 := Proto1.New()
 	S := P1.New_S_1to1(K, 1)
@@ -58,11 +54,10 @@ func serverCode(wg *sync.WaitGroup, K int) *S_1.End {
 		defer as[j-1].Close()
 	}
 	for j := 1; j <= K; j++ {
-		/*err := session.Accept(S, P1.W.Name(), i, conn)
+		err := S.W_1toK_Accept(j, as[j-1], new(session2.GobFormatter))
 		if err != nil {
-			log.Fatalf("failed to create connection to W %d: %v", i, err)
-		}*/
-		S.W_1toK_Accept(j, as[j-1], new(session2.GobFormatter))
+			panic(err)
+		}
 	}
 	end := S.Run(runS)
 	wg.Done()
@@ -81,16 +76,10 @@ func runS(s *S_1.Init) S_1.End {
 func clientCode(wg *sync.WaitGroup, K int, self int) *W_1toK.End {
 	P1 := Proto1.New()
 	W := P1.New_W_1toK(K, self)  // Endpoint needs n to check self
-	/*req := tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(PORT+self))
-	W.S_1to1_Dial(1, req, new(session.ScribDefaultFormatter))*/
-	//W.S_1to1_Dial(1, util.LOCALHOST, strconv.Itoa(PORT+self), new(session.ScribDefaultFormatter))
-	W.S_1to1_Dial(1, util.LOCALHOST, PORT+self,
-		tcp.Dial,
-		new(session2.GobFormatter))
-	/*err := session.Connect(W, P1.S.Name(), 1, conn)
+	err := W.S_1to1_Dial(1, util.LOCALHOST, PORT+self, tcp.Dial, new(session2.GobFormatter))
 	if err != nil {
-		log.Fatalf("failed to create connection to Auctioneer: %v", err)
-	}*/
+		panic(err)
+	}
 	end := W.Run(runW)
 	wg.Done()
 	return end
