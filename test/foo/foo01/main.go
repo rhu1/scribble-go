@@ -50,7 +50,7 @@ func serverCode(wg *sync.WaitGroup, K int) *S_1.End {
 	S := P1.New_S_1to1(K, 1)
 	as := make([]tcp.ConnCfg, K)
 	for j := 1; j <= K; j++ {
-		as[j-1] = tcp.NewAcceptor(strconv.Itoa(PORT+j))
+		as[j-1] = tcp.Listen(strconv.Itoa(PORT+j))
 	}
 	for j := 1; j <= K; j++ {
 		/*err := session.Accept(S, P1.W.Name(), i, conn)
@@ -76,8 +76,9 @@ func runS(s *S_1.Init) S_1.End {
 func clientCode(wg *sync.WaitGroup, K int, self int) *W_1toK.End {
 	P1 := Proto1.New()
 	W := P1.New_W_1toK(K, self)  // Endpoint needs n to check self
-	req := tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(PORT+self))
-	W.S_1to1_Dial(1, req, new(session.ScribDefaultFormatter))
+	/*req := tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(PORT+self))
+	W.S_1to1_Dial(1, req, new(session.ScribDefaultFormatter))*/
+	W.S_1to1_Dial(1, util.LOCALHOST, strconv.Itoa(PORT+self), new(session.ScribDefaultFormatter))
 	/*err := session.Connect(W, P1.S.Name(), 1, conn)
 	if err != nil {
 		log.Fatalf("failed to create connection to Auctioneer: %v", err)
