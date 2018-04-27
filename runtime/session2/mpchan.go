@@ -16,7 +16,7 @@ func init() {
 }
 
 type wrapper struct {
-	Msg *interface{}
+	Msg interface{}
 }
 
 //func (*wrapper) GetOp() string {
@@ -42,27 +42,35 @@ func NewMPChan(self int, rolenames []string) *MPChan {
 	}
 }
 
+// Pre: msg is pointer
 func (ep *MPChan) ISend(rolename string, i int, msg interface{}) error {
-	return ep.MSend(rolename, i, wrapper{Msg:&msg})  // CHECKME: &wrapper?
+	//fmt.Printf("ISend %v %T\n", msg, msg)
+	return ep.MSend(rolename, i, wrapper{Msg:msg})  // CHECKME: &wrapper?
 }
 
 // Could just use interface{}, but specify *interface{} as typing info
+// N.B. the "interface{}" part is itself a poiinter, cf. ISend
 func (ep *MPChan) IRecv(rolename string, i int, msg *interface{}) error {
 	var w ScribMessage
 	err := ep.MRecv(rolename, i, &w)
+	//fmt.Printf("IRecv %v %T \n", w.(wrapper).Msg, w.(wrapper).Msg)
 	if err == nil {
-		*msg = *(w.(wrapper).Msg)
+		*msg = w.(wrapper).Msg
 	}
 	return err
 }
 
 func (ep *MPChan) MSend(rolename string, i int, msg ScribMessage) error {
+	//fmt.Printf("MSend %v %T %v %T\n", msg, msg, msg.(wrapper).Msg, msg.(wrapper).Msg)
 	return ep.Fmts[rolename][i].Serialize(msg)
 }
 
 func (ep *MPChan) MRecv(rolename string, i int, msg *ScribMessage) error {
 	err := ep.Fmts[rolename][i].Deserialize(msg)
+	//fmt.Printf("MRecv %v %T %v %T\n", *msg, *msg, (*msg).(wrapper).Msg, (*msg).(wrapper).Msg)
 	return err
+//MSend {0xc0420ea080} session2.wrapper 0xc0420ea080 *string
+//MRecv {A} session2.wrapper A string  // XXX gob converts Msg pointer field to non-pointer?
 }
 
 func (e *MPChan) Close() error {

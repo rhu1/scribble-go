@@ -49,10 +49,11 @@ func serverCode(wg *sync.WaitGroup, K int) *S_1.End {
 	var err error
 	P1 := Proto1.New()
 	S := P1.New_S_1to1(K, 1)
-	//as := make([]*tcp.TcpListener, K)
-	as := make([]*shm.ShmListener, K)
+	as := make([]*tcp.TcpListener, K)
+	//as := make([]*shm.ShmListener, K)
 	for j := 1; j <= K; j++ {
-		as[j-1], err = shm.Listen(PORT+j)
+		as[j-1], err = tcp.Listen(PORT+j)
+		//as[j-1], err = shm.Listen(PORT+j)
 		if err != nil {
 			panic(err)
 		}
@@ -60,8 +61,8 @@ func serverCode(wg *sync.WaitGroup, K int) *S_1.End {
 	}
 	for j := 1; j <= K; j++ {
 		err := S.W_1toK_Accept(j, as[j-1], 
-			//new(session2.GobFormatter))
-			new(session2.PassByPointer))
+			new(session2.GobFormatter))
+			//new(session2.PassByPointer))
 		if err != nil {
 			panic(err)
 		}
@@ -85,8 +86,8 @@ func clientCode(wg *sync.WaitGroup, K int, self int) *W_1toK.End {
 	P1 := Proto1.New()
 	W := P1.New_W_1toK(K, self)  // Endpoint needs n to check self
 	err := W.S_1to1_Dial(1, util.LOCALHOST, PORT+self,
-			//tcp.Dial, new(session2.GobFormatter))
-			shm.Dial, new(session2.PassByPointer))
+			tcp.Dial, new(session2.GobFormatter))
+			//shm.Dial, new(session2.PassByPointer))
 	if err != nil {
 		panic(err)
 	}

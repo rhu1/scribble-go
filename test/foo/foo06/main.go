@@ -11,9 +11,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rhu1/scribble-go-runtime/runtime/session"
-	"github.com/rhu1/scribble-go-runtime/runtime/transport/tcp"
-	"github.com/rhu1/scribble-go-runtime/runtime/transport/shm"
+	"github.com/rhu1/scribble-go-runtime/runtime/session2"
+	"github.com/rhu1/scribble-go-runtime/runtime/transport2/tcp"
+	"github.com/rhu1/scribble-go-runtime/runtime/transport2/shm"
 
 	"github.com/rhu1/scribble-go-runtime/test/foo/foo06/Foo6/Proto1"
 	S_1 "github.com/rhu1/scribble-go-runtime/test/foo/foo06/Foo6/Proto1/S_1to1"
@@ -23,8 +23,8 @@ import (
 
 // Bypass bloody annoying Go "unused import" errors
 var _ = strconv.Itoa
-var _ = tcp.NewAcceptor
-var _ = shm.NewConnector
+var _ = tcp.Dial
+var _ = shm.Dial
 
 const PORT = 8888
 
@@ -48,14 +48,26 @@ func main() {
 }
 
 func server(wg *sync.WaitGroup, K int) *S_1.End {
+	var err error
 	P1 := Proto1.New()
 	S := P1.New_S_1to1(K, 1)
-	as := make([]tcp.ConnCfg, K)
+	as := make([]*tcp.TcpListener, K)
+	//as := make([]*shm.ShmListener, K)
 	for j := 1; j <= K; j++ {
-		as[j-1] = tcp.NewAcceptor(strconv.Itoa(PORT+j))
+		as[j-1], err = tcp.Listen(PORT+j)
+		//as[j-1], err = shm.Listen(PORT+j)
+		if err != nil {
+			panic(err)
+		}
+		defer as[j-1].Close()
 	}
 	for j := 1; j <= K; j++ {
-		S.W_1toK_Accept(j, as[j-1], new(session.ScribDefaultFormatter))
+		err := S.W_1toK_Accept(j, as[j-1], 
+			new(session2.GobFormatter))
+			//new(session2.PassByPointer))
+		if err != nil {
+			panic(err)
+		}
 	}
 	end := S.Run(runS)
 	wg.Done()
@@ -84,8 +96,12 @@ func runS(s *S_1.Init) S_1.End {
 func client(wg *sync.WaitGroup, K int, self int) *W_1toK.End {
 	P1 := Proto1.New()
 	W := P1.New_W_1toK(K, self)
-	req := tcp.NewRequestor(util.LOCALHOST, strconv.Itoa(PORT+self))
-	W.S_1to1_Dial(1, req, new(session.ScribDefaultFormatter))
+	err := W.S_1to1_Dial(1, util.LOCALHOST, PORT+self,
+			tcp.Dial, new(session2.GobFormatter))
+			//shm.Dial, new(session2.PassByPointer))
+	if err != nil {
+		panic(err)
+	}
 	end := W.Run(runW)
 	wg.Done()
 	return end
