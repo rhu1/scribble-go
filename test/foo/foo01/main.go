@@ -29,7 +29,7 @@ const PORT = 8888
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	K := 1
+	K := 3
 
 	wg := new(sync.WaitGroup)
 	wg.Add(K + 1)
@@ -66,7 +66,7 @@ func serverCode(wg *sync.WaitGroup, K int) *S_1.End {
 			panic(err)
 		}
 	}
-	fmt.Println("S ready to run")
+	//fmt.Println("S ready to run")
 	end := S.Run(runS)
 	wg.Done()
 	return end
@@ -90,7 +90,7 @@ func clientCode(wg *sync.WaitGroup, K int, self int) *W_1toK.End {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("W(" + strconv.Itoa(W.Self) + ") ready to run")
+	//fmt.Println("W(" + strconv.Itoa(W.Self) + ") ready to run")
 	end := W.Run(runW)
 	wg.Done()
 	return end

@@ -16,9 +16,10 @@ func init() {
 }
 
 type wrapper struct {
-	Msg interface{}
+	Msg *interface{}
 }
 
+//func (*wrapper) GetOp() string {
 func (wrapper) GetOp() string {
 	return "_wrapper"	
 }
@@ -42,7 +43,7 @@ func NewMPChan(self int, rolenames []string) *MPChan {
 }
 
 func (ep *MPChan) ISend(rolename string, i int, msg interface{}) error {
-	return ep.MSend(rolename, i, wrapper{Msg:msg})
+	return ep.MSend(rolename, i, wrapper{Msg:&msg})  // CHECKME: &wrapper?
 }
 
 // Could just use interface{}, but specify *interface{} as typing info
@@ -50,7 +51,7 @@ func (ep *MPChan) IRecv(rolename string, i int, msg *interface{}) error {
 	var w ScribMessage
 	err := ep.MRecv(rolename, i, &w)
 	if err == nil {
-		*msg = w.(wrapper).Msg
+		*msg = *(w.(wrapper).Msg)
 	}
 	return err
 }
