@@ -55,6 +55,7 @@ func (f *GobFormatter) Deserialize(m *ScribMessage) (error) {
 	return err
 }
 
+// FIXME: (rename?) and move to shm package
 type PassByPointer struct {
 	c *shm.ShmChannel
 }
