@@ -65,15 +65,13 @@ func (f *PassByPointer) Wrap(c transport2.BinChannel) {
 
 func (f *PassByPointer) Serialize(m ScribMessage) error {
 	f.c.WritePointer(&m)
-	fmt.Println("Serialized: ", m)
 	return nil
 }
 
-func (f *PassByPointer) Deserialize(m *ScribMessage) (error) {
+func (f *PassByPointer) Deserialize(m *ScribMessage) error {
 	var ptr interface{}	
 	f.c.ReadPointer(&ptr)
-	m = ptr.(*ScribMessage)
-	fmt.Println("Deserialized: ", m, *m)
+	*m = *(ptr.(*ScribMessage))  // CHECKME: is this copying the actual message value, or just the "interface value"?
 	return nil
 }
 

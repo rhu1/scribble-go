@@ -45,6 +45,7 @@ func (ep *MPChan) ISend(rolename string, i int, msg interface{}) error {
 	return ep.MSend(rolename, i, wrapper{Msg:msg})
 }
 
+// Could just use interface{}, but specify *interface{} as typing info
 func (ep *MPChan) IRecv(rolename string, i int, msg *interface{}) error {
 	var w ScribMessage
 	err := ep.MRecv(rolename, i, &w)
