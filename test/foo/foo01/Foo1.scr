@@ -19,6 +19,8 @@ type <go> "TwoBuyer.Date" from "scrib/twobuyer/TwoBuyer/TwoBuyer/types.go" as Da
 // endpoint params as fields -- done
 // (extra Run/Foreach args?  e.g., "context", foreach indices, etc.) -- cf. Pget, req.Head()
 
+// CHECKME: interleaved sessions using top-level Run API
+
 // sig -- partly done -- TODO: custom message formatting (bypass default deserialization type problems)
 // foreach
 // deleg
