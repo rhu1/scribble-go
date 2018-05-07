@@ -1,0 +1,21 @@
+//Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/foreach/foreach01/Foreach1.scr -d test/foreach/foreach01/ -param Proto1 -param-api github.com/rhu1/scribble-go-runtime/test/foreach/foreach01/Foreach1 S
+
+
+// http://sandbox.kidstrythisathome.com/erdos/
+
+
+module Foreach1;
+
+
+type <go> "int" from "..." as int;  // FIXME: use sig as default
+
+
+// i.e., Scatter by S -- A(int) from S[1.1] to W[1,K]
+global protocol Proto1(role S, role W)
+{
+	foreach W[I:1,K]
+	{
+		A(int) from S[1,1] to W[I, I];
+	}
+}
