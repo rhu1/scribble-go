@@ -1,0 +1,28 @@
+//Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/sigs/sigs01/Sigs1.scr -d test/sigs/sigs01/ -param Proto1 -param-api github.com/rhu1/scribble-go-runtime/test/sigs/sigs01/Sigs1 S
+
+
+// http://sandbox.kidstrythisathome.com/erdos/
+
+
+module Sigs1;
+
+
+sig <go> "messages.Foo"  // Go type name  // FIXME: derive package prefix from ext-source field?
+		from "github.com/rhu1/scribble-go-runtime/test/sigs/sigs01/messages"   // Package to import
+		as Foo;  // CHECKME: use alias in Go API?
+
+sig <go> "messages.Bar" from "github.com/rhu1/scribble-go-runtime/test/sigs/sigs01/messages" as Bar;
+
+
+global protocol Proto1(role S, role W)
+{
+	choice at S[1]
+	{	
+		Foo from S[1,1] to W[1,1];
+	}
+	or
+	{
+		Bar from S[1,1] to W[1,1];
+	}		
+}
