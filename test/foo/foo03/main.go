@@ -64,7 +64,7 @@ func server(wg *sync.WaitGroup, K int) *S_1.End {
 	return end
 }
 
-func runS(s *S_1.Init) S_1.End {
+func runS(s *S_1.Init_4) S_1.End {
 	seed := rand.NewSource(time.Now().UnixNano())
 	rnd := rand.New(seed)
 
@@ -94,7 +94,7 @@ func client(wg *sync.WaitGroup, K int, self int) *W_1toK.End {
 	return end
 }
 
-func runW(w *W_1toK.Init) W_1toK.End {
+func runW(w *W_1toK.Init_8) W_1toK.End {
 	var end *W_1toK.End
 	var x int
 
