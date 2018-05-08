@@ -1,6 +1,6 @@
 //rhu@HZHL4 ~/code/go
-//$ go install github.com/rhu1/scribble-go-runtime/test/foreach/foreach04
-//$ bin/foreach04.exe
+//$ go install github.com/rhu1/scribble-go-runtime/test/foreach/foreach06
+//$ bin/foreach06.exe
 
 package main
 
@@ -14,10 +14,10 @@ import (
 	"github.com/rhu1/scribble-go-runtime/runtime/session2"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2/tcp"
 
-	"github.com/rhu1/scribble-go-runtime/test/foreach/foreach04/Foreach4/Proto1"
-	S_1  "github.com/rhu1/scribble-go-runtime/test/foreach/foreach04/Foreach4/Proto1/S_1to1"
-	W_1  "github.com/rhu1/scribble-go-runtime/test/foreach/foreach04/Foreach4/Proto1/W_1to1and1toK"
-	W_2K "github.com/rhu1/scribble-go-runtime/test/foreach/foreach04/Foreach4/Proto1/W_1toK_not_1to1"
+	"github.com/rhu1/scribble-go-runtime/test/foreach/foreach06/Foreach6/Proto1"
+	S_1  "github.com/rhu1/scribble-go-runtime/test/foreach/foreach06/Foreach6/Proto1/S_1to1"
+	W_1  "github.com/rhu1/scribble-go-runtime/test/foreach/foreach06/Foreach6/Proto1/W_1to1and1toK"
+	W_2K "github.com/rhu1/scribble-go-runtime/test/foreach/foreach06/Foreach6/Proto1/W_1toK_not_1to1"
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 
@@ -72,15 +72,17 @@ func serverCode(wg *sync.WaitGroup, K int) *S_1.End {
 	return end
 }
 
-func runS(s *S_1.Init_19) S_1.End {
+func runS(s *S_1.Init_21) S_1.End {
 	pay := []int{123}
 	s1 := s.W_1to1_Scatter_A(pay)
 	fmt.Println("S scattered A:", pay)
-	end := s1.Foreach(nested)
+	end := s1.Foreach(nested).
+	          W_1to1_Gather_C(pay)
+	fmt.Println("S gathered C:", pay)
 	return *end
 }
 
-func nested(s *S_1.Init_17) S_1.End {
+func nested(s *S_1.Init_19) S_1.End {
 	pay := make([]int, 1)
 	end := s.W_ItoI_Gather_B(pay)
 	fmt.Println("S gathered B:", pay)
@@ -103,13 +105,16 @@ func client1Code(wg *sync.WaitGroup, K int) *W_1.End {
 	return end
 }
 
-func runW1(w *W_1.Init_5) W_1.End {
+func runW1(w *W_1.Init_6) W_1.End {
 	pay := make([]int, 1)
 	w2 := w.S_1to1_Gather_A(pay)
 	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") gathered A:", pay)
-	rep := []int{pay[0]*pay[0]}
-	end := w2.S_1to1_Scatter_B(rep)
+	rep := []int{w.Ept.Self}
+	w3 := w2.S_1to1_Scatter_B(rep)
 	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") scattered B:", rep)
+	rep = []int{pay[0]*pay[0]}
+	end := w3.S_1to1_Scatter_C(pay)
+	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") scattered C:", rep)
 	return *end
 }
 
@@ -128,7 +133,7 @@ func client2KCode(wg *sync.WaitGroup, K int, self int) *W_2K.End {
 	return end
 }
 
-func runW(w *W_2K.Init_10) W_2K.End {
+func runW(w *W_2K.Init_12) W_2K.End {
 	pay := []int{w.Ept.Self}
 	end := w.S_1to1_Scatter_B(pay)
 	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") scattered B:", pay)

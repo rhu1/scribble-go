@@ -1,0 +1,23 @@
+//Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/foreach/foreach06/Foreach6.scr -d test/foreach/foreach06/ -param Proto1 -param-api github.com/rhu1/scribble-go-runtime/test/foreach/foreach06/Foreach6 S
+
+
+// http://sandbox.kidstrythisathome.com/erdos/
+
+
+module Foreach6;
+
+
+type <go> "int" from "..." as int;
+
+
+// Testing: foreach initial state (that is not the terminal state -- cf. foreach01--03)
+global protocol Proto1(role S, role W)
+{
+	A(int) from S[1,1] to W[1,1];
+	foreach W[I:1,K]
+	{
+		B(int) from W[I,I] to S[1,1];
+	}
+	C(int) from W[1,1] to S[1,1];
+}
