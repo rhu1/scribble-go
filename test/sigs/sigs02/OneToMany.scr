@@ -1,0 +1,21 @@
+//Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/sigs/sigs02/OneToMany.scr -d test/sigs/sigs02/ -param Scatter -param-api github.com/rhu1/scribble-go-runtime/test/sigs/sigs02/OneToMany A
+
+
+// OneToMany - the "scatter" pattern.
+
+module OneToMany;
+
+sig <go> "onetomany.Data" from "github.com/rhu1/scribble-go-runtime/test/sigs/sigs02/onetomany" as Data;
+
+// Scatter is the basic one-to-many scatter pattern.
+global protocol Scatter(role A, role B) {
+  Data from A[1,1] to B[1,K];
+}
+
+// Foreach is the foreach-based one-to-many scatter pattern.
+global protocol Foreach(role A, role B) {
+  foreach B[I:1,K] {
+    Data from A[1,1] to B[I,I];
+  }
+}
