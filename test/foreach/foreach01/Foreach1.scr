@@ -16,6 +16,6 @@ global protocol Proto1(role S, role W)
 {
 	foreach W[I:1,K]
 	{
-		A(int) from S[1,1] to W[I, I];
+		A(int) from S[1,1] to W[I,I];
 	}
 }

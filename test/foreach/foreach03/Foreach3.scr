@@ -8,7 +8,7 @@
 module Foreach3;
 
 
-type <go> "int" from "..." as int;  // FIXME: use sig as default
+type <go> "int" from "..." as int;
 
 
 // i.e., All-to-All -- A(int) from S[1,K1] to W[1.K2]
@@ -18,7 +18,7 @@ global protocol Proto1(role S, role W)
 	{
 		foreach W[I2:1,K2]
 		{
-			A(int) from S[I1, I1] to W[I2,I2];
+			A(int) from S[I1,I1] to W[I2,I2];
 		}
 	}	
 }

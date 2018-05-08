@@ -8,7 +8,7 @@
 module Foreach2;
 
 
-type <go> "int" from "..." as int;  // FIXME: use sig as default
+type <go> "int" from "..." as int;
 
 
 // i.e., Gather by S -- A(int) from W[1,K] to S[1.1]
@@ -16,6 +16,6 @@ global protocol Proto1(role S, role W)
 {
 	foreach W[I:1,K]
 	{
-		A(int) from W[I, I] to S[1,1];
+		A(int) from W[I,I] to S[1,1];
 	}
 }
