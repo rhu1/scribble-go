@@ -34,3 +34,11 @@ test/foo/foo10/Foo10/
 test/foo/foo11/Foo11/
 test/foo/foo12/Foo12/
 
+test/foreach/foreach01/Foreach1/
+test/foreach/foreach02/Foreach2/
+test/foreach/foreach03/Foreach3/
+test/foreach/foreach04/Foreach4/
+test/foreach/foreach05/Foreach5/
+test/foreach/foreach06/Foreach6/
+
+test/sigs/sigs01/Sigs1/
