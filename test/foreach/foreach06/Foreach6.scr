@@ -11,7 +11,7 @@ module Foreach6;
 type <go> "int" from "..." as int;
 
 
-// Testing: foreach initial state (that is not the terminal state -- cf. foreach01--03)
+// Testing: foreach non-initial and non-terminal state
 global protocol Proto1(role S, role W)
 {
 	A(int) from S[1,1] to W[1,1];
