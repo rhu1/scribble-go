@@ -16,8 +16,8 @@ import (
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2/tcp"
 
 	"github.com/rhu1/scribble-go-runtime/test/foo/foo01/Foo1/Proto1"
-	S_1 "github.com/rhu1/scribble-go-runtime/test/foo/foo01/Foo1/Proto1/S_1to1"
-	"github.com/rhu1/scribble-go-runtime/test/foo/foo01/Foo1/Proto1/W_1toK"
+	S_1 "github.com/rhu1/scribble-go-runtime/test/foo/foo01/Foo1/Proto1/family_1/S_1to1"
+	"github.com/rhu1/scribble-go-runtime/test/foo/foo01/Foo1/Proto1/family_1/W_1toK"
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 
@@ -73,7 +73,7 @@ func serverCode(wg *sync.WaitGroup, K int) *S_1.End {
 	return end
 }
 
-func runS(s *S_1.Init) S_1.End {
+func runS(s *S_1.Init_8) S_1.End {
 	data := []int { 2, 3, 5, 7, 11, 13 }
 	K := s.Ept.K  // Good API? -- generate param values as direct fields? (instead of generic map)
 	pay := data[0:K]
@@ -97,7 +97,7 @@ func clientCode(wg *sync.WaitGroup, K int, self int) *W_1toK.End {
 	return end
 }
 
-func runW(w *W_1toK.Init) W_1toK.End {
+func runW(w *W_1toK.Init_4) W_1toK.End {
 	pay := make([]int, 1)
 	end := w.S_1to1_Gather_A(pay)
 	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") gathered:", pay)
