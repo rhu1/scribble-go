@@ -22,12 +22,13 @@ type <go> "TwoBuyer.Date" from "scrib/twobuyer/TwoBuyer/TwoBuyer/types.go" as Da
 // CHECKME: interleaved sessions using top-level Run API -- generate Init as before
 
 // sig -- partly done -- TODO: custom message formatting (bypass default deserialization type problems)
-// foreach -- parallel foreach
+// foreach -- partly done -- TODO: fix Init/End naming, refactor "nested API" gen, further testing -- TODO: parallel foreach
 // deleg -- Proto1@W[K-3] ?
 // Pget
 // families
+// domain annotations
 
-// errors
+// errors -- partly done -- TODO: branch action error (need to return some "default" error -- i.e., outside of actual cases)
 // linearity
 
 // pair/pipe

@@ -57,7 +57,9 @@ func serverCode(wg *sync.WaitGroup, K int) *S_1.End {
 		}
 		defer as[j-1].Close()
 	}
-	S.W_1to1and1toK_Accept(1, as[0], new(session2.GobFormatter))
+	if err:= S.W_1to1and1toK_Accept(1, as[0], new(session2.GobFormatter)); err != nil {
+		panic(err)
+	}
 	for j := 2; j <= K; j++ {
 		err := S.W_1toK_not_1to1_Accept(j, as[j-1], 
 			new(session2.GobFormatter))
