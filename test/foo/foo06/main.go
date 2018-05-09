@@ -74,7 +74,7 @@ func server(wg *sync.WaitGroup, K int) *S_1.End {
 	return end
 }
 
-func runS(s *S_1.Init) S_1.End {
+func runS(s *S_1.Init_7) S_1.End {
 	data := []int{ 2, 3, 5, 7, 11, 13, 17, 19, 23 }
 	pay := data[0:s.Ept.K]
 
@@ -107,7 +107,7 @@ func client(wg *sync.WaitGroup, K int, self int) *W_1toK.End {
 	return end
 }
 
-func runW(w *W_1toK.Init) W_1toK.End {
+func runW(w *W_1toK.Init_17) W_1toK.End {
 	pay := make([]int, 1)
 	var x int
 	for {
