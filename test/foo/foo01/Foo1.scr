@@ -13,7 +13,7 @@ type <go> "int" from "..." as int;
 type <go> "TwoBuyer.Address" from "scrib/twobuyer/TwoBuyer/TwoBuyer/types.go" as Address;
 type <go> "TwoBuyer.Date" from "scrib/twobuyer/TwoBuyer/TwoBuyer/types.go" as Date;*/
 
-// scrib surface syntax -- done
+// scrib surface syntax -- partly done -- TODO: domain annotations, pair/pipe, multi-interval foreach, multidim intervals
 // internalise dial/accept peers -- partly done -- TODO: full "nested" API (as an extra option)
 // remove proto sig param decls -- done
 // endpoint params as fields -- done
@@ -23,18 +23,19 @@ type <go> "TwoBuyer.Date" from "scrib/twobuyer/TwoBuyer/TwoBuyer/types.go" as Da
 
 // sig -- partly done -- TODO: custom message formatting (bypass default deserialization type problems)
 // foreach -- partly done -- TODO: fix Init/End naming, refactor "nested API" gen, further testing -- TODO: parallel foreach
-// deleg -- Proto1@W[K-3] ?
-// Pget
-// families -- TODO: annotations or CL args for family names?  (via index var value mappings, test using Z3?)
+// families -- partly done -- TODO: annotations or CL args for family names?  (via index var value mappings, test using Z3?)
 // domain annotations
 
 // errors -- partly done -- TODO: branch action error (need to return some "default" error -- i.e., outside of actual cases)
-// linearity
-
-// pair/pipe
-// Ring
-
 // state chan prealloc/reuse
+// linearity
+// shm
+// type-specific channels (shm only?)
+
+// deleg -- Proto1@W[K-3] ?
+// Pget
+// pair/pipe -- general index exprs
+// Ring
 
 // multidim
 // Mesh

@@ -1,5 +1,5 @@
 //Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
-//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/foo/foo06/Foo6.scr -d test/foo/foo06/ -param Proto1 -param-api github.com/rhu1/scribble-go-runtime/test/foo/foo06/Foo6 S
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/foo/foo06/Foo6.scr -d test/foo/foo06/ -param Proto1 github.com/rhu1/scribble-go-runtime/test/foo/foo06/Foo6 -param-api S -param-api W
 
 
 // http://sandbox.kidstrythisathome.com/erdos/
