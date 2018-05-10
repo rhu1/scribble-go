@@ -15,7 +15,7 @@ import (
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2/tcp"
 
 	"github.com/rhu1/scribble-go-runtime/test/foreach/foreach06/Foreach6/Proto1"
-	S_1  "github.com/rhu1/scribble-go-runtime/test/foreach/foreach06/Foreach6/Proto1/S_1to1"
+	S_1  "github.com/rhu1/scribble-go-runtime/test/foreach/foreach06/Foreach6/Proto1/family_1/S_1to1"
 	W_1  "github.com/rhu1/scribble-go-runtime/test/foreach/foreach06/Foreach6/Proto1/W_1to1and1toK"
 	W_2K "github.com/rhu1/scribble-go-runtime/test/foreach/foreach06/Foreach6/Proto1/W_1toK_not_1to1"
 	"github.com/rhu1/scribble-go-runtime/test/util"
@@ -46,7 +46,7 @@ func main() {
 func serverCode(wg *sync.WaitGroup, K int) *S_1.End {
 	var err error
 	P1 := Proto1.New()
-	S := P1.New_S_1to1(K, 1)
+	S := P1.New_family_1_S_1to1(K, 1)
 	as := make([]*tcp.TcpListener, K)
 	//as := make([]*shm.ShmListener, K)
 	for j := 1; j <= K; j++ {

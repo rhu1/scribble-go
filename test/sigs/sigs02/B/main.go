@@ -13,9 +13,9 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/rhu1/scribble-go-runtime/test/sigs/sigs02/messages"
 	"github.com/rhu1/scribble-go-runtime/test/sigs/sigs02/OneToMany/Scatter"
 	B_1K "github.com/rhu1/scribble-go-runtime/test/sigs/sigs02/OneToMany/Scatter/B_1toK"
-	"github.com/rhu1/scribble-go-runtime/test/sigs/sigs02/onetomany"
 
 	"github.com/rhu1/scribble-go-runtime/runtime/session2"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2/tcp"
@@ -26,7 +26,7 @@ const (
 )
 
 func init() {
-	var data onetomany.Data
+	var data messages.Data
 	gob.Register(data)
 }
 
@@ -49,7 +49,7 @@ func b(s *Scatter.Scatter, id int, wg *sync.WaitGroup) {
 		log.Fatal(err)
 	}
 	B.Run(func(s *B_1K.Init_4) B_1K.End {
-		d := make([]onetomany.Data, 1)
+		d := make([]messages.Data, 1)
 		end := s.A_1to1_Gather_Data(d)
 		fmt.Println("B(" + strconv.Itoa(s.Ept.Self) + ") gathered:", d)
 		return *end

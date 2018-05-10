@@ -1,5 +1,5 @@
 //Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
-//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/foreach/foreach04/Foreach4.scr -d test/foreach/foreach04/ -param Proto1 -param-api github.com/rhu1/scribble-go-runtime/test/foreach/foreach04/Foreach4 S
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/foreach/foreach04/Foreach4.scr -d test/foreach/foreach04/ -param Proto1 github.com/rhu1/scribble-go-runtime/test/foreach/foreach04/Foreach4 -param-api S -param-api W
 
 
 // http://sandbox.kidstrythisathome.com/erdos/

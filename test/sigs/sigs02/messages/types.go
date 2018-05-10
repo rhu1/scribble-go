@@ -1,4 +1,4 @@
-package onetomany
+package messages
 
 // Data is the default payload type.
 type Data int  // N.B. testing primitive 

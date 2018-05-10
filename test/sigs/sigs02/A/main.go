@@ -11,9 +11,9 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/rhu1/scribble-go-runtime/test/sigs/sigs02/messages"
 	"github.com/rhu1/scribble-go-runtime/test/sigs/sigs02/OneToMany/Scatter"
 	A_1 "github.com/rhu1/scribble-go-runtime/test/sigs/sigs02/OneToMany/Scatter/A_1to1"
-	"github.com/rhu1/scribble-go-runtime/test/sigs/sigs02/onetomany"
 
 	"github.com/rhu1/scribble-go-runtime/runtime/session2"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2/tcp"
@@ -24,7 +24,7 @@ const (
 )
 
 func init() {
-	var data onetomany.Data
+	var data messages.Data
 	gob.Register(data)
 }
 
@@ -37,9 +37,9 @@ func main() {
 		}
 	}
 	A.Run(func(s *A_1.Init_8) A_1.End {
-		var d []onetomany.Data
+		var d []messages.Data
 		for i := 0; i < k; i++ {
-			d = append(d, onetomany.Data(i))
+			d = append(d, messages.Data(i))
 		}
 		end := s.B_1toK_Scatter_Data(d)
 		fmt.Println("A scattered:", d)
