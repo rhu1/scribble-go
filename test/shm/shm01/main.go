@@ -35,10 +35,6 @@ var DIAL = shm.Dial
 var FORMATTER = func() *session2.PassByPointer { return new(session2.PassByPointer) } 
 //*/
 
-/*var LISTEN func(int) (transport2.ScribListener, error)
-var DIAL func(string, int) (transport2.BinChannel, error)
-var FORMATTER func() session2.ScribMessageFormatter*/
-
 
 const PORT = 8888
 
