@@ -5,6 +5,7 @@ import (
 	//"encoding/base64"
 	"encoding/gob"
 	"fmt"
+	"io"
 
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2/shm"
@@ -38,12 +39,14 @@ type GobFormatter struct {
 	c transport2.BinChannel
 	enc *gob.Encoder
 	dec *gob.Decoder
+	rdr io.Reader
 }
 
 func (f *GobFormatter) Wrap(c transport2.BinChannel) {
 	f.c = c
 	f.enc = gob.NewEncoder(c.GetWriter())
-	f.dec = gob.NewDecoder(c.GetReader())
+	f.rdr = c.GetReader()
+	f.dec = gob.NewDecoder(f.rdr)
 }	
 
 func (f *GobFormatter) Serialize(m ScribMessage) error {
@@ -52,8 +55,15 @@ func (f *GobFormatter) Serialize(m ScribMessage) error {
 }
 
 func (f *GobFormatter) Deserialize(m *ScribMessage) (error) {
+	//fmt.Printf("Deserialize1: %v %T\n", *m, *m)
+	//b := make([]byte, 100)
+	//f.rdr.Read(b)
+	//fmt.Printf("To deserialise\n", b)
+
   err := f.dec.Decode(m)  // Decode *ScribMessage
-	//fmt.Printf("Deserialize: %v %T\n", *m, *m)
+
+	//fmt.Printf("Deserialize2: %v %T\n", *m, *m)
+
 	return err
 }
 
