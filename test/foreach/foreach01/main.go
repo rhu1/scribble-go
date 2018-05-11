@@ -69,7 +69,7 @@ func serverCode(wg *sync.WaitGroup, K int) *S_1.End {
 	return end
 }
 
-func runS(s *S_1.Init_12) S_1.End {
+func runS(s *S_1.Init) S_1.End {
 	return *s.Foreach(nested)
 }
 
@@ -97,7 +97,7 @@ func clientCode(wg *sync.WaitGroup, K int, self int) *W_1toK.End {
 	return end
 }
 
-func runW(w *W_1toK.Init_4) W_1toK.End {
+func runW(w *W_1toK.Init) W_1toK.End {
 	pay := make([]int, 1)
 	end := w.S_1to1_Gather_A(pay)
 	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") gathered:", pay)

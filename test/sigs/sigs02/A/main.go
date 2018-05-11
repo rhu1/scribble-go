@@ -36,7 +36,7 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-	A.Run(func(s *A_1.Init_8) A_1.End {
+	A.Run(func(s *A_1.Init) A_1.End {
 		var d []messages.Data
 		for i := 0; i < k; i++ {
 			d = append(d, messages.Data(i))

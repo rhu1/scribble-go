@@ -48,7 +48,7 @@ func b(s *Scatter.Scatter, id int, wg *sync.WaitGroup) {
 	if err := B.A_1to1_Accept(1, ln, new(session2.GobFormatter)); err != nil {
 		log.Fatal(err)
 	}
-	B.Run(func(s *B_1K.Init_4) B_1K.End {
+	B.Run(func(s *B_1K.Init) B_1K.End {
 		d := make([]messages.Data, 1)
 		end := s.A_1to1_Gather_Data(d)
 		fmt.Println("B(" + strconv.Itoa(s.Ept.Self) + ") gathered:", d)

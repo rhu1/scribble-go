@@ -74,7 +74,7 @@ func serverCode(wg *sync.WaitGroup, K int) *S_1.End {
 	return end
 }
 
-func runS(s *S_1.Init_19) S_1.End {
+func runS(s *S_1.Init) S_1.End {
 	pay := []int{123}
 	s1 := s.W_1to1_Scatter_A(pay)
 	fmt.Println("S scattered A:", pay)
@@ -105,7 +105,7 @@ func client1Code(wg *sync.WaitGroup, K int) *W_1.End {
 	return end
 }
 
-func runW1(w *W_1.Init_5) W_1.End {
+func runW1(w *W_1.Init) W_1.End {
 	pay := make([]int, 1)
 	w2 := w.S_1to1_Gather_A(pay)
 	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") gathered A:", pay)
@@ -130,7 +130,7 @@ func client2KCode(wg *sync.WaitGroup, K int, self int) *W_2K.End {
 	return end
 }
 
-func runW(w *W_2K.Init_10) W_2K.End {
+func runW(w *W_2K.Init) W_2K.End {
 	pay := []int{w.Ept.Self}
 	end := w.S_1to1_Scatter_B(pay)
 	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") scattered B:", pay)

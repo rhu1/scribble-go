@@ -72,7 +72,7 @@ func serverCode(wg *sync.WaitGroup, K1 int, K2 int, self int) *S_1toK1.End {
 	return end
 }
 
-func runS(s *S_1toK1.Init_16) S_1toK1.End {
+func runS(s *S_1toK1.Init) S_1toK1.End {
 	return *s.Foreach(nested)
 }
 
@@ -103,7 +103,7 @@ func clientCode(wg *sync.WaitGroup, K1 int, K2 int, self int) *W_1toK2.End {
 	return end
 }
 
-func runW(w *W_1toK2.Init_8) W_1toK2.End {
+func runW(w *W_1toK2.Init) W_1toK2.End {
 	return *w.Foreach(gather)
 }
 
