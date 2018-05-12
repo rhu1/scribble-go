@@ -6,7 +6,7 @@
 module Shm5;
 
 
-// Testing: tcp/shm for struct "sig" -- field is *int (cf. shm01, int payload dispatched as *int field of implicit struct wrapper)
+// Testing: tcp/shm for struct "sig" -- field is *int (cf. shm01, int payload dispatched as *int field of implicit struct wrapper) -- OK
 // Foo = type Foo struct { X *int }
 sig <go> "messages.Foo" from "github.com/rhu1/scribble-go-runtime/test/shm/shm05/messages" as Foo;
 
