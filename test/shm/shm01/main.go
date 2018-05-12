@@ -27,6 +27,7 @@ var _ = gob.Register
 var _ = shm.Dial
 var _ = tcp.Dial
 
+
 //*
 var LISTEN = tcp.Listen
 var DIAL = tcp.Dial
