@@ -42,6 +42,17 @@ type <go> "TwoBuyer.Date" from "scrib/twobuyer/TwoBuyer/TwoBuyer/types.go" as Da
 
 // dynamic Pget?
 
+//...update syntax
+//... update interval syntax
+//... redo foo tests using new scheme -- including sig tests
+
+//...add foreach?
+//...Endpoint -- families: dial/accept
+//...nested state chan API
+//...multidim indices
+
+//...do copy-on-send via Go pass-by-value -- more Go like?
+
 
 global protocol Proto1(role S, role W)
 {

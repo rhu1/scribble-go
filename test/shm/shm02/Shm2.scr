@@ -2,14 +2,13 @@
 //$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/shm/shm02/Shm2.scr -d test/shm/shm02/ -param Proto1 github.com/rhu1/scribble-go-runtime/test/shm/shm02/Shm2 -param-api S -param-api W
 
 
-
 module Shm2;
 
 
-// Foo = type Foo struct { X int }
-sig <go> "messages.Foo" from "github.com/rhu1/scribble-go-runtime/test/shm/shm02/messages" as Foo;
+// Testing: tcp/shm for struct payloads -- OK
+type <go> "messages.Foo" from "github.com/rhu1/scribble-go-runtime/test/shm/shm02/messages" as Foo;
 
 global protocol Proto1(role S, role W)
 {
-	Foo from S[1,1] to W[1,K];
+	A(Foo) from S[1,1] to W[1,K];
 }

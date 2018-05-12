@@ -1,0 +1,16 @@
+//Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/shm/shm03/Shm3.scr -d test/shm/shm03/ -param Proto1 github.com/rhu1/scribble-go-runtime/test/shm/shm03/Shm3 -param-api S -param-api W
+
+
+
+module Shm3;
+
+
+// Testing: tcp/shm for int "sig" (i.e., primitive "alias")
+// type Foo int
+sig <go> "messages.Foo" from "github.com/rhu1/scribble-go-runtime/test/shm/shm03/messages" as Foo;
+
+global protocol Proto1(role S, role W)
+{
+	Foo from S[1,1] to W[1,K];
+}

@@ -2,25 +2,11 @@
 //$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/shm/shm01/Shm1.scr -d test/shm/shm01/ -param Proto1 github.com/rhu1/scribble-go-runtime/test/shm/shm01/Shm1 -param-api S -param-api W
 
 
-
-// http://sandbox.kidstrythisathome.com/erdos/
-
-
 module Shm1;
 
 
+// Testing: tcp/shm for primitive payloads -- FIXME: tcp/gob panic: interface conversion: interface {} is int, not *int -- in gather
 type <go> "int" from "..." as int;
-
-//...update syntax
-//... update interval syntax
-//... redo foo tests using new scheme -- including sig tests
-
-//...add foreach?
-//...Endpoint -- families: dial/accept
-//...nested state chan API
-//...multidim indices
-
-//...do copy-on-send via Go pass-by-value -- more Go like?
 
 global protocol Proto1(role S, role W)
 {

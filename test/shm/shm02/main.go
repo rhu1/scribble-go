@@ -5,7 +5,6 @@
 package main
 
 import (
-	"encoding/gob"
 	"fmt"
 	"log"
 	"strconv"
@@ -27,8 +26,6 @@ import (
 var _ = shm.Dial
 var _ = tcp.Dial
 
-const PORT = 8888
-
 //*
 var LISTEN = tcp.Listen
 var DIAL = tcp.Dial
@@ -39,24 +36,23 @@ var DIAL = shm.Dial
 var FORMATTER = func() *session2.PassByPointer { return new(session2.PassByPointer) } 
 //*/
 
-func init() {
-	gob.Register(&messages.Foo{})
-}
+
+const PORT = 8888
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	n := 3
+	K := 3
 
 	wg := new(sync.WaitGroup)
-	wg.Add(n + 1)
+	wg.Add(K + 1)
 
-	go serverCode(wg, n)
+	go serverCode(wg, K)
 
 	time.Sleep(100 * time.Millisecond) //2017/12/11 11:21:40 cannot connect to 127.0.0.1:8891: dial tcp 127.0.0.1:8891: connectex: No connection could be made because the target machine actively refused it.
 
-	for i := 1; i <= n; i++ {
-		go clientCode(wg, n, i)
+	for i := 1; i <= K; i++ {
+		go clientCode(wg, K, i)
 	}
 
 	wg.Wait()
@@ -89,7 +85,7 @@ func serverCode(wg *sync.WaitGroup, K int) *S_1.End {
 
 func runS(s *S_1.Init) S_1.End {
 	data := []messages.Foo{messages.Foo{2}, messages.Foo{3}, messages.Foo{5}}
-	end := s.W_1toK_Scatter_Foo(data)
+	end := s.W_1toK_Scatter_A(data)
 	fmt.Println("S scattered:", data)
 	return *end
 }
@@ -108,7 +104,7 @@ func clientCode(wg *sync.WaitGroup, K int, self int) *W_1K.End {
 
 func runW(w *W_1K.Init) W_1K.End {
 	data := make([]messages.Foo, 1)
-	end := w.S_1to1_Gather_Foo(data)
+	end := w.S_1to1_Gather_A(data)
 	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") gathered:", data)
 	return *end
 }
