@@ -13,6 +13,7 @@ import (
 
 var _ = fmt.Print
 
+
 // cf. org.scribble.runtime.net.ScribMessage
 type ScribMessage interface {
 	GetOp() string
@@ -35,6 +36,10 @@ type ScribMessageFormatter interface {
 	GetDec() *gob.Decoder*/
 }
 
+
+/**
+ * N.B. must do gob.Register on _pointer_ to message types -- because MPChan MSend/Receive communicate by pointer (for efficient transparency with shm)
+ */
 type GobFormatter struct {
 	c transport2.BinChannel
 	enc *gob.Encoder
@@ -67,6 +72,7 @@ func (f *GobFormatter) Deserialize(m *ScribMessage) (error) {
 	return err
 }
 
+
 // FIXME: (rename?) and move to shm package
 type PassByPointer struct {
 	c *shm.ShmChannel
@@ -87,6 +93,14 @@ func (f *PassByPointer) Deserialize(m *ScribMessage) error {
 	*m = *(ptr.(*ScribMessage))  // CHECKME: is this copying the actual message value, or just the "interface value"?
 	return nil
 }
+
+
+
+
+
+
+
+
 
 /*func (f *GobFormatter) EncodeInt(m int) error {
 	return f.enc.Encode(&m)
