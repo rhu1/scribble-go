@@ -38,7 +38,7 @@ type ScribMessageFormatter interface {
 
 
 /**
- * N.B. must do gob.Register on _pointer_ to message types -- because MPChan MSend/Receive communicate by pointer (for efficient transparency with shm)
+ * N.B. must do gob.Register on _pointer_ to message types (cf. sigs02, shm03) -- because MPChan MSend/Receive communicate by pointer (for efficient transparency with shm)
  */
 type GobFormatter struct {
 	c transport2.BinChannel

@@ -27,7 +27,6 @@ import (
 var _ = shm.Dial
 var _ = tcp.Dial
 
-const PORT = 8888
 
 //*
 var LISTEN = tcp.Listen
@@ -38,6 +37,10 @@ var LISTEN = shm.Listen
 var DIAL = shm.Dial
 var FORMATTER = func() *session2.PassByPointer { return new(session2.PassByPointer) } 
 //*/
+
+
+const PORT = 8888
+
 
 func init() {
 	var foo messages.Foo
