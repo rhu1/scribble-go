@@ -5,7 +5,7 @@
 module Shm1;
 
 
-// Testing: tcp/shm for primitive payloads -- FIXME: tcp/gob panic: interface conversion: interface {} is int, not *int -- in gather
+// Testing: tcp/shm for primitive payloads -- shm OK -- tcp FIXME: tcp/gob panic: interface conversion: interface {} is int, not *int -- in gather
 type <go> "int" from "..." as int;
 
 global protocol Proto1(role S, role W)

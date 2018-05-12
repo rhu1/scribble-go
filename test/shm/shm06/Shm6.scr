@@ -1,0 +1,15 @@
+//Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/shm/shm06/Shm6.scr -d test/shm/shm06/ -param Proto1 github.com/rhu1/scribble-go-runtime/test/shm/shm06/Shm6 -param-api S -param-api W
+
+
+
+module Shm6;
+
+
+// Testing: tcp/shm for *int payload -- shm OK -- TCP FIXME: panic: interface conversion: interface {} is int, not **int -- cf. shm01
+type <go> "*int" from "..." as ptr_int;
+
+global protocol Proto1(role S, role W)
+{
+	A(ptr_int) from S[1,1] to W[1,K];
+}

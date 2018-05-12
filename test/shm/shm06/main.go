@@ -1,6 +1,6 @@
 //rhu@HZHL4 ~/code/go
-//$ go install github.com/rhu1/scribble-go-runtime/test/shm/shm01
-//$ bin/shm01.exe
+//$ go install github.com/rhu1/scribble-go-runtime/test/shm/shm06
+//$ bin/shm06.exe
 
 package main
 
@@ -16,14 +16,16 @@ import (
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2/shm"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2/tcp"
 
-	"github.com/rhu1/scribble-go-runtime/test/shm/shm01/Shm1/Proto1"
-	S_1  "github.com/rhu1/scribble-go-runtime/test/shm/shm01/Shm1/Proto1/S_1to1"
-	W_1K "github.com/rhu1/scribble-go-runtime/test/shm/shm01/Shm1/Proto1/W_1toK"
+	"github.com/rhu1/scribble-go-runtime/test/shm/shm06/Shm6/Proto1"
+	S_1  "github.com/rhu1/scribble-go-runtime/test/shm/shm06/Shm6/Proto1/S_1to1"
+	W_1K "github.com/rhu1/scribble-go-runtime/test/shm/shm06/Shm6/Proto1/W_1toK"
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 
 var _ = shm.Dial
 var _ = tcp.Dial
+
+const PORT = 8888
 
 //*
 var LISTEN = tcp.Listen
@@ -34,9 +36,6 @@ var LISTEN = shm.Listen
 var DIAL = shm.Dial
 var FORMATTER = func() *session2.PassByPointer { return new(session2.PassByPointer) } 
 //*/
-
-
-const PORT = 8888
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
@@ -83,7 +82,8 @@ func serverCode(wg *sync.WaitGroup, K int) *S_1.End {
 
 
 func runS(s *S_1.Init) S_1.End {
-	data := []int{2, 3, 5}
+	bar := []int{2, 3, 5}
+	data := []*int{&bar[0], &bar[1], &bar[2]}
 	end := s.W_1toK_Scatter_A(data)
 	fmt.Println("S scattered:", data)
 	return *end
@@ -102,8 +102,8 @@ func clientCode(wg *sync.WaitGroup, K int, self int) *W_1K.End {
 }
 
 func runW(w *W_1K.Init) W_1K.End {
-	data := make([]int, 1)
+	data := make([]*int, 1)
 	end := w.S_1to1_Gather_A(data)
-	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") gathered:", data)
+	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") gathered:", data, *data[0])
 	return *end
 }
