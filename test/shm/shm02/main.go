@@ -5,6 +5,7 @@
 package main
 
 import (
+	"encoding/gob"
 	"fmt"
 	"log"
 	"strconv"
@@ -23,6 +24,7 @@ import (
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 
+var _ = gob.Register
 var _ = shm.Dial
 var _ = tcp.Dial
 
@@ -38,6 +40,11 @@ var FORMATTER = func() *session2.PassByPointer { return new(session2.PassByPoint
 
 
 const PORT = 8888
+
+func init() {
+	var foo messages.Foo
+	gob.Register(&foo)  // CHECKME: if commented, why sometimes decoded as "0", and sometimes run-time unregistered error?
+}
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)

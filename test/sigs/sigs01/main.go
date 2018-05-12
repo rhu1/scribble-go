@@ -26,8 +26,8 @@ import (
 const PORT = 8888
 
 func init() {
-	gob.Register(messages.Foo{})
-	gob.Register(messages.Bar{})
+	gob.Register(&messages.Foo{})
+	gob.Register(&messages.Bar{})
 }
 
 func main() {

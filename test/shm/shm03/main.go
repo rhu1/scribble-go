@@ -76,8 +76,7 @@ func serverCode(wg *sync.WaitGroup, K int) *S_1.End {
 		defer as[j-1].Close()
 	}
 	for j := 1; j <= K; j++ {
-		err := S.W_1toK_Accept(j, as[j-1], FORMATTER())
-		if err != nil {
+		if err := S.W_1toK_Accept(j, as[j-1], FORMATTER()); err != nil {
 			panic(err)
 		}
 	}
@@ -98,8 +97,7 @@ func runS(s *S_1.Init) S_1.End {
 func clientCode(wg *sync.WaitGroup, K int, self int) *W_1K.End {
 	P1 := Proto1.New()
 	W := P1.New_W_1toK(K, self)
-	err := W.S_1to1_Dial(1, util.LOCALHOST, PORT + self, DIAL, FORMATTER())
-	if err != nil {
+	if err := W.S_1to1_Dial(1, util.LOCALHOST, PORT + self, DIAL, FORMATTER()); err != nil {
 		panic(err)
 	}
 	end := W.Run(runW)

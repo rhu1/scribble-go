@@ -25,7 +25,7 @@ const (
 
 func init() {
 	var data messages.Data
-	gob.Register(data)
+	gob.Register(&data)
 }
 
 func main() {

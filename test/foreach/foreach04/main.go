@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"github.com/rhu1/scribble-go-runtime/runtime/session2"
+	"github.com/rhu1/scribble-go-runtime/runtime/transport2"
+	"github.com/rhu1/scribble-go-runtime/runtime/transport2/shm"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2/tcp"
 
 	"github.com/rhu1/scribble-go-runtime/test/foreach/foreach04/Foreach4/Proto1"
@@ -20,6 +22,21 @@ import (
 	W_2K "github.com/rhu1/scribble-go-runtime/test/foreach/foreach04/Foreach4/Proto1/W_1toK_not_1to1"
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
+
+var _ = shm.Dial
+var _ = tcp.Dial
+
+
+/*
+var LISTEN = tcp.Listen
+var DIAL = tcp.Dial
+var FORMATTER = func() *session2.GobFormatter { return new(session2.GobFormatter) } 
+/*/
+var LISTEN = shm.Listen
+var DIAL = shm.Dial
+var FORMATTER = func() *session2.PassByPointer { return new(session2.PassByPointer) } 
+//*/
+
 
 const PORT = 8888
 
@@ -47,23 +64,19 @@ func serverCode(wg *sync.WaitGroup, K int) *S_1.End {
 	var err error
 	P1 := Proto1.New()
 	S := P1.New_family_1_S_1to1(K, 1)
-	as := make([]*tcp.TcpListener, K)
-	//as := make([]*shm.ShmListener, K)
+	as := make([]transport2.ScribListener, K)
 	for j := 1; j <= K; j++ {
-		as[j-1], err = tcp.Listen(PORT+j)
-		//as[j-1], err = shm.Listen(PORT+j)
+		as[j-1], err = LISTEN(PORT+j)
 		if err != nil {
 			panic(err)
 		}
 		defer as[j-1].Close()
 	}
-	if err:= S.W_1to1and1toK_Accept(1, as[0], new(session2.GobFormatter)); err != nil {
+	if err:= S.W_1to1and1toK_Accept(1, as[0], FORMATTER()); err != nil {
 		panic(err)
 	}
 	for j := 2; j <= K; j++ {
-		err := S.W_1toK_not_1to1_Accept(j, as[j-1], 
-			new(session2.GobFormatter))
-			//new(session2.PassByPointer))
+		err := S.W_1toK_not_1to1_Accept(j, as[j-1], FORMATTER())
 		if err != nil {
 			panic(err)
 		}
@@ -93,10 +106,7 @@ func client1Code(wg *sync.WaitGroup, K int) *W_1.End {
 	self := 1
 	P1 := Proto1.New()
 	W := P1.New_W_1to1and1toK(K, self)  // Endpoint needs n to check self
-	err := W.S_1to1_Dial(1, util.LOCALHOST, PORT+self,
-			tcp.Dial, new(session2.GobFormatter))
-			//shm.Dial, new(session2.PassByPointer))
-	if err != nil {
+	if err := W.S_1to1_Dial(1, util.LOCALHOST, PORT+self, DIAL, FORMATTER()); err != nil {
 		panic(err)
 	}
 	//fmt.Println("W(" + strconv.Itoa(W.Self) + ") ready to run")
@@ -118,10 +128,7 @@ func runW1(w *W_1.Init) W_1.End {
 func client2KCode(wg *sync.WaitGroup, K int, self int) *W_2K.End {
 	P1 := Proto1.New()
 	W := P1.New_W_1toK_not_1to1(K, self)  // Endpoint needs n to check self
-	err := W.S_1to1_Dial(1, util.LOCALHOST, PORT+self,
-			tcp.Dial, new(session2.GobFormatter))
-			//shm.Dial, new(session2.PassByPointer))
-	if err != nil {
+	if err := W.S_1to1_Dial(1, util.LOCALHOST, PORT+self, DIAL, FORMATTER()); err != nil {
 		panic(err)
 	}
 	//fmt.Println("W(" + strconv.Itoa(W.Self) + ") ready to run")

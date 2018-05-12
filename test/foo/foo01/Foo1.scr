@@ -8,11 +8,6 @@
 module Foo1;
 
 
-type <go> "int" from "..." as int;
-/*type <go> "string" from "..." as string;
-type <go> "TwoBuyer.Address" from "scrib/twobuyer/TwoBuyer/TwoBuyer/types.go" as Address;
-type <go> "TwoBuyer.Date" from "scrib/twobuyer/TwoBuyer/TwoBuyer/types.go" as Date;*/
-
 // scrib surface syntax -- partly done -- TODO: domain annotations, pair/pipe, multi-interval foreach, multidim intervals
 // internalise dial/accept peers -- partly done -- TODO: full "nested" API (as an extra option)
 // remove proto sig param decls -- done
@@ -29,7 +24,7 @@ type <go> "TwoBuyer.Date" from "scrib/twobuyer/TwoBuyer/TwoBuyer/types.go" as Da
 // errors -- partly done -- TODO: branch action error (need to return some "default" error -- i.e., outside of actual cases)
 // state chan prealloc/reuse
 // linearity
-// shm
+// tcp/shm -- partly done -- primitive "type" payloads not working for gob
 // type-specific channels (shm only?)
 
 // deleg -- Proto1@W[K-3] ?
@@ -42,6 +37,9 @@ type <go> "TwoBuyer.Date" from "scrib/twobuyer/TwoBuyer/TwoBuyer/types.go" as Da
 
 // dynamic Pget?
 
+
+
+
 //...update syntax
 //... update interval syntax
 //... redo foo tests using new scheme -- including sig tests
@@ -52,6 +50,14 @@ type <go> "TwoBuyer.Date" from "scrib/twobuyer/TwoBuyer/TwoBuyer/types.go" as Da
 //...multidim indices
 
 //...do copy-on-send via Go pass-by-value -- more Go like?
+
+
+
+type <go> "int" from "..." as int;
+/*type <go> "string" from "..." as string;
+type <go> "TwoBuyer.Address" from "scrib/twobuyer/TwoBuyer/TwoBuyer/types.go" as Address;
+type <go> "TwoBuyer.Date" from "scrib/twobuyer/TwoBuyer/TwoBuyer/types.go" as Date;*/
+
 
 
 global protocol Proto1(role S, role W)

@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"github.com/rhu1/scribble-go-runtime/runtime/session2"
+	"github.com/rhu1/scribble-go-runtime/runtime/transport2"
+	"github.com/rhu1/scribble-go-runtime/runtime/transport2/shm"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2/tcp"
 
 	"github.com/rhu1/scribble-go-runtime/test/foreach/foreach03/Foreach3/Proto1"
@@ -19,6 +21,20 @@ import (
 	"github.com/rhu1/scribble-go-runtime/test/foreach/foreach03/Foreach3/Proto1/W_1toK2"
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
+
+var _ = shm.Dial
+var _ = tcp.Dial
+
+
+/*
+var LISTEN = tcp.Listen
+var DIAL = tcp.Dial
+var FORMATTER = func() *session2.GobFormatter { return new(session2.GobFormatter) } 
+/*/
+var LISTEN = shm.Listen
+var DIAL = shm.Dial
+var FORMATTER = func() *session2.PassByPointer { return new(session2.PassByPointer) } 
+//*/
 
 const PORT = 8888
 
@@ -48,20 +64,16 @@ func serverCode(wg *sync.WaitGroup, K1 int, K2 int, self int) *S_1toK1.End {
 	var err error
 	P1 := Proto1.New()
 	S := P1.New_S_1toK1(K2, K1, self)  // FIXME: order
-	as := make([]*tcp.TcpListener, K2)
-	//as := make([]*shm.ShmListener, K)
+	as := make([]transport2.ScribListener, K2)
 	for j := 1; j <= K2; j++ {
-		as[j-1], err = tcp.Listen(PORT + K2*(self-1) + j)
-		//as[j-1], err = shm.Listen(PORT+j)
+		as[j-1], err = LISTEN(PORT + K2*(self-1) + j)
 		if err != nil {
 			panic(err)
 		}
 		defer as[j-1].Close()
 	}
 	for j := 1; j <= K2; j++ {
-		err := S.W_1toK2_Accept(j, as[j-1], 
-			new(session2.GobFormatter))
-			//new(session2.PassByPointer))
+		err := S.W_1toK2_Accept(j, as[j-1], FORMATTER())
 		if err != nil {
 			panic(err)
 		}
@@ -90,9 +102,7 @@ func clientCode(wg *sync.WaitGroup, K1 int, K2 int, self int) *W_1toK2.End {
 	P1 := Proto1.New()
 	W := P1.New_W_1toK2(K1, K2, self)  // Endpoint needs n to check self
 	for j := 1; j <= K1; j++ {
-		err := W.S_1toK1_Dial(j, util.LOCALHOST, PORT + (K2*(j-1) + self),
-				tcp.Dial, new(session2.GobFormatter))
-				//shm.Dial, new(session2.PassByPointer))
+		err := W.S_1toK1_Dial(j, util.LOCALHOST, PORT + (K2*(j-1) + self), DIAL, FORMATTER())
 		if err != nil {
 			panic(err)
 		}

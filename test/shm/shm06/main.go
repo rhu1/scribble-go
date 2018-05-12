@@ -5,6 +5,7 @@
 package main
 
 import (
+	"encoding/gob"
 	"fmt"
 	"log"
 	"strconv"
@@ -22,10 +23,10 @@ import (
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 
+var _ = gob.Register
 var _ = shm.Dial
 var _ = tcp.Dial
 
-const PORT = 8888
 
 //*
 var LISTEN = tcp.Listen
@@ -35,6 +36,17 @@ var FORMATTER = func() *session2.GobFormatter { return new(session2.GobFormatter
 var LISTEN = shm.Listen
 var DIAL = shm.Dial
 var FORMATTER = func() *session2.PassByPointer { return new(session2.PassByPointer) } 
+//*/
+
+
+const PORT = 8888
+
+
+/*
+func init() {
+	var tmp *int
+	gob.Register(&tmp)  // Problem is something to do with this? -- panic: gob: registering duplicate names for **int: "int" != "**int" 
+}
 //*/
 
 func main() {
@@ -103,7 +115,7 @@ func clientCode(wg *sync.WaitGroup, K int, self int) *W_1K.End {
 
 func runW(w *W_1K.Init) W_1K.End {
 	data := make([]*int, 1)
-	end := w.S_1to1_Gather_A(data)
+	end := w.S_1to1_Gather_A(data)  // FIXME: panic: interface conversion: interface {} is int, not **int -- cf. gob.Register in commented init() ? -- also cf. shm01
 	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") gathered:", data, *data[0])
 	return *end
 }

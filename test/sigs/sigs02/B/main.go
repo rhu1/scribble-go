@@ -27,7 +27,7 @@ const (
 
 func init() {
 	var data messages.Data
-	gob.Register(data)
+	gob.Register(&data)
 }
 
 func main() {
@@ -50,7 +50,7 @@ func b(s *Scatter.Scatter, id int, wg *sync.WaitGroup) {
 	}
 	B.Run(func(s *B_1K.Init) B_1K.End {
 		d := make([]messages.Data, 1)
-		end := s.A_1to1_Gather_Data(d)
+		end := s.A_1to1_Gather_Data(d)  // FIXME: panic: interface conversion: session2.ScribMessage is messages.Data, not *messages.Data -- because "type Data int" -- cf. shm03
 		fmt.Println("B(" + strconv.Itoa(s.Ept.Self) + ") gathered:", d)
 		return *end
 	})
