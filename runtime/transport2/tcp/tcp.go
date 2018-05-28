@@ -32,6 +32,11 @@ func (ss *TcpListener) Accept() (transport2.BinChannel, error) {
 	return &c, err
 }
 
+// Addr returns the listener's network address.
+func (ss *TcpListener) Addr() net.Addr {
+	return ss.port.Addr()
+}
+
 func (ss *TcpListener) Close() error {
 	return ss.port.Close()
 }
