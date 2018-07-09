@@ -8,7 +8,6 @@ import (
 	"io"
 
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2"
-	"github.com/rhu1/scribble-go-runtime/runtime/transport2/shm"
 )
 
 var _ = fmt.Print
@@ -72,15 +71,32 @@ func (f *GobFormatter) Deserialize(m *ScribMessage) (error) {
 	return err
 }
 
+// PointerWriter is an interface for writing a pointer ptr to a channel.
+type PointerWriter interface {
+	WritePointer(ptr interface{})
+}
+
+// PointerReader is an interface for reading a pointer from a channel
+// and write the received content to ptr.
+type PointerReader interface {
+	ReadPointer(ptr *interface{})
+}
+
+// PointerReadWriter is an interface for reading and writing
+// a pointer over a channel.
+type PointerReadWriter interface {
+	PointerWriter
+	PointerReader
+}
 
 // FIXME: (rename?) and move to shm package
 type PassByPointer struct {
-	c *shm.ShmChannel
+	c PointerReadWriter
 }
 
 func (f *PassByPointer) Wrap(c transport2.BinChannel) {
-	f.c = c.(*shm.ShmChannel)
-}	
+	f.c = c.(PointerReadWriter)
+}
 
 func (f *PassByPointer) Serialize(m ScribMessage) error {
 	f.c.WritePointer(&m)

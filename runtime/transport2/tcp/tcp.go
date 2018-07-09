@@ -1,11 +1,11 @@
 package tcp
 
-
 import (
 	//"bufio"
 	//"errors"
 	"fmt"
 	"io"
+	"log"
 	//"log"
 	"net"
 	"strconv"
@@ -24,12 +24,17 @@ type TcpListener struct {
 
 //func (ss *TcpListener) Accept() (*TcpChannel, error) {
 func (ss *TcpListener) Accept() (transport2.BinChannel, error) {
-	var c TcpChannel
 	conn, err := ss.port.Accept()
-	if err == nil {
-		c = TcpChannel{conn:conn}
+	if err != nil {
+		log.Fatalf("cannot accept %s: %v", ss.Addr().String(), err)
 	}
+	c := TcpChannel{conn: conn}
 	return &c, err
+}
+
+// Addr returns the listener's network address.
+func (ss *TcpListener) Addr() net.Addr {
+	return ss.port.Addr()
 }
 
 func (ss *TcpListener) Close() error {
@@ -40,22 +45,22 @@ func (ss *TcpListener) Close() error {
 	
 }*/
 
-func Listen(port int)	(*TcpListener, error) {
-	var ss TcpListener
-	p, err := net.Listen("tcp", "localhost:" + strconv.Itoa(port))
-	if err == nil {
-		ss = TcpListener{port:p}	
-	}	
+func Listen(port int) (*TcpListener, error) {
+	p, err := net.Listen("tcp", "localhost:"+strconv.Itoa(port))
+	if err != nil {
+		log.Fatalf("cannot listen at :%d: %v", port, err)
+	}
+	ss := TcpListener{port: p}
 	return &ss, err
 }
 
 //func Dial(host string, port int) (*TcpChannel, error) {
 func Dial(host string, port int) (transport2.BinChannel, error) {
-	var c TcpChannel
-	conn, err := net.Dial("tcp", host + ":" + strconv.Itoa(port))
-	if (err == nil) {
-		c = TcpChannel{conn:conn}
+	conn, err := net.Dial("tcp", host+":"+strconv.Itoa(port))
+	if err != nil {
+		log.Fatalf("cannot connect to %s: %v", conn.RemoteAddr().String(), err)
 	}
+	c := TcpChannel{conn: conn}
 	return &c, err
 }
 
