@@ -3,7 +3,7 @@ package session2
 import (
 	"encoding/gob"
 	"fmt"
-	//"sync"
+	"sync"
 	//"strconv"
 
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2"
@@ -25,8 +25,20 @@ func (wrapper) GetOp() string {
 }
 
 type MPChan struct {
-	Fmts    map[string](map[int]ScribMessageFormatter)
-	Conns   map[string](map[int]transport2.BinChannel)  // Don't need to export, wrapped by Fmts
+	// ConnWg tracks initiated but un-established connections.
+	// Connections functions (Dial/Accept) must manually call
+	// ConnWg.Add(1) to add to the count when initiating a new
+	// connection to ensure connections are established before
+	// being used by Run(), e.g.
+	//
+	//     c.MPChan.ConnWg.Add(1)
+	//     conn, err := socket.Accept()
+	//     // store conn ...
+	//     c.MPChan.ConnWg.Done()
+	ConnWg sync.WaitGroup
+
+	Fmts  map[string](map[int]ScribMessageFormatter)
+	Conns map[string](map[int]transport2.BinChannel) // Don't need to export, wrapped by Fmts
 }
 
 func NewMPChan(self int, rolenames []string) *MPChan {
@@ -81,15 +93,16 @@ func (e *MPChan) Close() error {
 	for _, cs := range e.Conns {
 		for _, c := range cs {
 			if e := c.Close(); err == nil && e != nil {
-				err = e	
+				err = e
 			}
 		}
 	}
 	return err
 }
 
-func (e *MPChan) CheckConnection() {
-	//...TODO
+// CheckConnection waits for initiated connection to be established.
+func (ep *MPChan) CheckConnection() {
+	ep.ConnWg.Wait()
 }
 
 /*// Or could make ScribMessage wrappers...
