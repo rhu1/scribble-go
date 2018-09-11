@@ -78,7 +78,14 @@ func serverCode(wg *sync.WaitGroup, K int) *S_1.End {
 		}
 	}
 	//fmt.Println("S ready to run")
+
+	/*
 	end := S.Run(runS)
+	/*/
+	defer S.Close()
+	end := runS(S.Init())
+	//*/
+
 	wg.Done()
 	return &end
 }
@@ -100,7 +107,14 @@ func clientCode(wg *sync.WaitGroup, K int, self int) *W_1toK.End {
 		panic(err)
 	}
 	//fmt.Println("W(" + strconv.Itoa(W.Self) + ") ready to run")
+
+	/*
 	end := W.Run(runW)
+	/*/
+	defer W.Close()
+	end := runW(W.Init())
+	//*/
+
 	wg.Done()
 	return &end
 }
