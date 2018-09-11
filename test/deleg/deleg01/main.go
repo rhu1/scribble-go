@@ -61,16 +61,21 @@ func testProto2() {
 func serverB(wgProto2 *sync.WaitGroup, port int) *B.End {
 	var err error
 	P2 := Proto2.New()
-	B := P2.New_B_1to1(1)
+	epB := P2.New_B_1to1(1)
 	ss, err := LISTEN(port)
 	if err != nil {
 		panic(err)
 	}
 	defer ss.Close()
-	if err := B.A_1to1_Accept(1, ss, FORMATTER()); err != nil {
+	if err := epB.A_1to1_Accept(1, ss, FORMATTER()); err != nil {
 		panic(err)
 	}
-	end := B.Run(runB)
+	/*
+	end := epB.Run(runB)
+	/*/
+	defer epB.Close()
+	end := runB(epB.Init())
+	//*/
 	wgProto2.Done()
 	return &end
 }
@@ -105,8 +110,9 @@ func runA(a *A.Init) A.End {
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	//testProto2()
-
+	/*
+	testProto2()
+	/*/
 	wgProto1 := new(sync.WaitGroup)
 	wgProto1.Add(1+1)
 	wgProto2 := new(sync.WaitGroup)
@@ -118,6 +124,7 @@ func main() {
 	go clientW(wgProto1, wgProto2, 8888)
 	wgProto1.Wait()
 	wgProto2.Wait()
+	//*/
 }
 
 func serverS(wgProto1 *sync.WaitGroup, port int) *S.End {
@@ -143,7 +150,8 @@ func runS(s *S.Init) S.End {
 	if err := epA.B_1to1_Dial(1, util.LOCALHOST, 33333, DIAL, FORMATTER()); err != nil {
 		panic(err)
 	}
-	pay := []A.Init{*epA.Init}
+	//defer epA.Close()  // FIXME
+	pay := []*A.Init{epA.Init()}
 	end := s.W_1to1_Scatter_Foo(pay)
 	fmt.Println("S delegated Foo@A:")
 	return *end
@@ -162,8 +170,8 @@ func clientW(wgProto1 *sync.WaitGroup, wgProto2 *sync.WaitGroup, port int) *W.En
 }
 
 func runW(w *W.Init) W.End {
-	pay := make([]A.Init, 1)
+	pay := make([]*A.Init, 1)
 	end := w.S_1to1_Gather_Foo(pay)
-	runA(&pay[0])
+	runA(pay[0])  // FIXME: Close?
 	return *end
 }
