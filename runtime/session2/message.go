@@ -55,7 +55,8 @@ func (f *GobFormatter) Wrap(c transport2.BinChannel) {
 
 func (f *GobFormatter) Serialize(m ScribMessage) error {
 	//fmt.Printf("Serialize: %v %T\n", m, m)
-	return f.enc.Encode(&m)  // Encode *ScribMessage
+	return f.enc.Encode(&m)  // Encode *ScribMessage  // CHECKME just m? not &m
+		// "val" should be m
 }
 
 func (f *GobFormatter) Deserialize(m *ScribMessage) (error) {
@@ -65,6 +66,7 @@ func (f *GobFormatter) Deserialize(m *ScribMessage) (error) {
 	//fmt.Printf("To deserialise\n", b)
 
   err := f.dec.Decode(m)  // Decode *ScribMessage
+	  // pointer, "m" is *
 
 	//fmt.Printf("Deserialize2: %v %T\n", *m, *m)
 
