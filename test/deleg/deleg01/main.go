@@ -48,13 +48,24 @@ var FORMATTER = func() *session2.PassByPointer { return new(session2.PassByPoint
 const PORT = 33333
 
 
-func testProto2() {
+func main() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
+	/*
+	testProto2()
+	/*/
+	wgProto1 := new(sync.WaitGroup)
+	wgProto1.Add(1+1)
 	wgProto2 := new(sync.WaitGroup)
 	wgProto2.Add(1+1)
 	go serverB(wgProto2, PORT)
 	time.Sleep(100 * time.Millisecond)
-	go clientA(wgProto2, PORT)
+	go serverS(wgProto1, 8888)
+	time.Sleep(100 * time.Millisecond)
+	go clientW(wgProto1, wgProto2, 8888)
+	wgProto1.Wait()
 	wgProto2.Wait()
+	//*/
 }
 
 func serverB(wgProto2 *sync.WaitGroup, port int) *B.End {
@@ -105,27 +116,6 @@ func runA(a *A.Init) A.End {
 	return end
 }
 
-
-func main() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
-
-	/*
-	testProto2()
-	/*/
-	wgProto1 := new(sync.WaitGroup)
-	wgProto1.Add(1+1)
-	wgProto2 := new(sync.WaitGroup)
-	wgProto2.Add(1+1)
-	go serverB(wgProto2, PORT)
-	time.Sleep(100 * time.Millisecond)
-	go serverS(wgProto1, 8888)
-	time.Sleep(100 * time.Millisecond)
-	go clientW(wgProto1, wgProto2, 8888)
-	wgProto1.Wait()
-	wgProto2.Wait()
-	//*/
-}
-
 func serverS(wgProto1 *sync.WaitGroup, port int) *S.End {
 	var err error
 	P1 := Proto1.New()
@@ -173,4 +163,13 @@ func runW(w *W.Init) W.End {
 	end := w.S_1to1_Gather_Foo(pay)
 	runA(pay[0])  // FIXME: Close?
 	return *end
+}
+
+func testProto2() {
+	wgProto2 := new(sync.WaitGroup)
+	wgProto2.Add(1+1)
+	go serverB(wgProto2, PORT)
+	time.Sleep(100 * time.Millisecond)
+	go clientA(wgProto2, PORT)
+	wgProto2.Wait()
 }

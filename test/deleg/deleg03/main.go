@@ -51,10 +51,11 @@ const PORT = 8888
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
+	K := 1
+
 	/*
-	testProto2()
+	testProto2(K)
 	/*/
-	K := 3
 	wgProto1 := new(sync.WaitGroup)
 	wgProto1.Add(1+1)
 	wgProto2 := new(sync.WaitGroup)
@@ -106,9 +107,11 @@ func clientA(wgProto2 *sync.WaitGroup, K int) *A.End {
 	P2 := Proto2.New()
 	A := P2.New_A_1to1(K, 1)
 	for j := 1; j <= K; j++ {
+		fmt.Println("A requesting connection to B[", j, "]")
 		if err := A.B_1toK_Dial(j, util.LOCALHOST,  PORT+j, DIAL, FORMATTER()); err != nil {
 			panic(err)
 		}
+		fmt.Println("A connected to B[", j, "]")
 	}
 	end := A.Run(runA)
 	wgProto2.Done()
@@ -151,6 +154,7 @@ func runS(s *S.Init, K int) S.End {
 	if err := epB.A_1to1_Accept(1, ss, FORMATTER()); err != nil {
 		panic(err)
 	}
+	fmt.Println("S/B accepted connection from A")
 	//defer epB.Close()  // FIXME
 	pay := []*B.Init{epB.Init()}
 	end := s.W_1to1_Scatter_Foo(pay)
@@ -178,8 +182,7 @@ func runW(w *W.Init) W.End {
 	return *end
 }
 
-func testProto2() {
-	K := 3
+func testProto2(K int) {
 	wgProto2 := new(sync.WaitGroup)
 	wgProto2.Add(1+K)
 	for j := 1; j <= K; j++ {

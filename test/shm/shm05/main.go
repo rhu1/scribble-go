@@ -86,7 +86,7 @@ func serverCode(wg *sync.WaitGroup, K int) *S_1.End {
 	//fmt.Println("S ready to run")
 	end := S.Run(runS)
 	wg.Done()
-	return end
+	return &end
 }
 
 
@@ -107,7 +107,7 @@ func clientCode(wg *sync.WaitGroup, K int, self int) *W_1K.End {
 	}
 	end := W.Run(runW)
 	wg.Done()
-	return end
+	return &end
 }
 
 func runW(w *W_1K.Init) W_1K.End {
