@@ -140,7 +140,7 @@ func Dial(_ string, port int) (transport2.BinChannel, error) {
 	defer ports.mu.Unlock()
 	ch, exists := ports.chans[port]
 	if !exists {
-		return nil, io.ErrClosedPipe
+		return nil, fmt.Errorf("shm: dial failed: port %d does not exist", port)
 	}
 	c := Channel{
 		rdRx: ch.cb2, rdTx: ch.cn2, rdPtr: ch.cp2,
