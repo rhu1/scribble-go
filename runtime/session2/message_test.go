@@ -71,11 +71,9 @@ func TestSerialisePrimitiveType(t *testing.T) {
 			}
 			// Receive
 			for i := range toRecv {
-				var tmp interface{}
-				if err := mockIRecv(transport.rFmt, &tmp); err != nil {
+				if err := mockIRecv(transport.rFmt, &toRecv[i]); err != nil {
 					t.Errorf("deserialise failed: %v", err)
 				}
-				toRecv[i] = *(tmp.(*int))
 			}
 			if want, got := len(toSend), len(toRecv); want != got {
 				t.Errorf("mismatch: sent %d items but received %d", want, got)
@@ -112,11 +110,9 @@ func TestSerialiseStructType(t *testing.T) {
 			}
 			// Receive
 			for i := range toRecv {
-				var tmp interface{}
-				if err := mockIRecv(transport.rFmt, &tmp); err != nil {
+				if err := mockIRecv(transport.rFmt, &toRecv[i]); err != nil {
 					t.Errorf("deserialise failed: %v", err)
 				}
-				toRecv[i] = *(tmp.(*StructType))
 			}
 			if want, got := len(toSend), len(toRecv); want != got {
 				t.Errorf("mismatch: sent %d items but received %d", want, got)
@@ -151,11 +147,9 @@ func TestSerialiseNamedSig(t *testing.T) {
 			}
 			// Receive
 			for i := range toRecv {
-				var tmp interface{}
-				if err := mockIRecv(transport.rFmt, &tmp); err != nil {
+				if err := mockIRecv(transport.rFmt, &toRecv[i]); err != nil {
 					t.Errorf("deserialise failed: %v", err)
 				}
-				toRecv[i] = *tmp.(*NamedSig)
 			}
 			if want, got := len(toSend), len(toRecv); want != got {
 				t.Errorf("mismatch: sent %d items but received %d", want, got)
@@ -192,11 +186,9 @@ func TestSerialiseStructSig(t *testing.T) {
 			}
 			// Receive
 			for i := range toRecv {
-				var tmp interface{}
-				if err := mockIRecv(transport.rFmt, &tmp); err != nil {
+				if err := mockIRecv(transport.rFmt, &toRecv[i]); err != nil {
 					t.Errorf("deserialise failed: %v", err)
 				}
-				toRecv[i] = *tmp.(*StructSig)
 			}
 			if want, got := len(toSend), len(toRecv); want != got {
 				t.Errorf("mismatch: sent %d items but received %d", want, got)
@@ -225,7 +217,11 @@ func TestSerialiseStructPtrFieldSig(t *testing.T) {
 		StructPtrFieldSig{&i1},
 		StructPtrFieldSig{&i2},
 	}
-	toRecv := make([]StructPtrFieldSig, 3)
+	toRecv := []StructPtrFieldSig{
+		StructPtrFieldSig{},
+		StructPtrFieldSig{},
+		StructPtrFieldSig{},
+	}
 
 	for _, transport := range transports {
 		t.Run(transport.name, func(t *testing.T) {
@@ -238,12 +234,9 @@ func TestSerialiseStructPtrFieldSig(t *testing.T) {
 			}
 			// Receive
 			for i := range toRecv {
-				var tmp interface{}
-
-				if err := mockIRecv(transport.rFmt, &tmp); err != nil {
+				if err := mockIRecv(transport.rFmt, &toRecv[i]); err != nil {
 					t.Errorf("deserialise failed: %v", err)
 				}
-				toRecv[i] = *tmp.(*StructPtrFieldSig)
 			}
 			if want, got := len(toSend), len(toRecv); want != got {
 				t.Errorf("mismatch: sent %d items but received %d", want, got)
@@ -276,12 +269,9 @@ func TestSerialisePtrPrimitiveSig(t *testing.T) {
 			}
 			// Receive
 			for i := range toRecv {
-				var tmp interface{}
-
-				if err := mockIRecv(transport.rFmt, &tmp); err != nil {
+				if err := mockIRecv(transport.rFmt, &toRecv[i]); err != nil {
 					t.Errorf("deserialise failed: %v", err)
 				}
-				toRecv[i] = *tmp.(**int)
 			}
 			if want, got := len(toSend), len(toRecv); want != got {
 				t.Errorf("mismatch: sent %d items but received %d", want, got)
