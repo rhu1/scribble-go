@@ -96,6 +96,8 @@ func (ln *Listener) Accept() (transport2.BinChannel, error) {
 }
 
 func (ln *Listener) Close() error {
+	ports.mu.Lock()
+	defer ports.mu.Unlock()
 	delete(ports.chans, ln.port)
 	return nil
 }
