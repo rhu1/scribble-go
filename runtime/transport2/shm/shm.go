@@ -17,6 +17,7 @@ type sharedChan struct {
 	cn2 chan int
 	cp1 chan interface{}
 	cp2 chan interface{}
+	blk chan struct{} // block until connected
 }
 
 func newSharedChan() *sharedChan {
@@ -27,6 +28,7 @@ func newSharedChan() *sharedChan {
 		cn2: make(chan int),
 		cp1: make(chan interface{}),
 		cp2: make(chan interface{}),
+		blk: make(chan struct{}),
 	}
 }
 
@@ -92,6 +94,7 @@ func (ln *Listener) Accept() (transport2.BinChannel, error) {
 		rdRx: ln.ch.cb1, rdTx: ln.ch.cn1, rdPtr: ln.ch.cp1,
 		wrTx: ln.ch.cb2, wrRx: ln.ch.cn2, wrPtr: ln.ch.cp2,
 	}
+	<-ln.ch.blk
 	return &c, nil
 }
 
@@ -148,5 +151,6 @@ func Dial(_ string, port int) (transport2.BinChannel, error) {
 		rdRx: ch.cb2, rdTx: ch.cn2, rdPtr: ch.cp2,
 		wrTx: ch.cb1, wrRx: ch.cn1, wrPtr: ch.cp1,
 	}
+	close(ch.blk)
 	return &c, nil
 }
