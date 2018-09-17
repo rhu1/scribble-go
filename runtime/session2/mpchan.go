@@ -62,13 +62,10 @@ func (ep *MPChan) ISend(rolename string, i int, msg interface{}) error {
 
 // Could just use interface{}?  but specify *interface{} as typing info?
 // N.B. the "interface{}" part is itself a pointer, cf. ISend
-func (ep *MPChan) IRecv(rolename string, i int, msg *interface{}) error {
-	var w ScribMessage
+func (ep *MPChan) IRecv(rolename string, i int, msg interface{}) error {
+	var w ScribMessage = wrapper{msg}
 	err := ep.MRecv(rolename, i, &w)
 	//fmt.Printf("IRecv %v %T \n", w.(wrapper).Msg, w.(wrapper).Msg)
-	if err == nil {
-		*msg = w.(wrapper).Msg
-	}
 	return err
 }
 
