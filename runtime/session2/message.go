@@ -6,6 +6,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"io"
+	"unsafe"
 
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2"
 )
@@ -51,27 +52,35 @@ func (f *GobFormatter) Wrap(c transport2.BinChannel) {
 	f.enc = gob.NewEncoder(c.GetWriter())
 	f.rdr = c.GetReader()
 	f.dec = gob.NewDecoder(f.rdr)
-}	
+}
 
 func (f *GobFormatter) Serialize(m ScribMessage) error {
 	//fmt.Printf("Serialize: %v %T\n", m, m)
-	return f.enc.Encode(m.(wrapper).Msg) // Encode *ScribMessage  // CHECKME just m? not &m
+	switch smsg := m.(type) {
+	case wrapper:
+		return f.enc.Encode(smsg.Msg)
+	default:
+		return f.enc.Encode(&m) // Encode *ScribMessage  // CHECKME just m? not &m
+	}
 	// "val" should be m
 }
 
-func (f *GobFormatter) Deserialize(m *ScribMessage) (error) {
+func (f *GobFormatter) Deserialize(m *ScribMessage) error {
 	//fmt.Printf("Deserialize1: %v %T\n", *m, *m)
 	//b := make([]byte, 100)
 	//f.rdr.Read(b)
 	//fmt.Printf("To deserialise\n", b)
 
-	msg := (*m).(wrapper).Msg
-	err := f.dec.Decode(msg) // Decode *ScribMessage
+	switch smeg := (*m).(type) {
+	case wrapper:
+		msg := smeg.Msg
+		return f.dec.Decode(msg)
+	default:
+		return f.dec.Decode(m) // Decode *ScribMessage
+	}
 	// pointer, "m" is *
 
 	//fmt.Printf("Deserialize2: %v %T\n", *m, *m)
-
-	return err
 }
 
 // PointerWriter is an interface for writing a pointer ptr to a channel.
@@ -102,24 +111,53 @@ func (f *PassByPointer) Wrap(c transport2.BinChannel) {
 }
 
 func (f *PassByPointer) Serialize(m ScribMessage) error {
-	f.c.WritePointer(&m)
+	switch m := m.(type) {
+	case wrapper:
+		msg := m.Msg
+		f.c.WritePointer(msg)
+	default:
+		f.c.WritePointer(&m)
+	}
 	return nil
 }
 
 func (f *PassByPointer) Deserialize(m *ScribMessage) error {
-	var ptr interface{}	
-	f.c.ReadPointer(&ptr)
-	*m = *(ptr.(*ScribMessage))  // CHECKME: is this copying the actual message value, or just the "interface value"?
+	switch smsg := (*m).(type) {
+	case wrapper:
+		// rcvd is a temporary container
+		// to hold received data from ReadPointer.
+		var rcvd interface{}
+		f.c.ReadPointer(&rcvd) // at runtime rcvd is of type *T
+
+		// In current implementation, m is always wrapped
+		// and the real *T is in (wrapper).Msg
+		// Note: msg is an interface{}, but at runtime it is the
+		// address to where the received data should go (i.e. *T)
+		msg := smsg.Msg
+		ptrToMsg := derefIface(msg)
+		ptrToRcvd := derefIface(rcvd)
+
+		// This assignment is equivalent to
+		// *msg = *rcvd
+		// except msg and *rcvd are both hidden under interface{}
+		*(**unsafe.Pointer)(unsafe.Pointer(uintptr(ptrToMsg))) =
+			*(**unsafe.Pointer)(unsafe.Pointer(uintptr(ptrToRcvd)))
+	default:
+		var ptr interface{}
+		f.c.ReadPointer(&ptr)
+		*m = *(ptr.(*ScribMessage))
+	}
 	return nil
 }
 
-
-
-
-
-
-
-
+// derefIface takes an interface and returns a pointer
+// to its underlying value.
+func derefIface(iface interface{}) unsafe.Pointer {
+	var word uint
+	// An interface{} is a 2-word wide data structure where the latter word
+	// contains pointer to the underlying value in the interface{} variable
+	return *(*unsafe.Pointer)(unsafe.Pointer(uintptr(unsafe.Pointer(&iface)) + unsafe.Sizeof(word)))
+}
 
 /*func (f *GobFormatter) EncodeInt(m int) error {
 	return f.enc.Encode(&m)
