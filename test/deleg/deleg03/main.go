@@ -67,7 +67,7 @@ func main() {
 	go serverS(wgProto1, 8888, K)
 	time.Sleep(100 * time.Millisecond)
 	go clientW(wgProto1, wgProto2, 8888)
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(1000 * time.Millisecond)
 	go clientA(wgProto2, K)
 	wgProto1.Wait()
 	wgProto2.Wait()
@@ -83,9 +83,11 @@ func serverB(wgProto2 *sync.WaitGroup, K int, self int) *B.End {
 		panic(err)
 	}
 	defer ss.Close()
+	fmt.Println("B[", self ,"accepting connection from A")
 	if err := epB.A_1to1_Accept(1, ss, FORMATTER()); err != nil {
 		panic(err)
 	}
+	fmt.Println("B[", self ,"accepted connection from A")
 	/*
 	end := epB.Run(runB)
 	/*/
@@ -150,7 +152,8 @@ func runS(s *S.Init, K int) S.End {
 	if err != nil {
 		panic(err)
 	}
-	defer ss.Close()
+	//defer ss.Close()
+	fmt.Println("S/B accepting connection from A")
 	if err := epB.A_1to1_Accept(1, ss, FORMATTER()); err != nil {
 		panic(err)
 	}

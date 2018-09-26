@@ -82,12 +82,12 @@ func (c *Channel) WritePointer(m interface{}) {
 
 // Listener is a server-side shared memory listener
 // which implements transport.ScribListener.
-type Listener struct {
+type ShmListener struct {
 	port int
 	ch   *sharedChan
 }
 
-func (ln *Listener) Accept() (transport2.BinChannel, error) {
+func (ln *ShmListener) Accept() (transport2.BinChannel, error) {
 	c := Channel{
 		rdRx: ln.ch.cb1, rdTx: ln.ch.cn1, rdPtr: ln.ch.cp1,
 		wrTx: ln.ch.cb2, wrRx: ln.ch.cn2, wrPtr: ln.ch.cp2,
@@ -95,7 +95,7 @@ func (ln *Listener) Accept() (transport2.BinChannel, error) {
 	return &c, nil
 }
 
-func (ln *Listener) Close() error {
+func (ln *ShmListener) Close() error {
 	delete(ports.chans, ln.port)
 	return nil
 }
@@ -124,7 +124,7 @@ func init() {
 }
 
 // Listen creates a new listener at with port as identifier.
-func Listen(port int) (*Listener, error) {
+func Listen(port int) (*ShmListener, error) {
 	ports.mu.Lock()
 	defer ports.mu.Unlock()
 	if _, exists := ports.chans[port]; exists {
@@ -132,7 +132,12 @@ func Listen(port int) (*Listener, error) {
 	}
 	shared := newSharedChan()
 	ports.chans[port] = shared
-	return &Listener{port: port, ch: shared}, nil
+	return &ShmListener{port: port, ch: shared}, nil
+}
+
+// FIXME HACK -- simply replace existing Listen signature with this one?
+func BListen(port int) (transport2.ScribListener, error) {
+	return Listen(port)	
 }
 
 func Dial(_ string, port int) (transport2.BinChannel, error) {

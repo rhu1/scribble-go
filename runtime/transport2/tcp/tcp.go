@@ -54,6 +54,11 @@ func Listen(port int) (*TcpListener, error) {
 	return &ss, err
 }
 
+// FIXME HACK -- simply replace existing Listen signature with this one?
+func BListen(port int) (transport2.ScribListener, error) {
+	return Listen(port)
+}
+
 //func Dial(host string, port int) (*TcpChannel, error) {
 func Dial(host string, port int) (transport2.BinChannel, error) {
 	conn, err := net.Dial("tcp", host+":"+strconv.Itoa(port))
