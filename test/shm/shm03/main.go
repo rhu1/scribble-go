@@ -2,6 +2,8 @@
 //$ go install github.com/rhu1/scribble-go-runtime/test/shm/shm03
 //$ bin/shm03.exe
 
+//go:generate scribblec-param.sh Shm3.scr -d . -param Proto1 github.com/rhu1/scribble-go-runtime/test/shm/shm03/Shm3 -param-api S -param-api W
+
 package main
 
 import (
