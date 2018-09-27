@@ -11,7 +11,9 @@ sig <go> "messages.Bar" from "github.com/rhu1/scribble-go-runtime/test/deleg/del
 
 global protocol Proto1(role S, role W)
 {
-	Foo(Proto2@A) from S[1,1] to W[1,1];  // MessageSig
+	Foo(Proto2:Proto2@A)
+	//Foo(Proto2@A)
+			from S[1,1] to W[1,1];  // MessageSig
 }
 
 global protocol Proto2(role A, role B)
