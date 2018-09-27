@@ -63,7 +63,7 @@ func BListen(port int) (transport2.ScribListener, error) {
 func Dial(host string, port int) (transport2.BinChannel, error) {
 	conn, err := net.Dial("tcp", host+":"+strconv.Itoa(port))
 	if err != nil {
-		log.Fatalf("cannot connect to %s: %v", conn.RemoteAddr().String(), err)
+		log.Fatalf("cannot connect to %s:%d: %v", host, port, err)
 	}
 	c := TcpChannel{conn: conn}
 	return &c, err
