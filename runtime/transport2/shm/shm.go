@@ -17,6 +17,7 @@ type sharedChan struct {
 	cn2 chan int
 	cp1 chan interface{}
 	cp2 chan interface{}
+	blk chan struct{} // block until connected
 }
 
 func newSharedChan() *sharedChan {
@@ -27,6 +28,7 @@ func newSharedChan() *sharedChan {
 		cn2: make(chan int),
 		cp1: make(chan interface{}),
 		cp2: make(chan interface{}),
+		blk: make(chan struct{}),
 	}
 }
 
@@ -92,10 +94,13 @@ func (ln *ShmListener) Accept() (transport2.BinChannel, error) {
 		rdRx: ln.ch.cb1, rdTx: ln.ch.cn1, rdPtr: ln.ch.cp1,
 		wrTx: ln.ch.cb2, wrRx: ln.ch.cn2, wrPtr: ln.ch.cp2,
 	}
+	<-ln.ch.blk
 	return &c, nil
 }
 
-func (ln *ShmListener) Close() error {
+func (ln *Listener) Close() error {
+	ports.mu.Lock()
+	defer ports.mu.Unlock()
 	delete(ports.chans, ln.port)
 	return nil
 }
@@ -145,11 +150,12 @@ func Dial(_ string, port int) (transport2.BinChannel, error) {
 	defer ports.mu.Unlock()
 	ch, exists := ports.chans[port]
 	if !exists {
-		return nil, io.ErrClosedPipe
+		return nil, fmt.Errorf("shm: dial failed: port %d does not exist", port)
 	}
 	c := Channel{
 		rdRx: ch.cb2, rdTx: ch.cn2, rdPtr: ch.cp2,
 		wrTx: ch.cb1, wrRx: ch.cn1, wrPtr: ch.cp1,
 	}
+	close(ch.blk)
 	return &c, nil
 }
