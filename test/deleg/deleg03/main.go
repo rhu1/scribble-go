@@ -2,6 +2,9 @@
 //$ go install github.com/rhu1/scribble-go-runtime/test/deleg/deleg03
 //$ bin/deleg03.exe
 
+//go:generate scribblec-param.sh Deleg3.scr -d . -param Proto2 github.com/rhu1/scribble-go-runtime/test/deleg/deleg03/Deleg3 -param-api A -param-api B
+//go:generate scribblec-param.sh Deleg3.scr -d . -param Proto1 github.com/rhu1/scribble-go-runtime/test/deleg/deleg03/Deleg3 -param-api S -param-api W
+
 package main
 
 import (
