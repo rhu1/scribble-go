@@ -1,6 +1,6 @@
 //rhu@HZHL4 ~/code/go
-//$ go install github.com/rhu1/scribble-go-runtime/test/deleg/deleg03
-//$ bin/deleg03.exe
+//$ go install github.com/rhu1/scribble-go-runtime/test/deleg/deleg04
+//$ bin/deleg04.exe
 
 package main
 
@@ -16,14 +16,13 @@ import (
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2/shm"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2/tcp"
 
-	//"github.com/rhu1/scribble-go-runtime/test/deleg/deleg03/chans"
-	"github.com/rhu1/scribble-go-runtime/test/deleg/deleg03/messages"
-	"github.com/rhu1/scribble-go-runtime/test/deleg/deleg03/Deleg3/Proto1"
-	S "github.com/rhu1/scribble-go-runtime/test/deleg/deleg03/Deleg3/Proto1/S_1to1"
-	W "github.com/rhu1/scribble-go-runtime/test/deleg/deleg03/Deleg3/Proto1/W_1to1"
-	"github.com/rhu1/scribble-go-runtime/test/deleg/deleg03/Deleg3/Proto2"
-	A "github.com/rhu1/scribble-go-runtime/test/deleg/deleg03/Deleg3/Proto2/A_1to1"
-	B "github.com/rhu1/scribble-go-runtime/test/deleg/deleg03/Deleg3/Proto2/B_1toK"
+	"github.com/rhu1/scribble-go-runtime/test/deleg/deleg04/messages"
+/*	"github.com/rhu1/scribble-go-runtime/test/deleg/deleg04/Deleg4/Proto1"
+	S "github.com/rhu1/scribble-go-runtime/test/deleg/deleg04/Deleg4/Proto1/S_1to1"
+	W "github.com/rhu1/scribble-go-runtime/test/deleg/deleg04/Deleg4/Proto1/W_1to1"*/
+	"github.com/rhu1/scribble-go-runtime/test/deleg/deleg04/Deleg4/Proto2"
+	A "github.com/rhu1/scribble-go-runtime/test/deleg/deleg04/Deleg4/Proto2/A_1to1"
+	B "github.com/rhu1/scribble-go-runtime/test/deleg/deleg04/Deleg4/Proto2/B_1to1"
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 
@@ -51,10 +50,8 @@ const PORT = 8888
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	K := 1
-
-	/*
-	testProto2(K)
+	//*
+	testProto2()
 	/*/
 	wgProto1 := new(sync.WaitGroup)
 	wgProto1.Add(1+1)
@@ -67,27 +64,25 @@ func main() {
 	go serverS(wgProto1, 8888, K)
 	time.Sleep(100 * time.Millisecond)
 	go clientW(wgProto1, wgProto2, 8888)
-	time.Sleep(1000 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	go clientA(wgProto2, K)
 	wgProto1.Wait()
 	wgProto2.Wait()
 	//*/
 }
 
-func serverB(wgProto2 *sync.WaitGroup, K int, self int) *B.End {
+func serverB(wgProto2 *sync.WaitGroup) *B.End {
 	//var err error
 	P2 := Proto2.New()
-	epB := P2.New_B_1toK(K, self)
-	ss, err := LISTEN(PORT+self)
+	epB := P2.New_B_1to1(1)
+	ss, err := LISTEN(PORT)
 	if err != nil {
 		panic(err)
 	}
 	defer ss.Close()
-	fmt.Println("B[", self ,"accepting connection from A")
 	if err := epB.A_1to1_Accept(1, ss, FORMATTER()); err != nil {
 		panic(err)
 	}
-	fmt.Println("B[", self ,"accepted connection from A")
 	/*
 	end := epB.Run(runB)
 	/*/
@@ -100,34 +95,37 @@ func serverB(wgProto2 *sync.WaitGroup, K int, self int) *B.End {
 
 func runB(b *B.Init) B.End {
 	pay := make([]messages.Bar, 1)
-	end := *b.A_1to1_Gather_Bar(pay)
+	b2 := *b.A_1to1_Gather_Bar(pay)
+	fmt.Println("B gathered Bar:", pay)
+	end := *b2.A_1to1_Gather_Bar(pay)
 	fmt.Println("B gathered Bar:", pay)
 	return end
 }
 
-func clientA(wgProto2 *sync.WaitGroup, K int) *A.End {
+func clientA(wgProto2 *sync.WaitGroup) *A.End {
 	P2 := Proto2.New()
-	A := P2.New_A_1to1(K, 1)
-	for j := 1; j <= K; j++ {
-		fmt.Println("A requesting connection to B[", j, "]")
-		if err := A.B_1toK_Dial(j, util.LOCALHOST,  PORT+j, DIAL, FORMATTER()); err != nil {
-			panic(err)
-		}
-		fmt.Println("A connected to B[", j, "]")
+	A := P2.New_A_1to1(1)
+	fmt.Println("A requesting connection to B")
+	if err := A.B_1to1_Dial(1, util.LOCALHOST,  PORT, DIAL, FORMATTER()); err != nil {
+		panic(err)
 	}
+	fmt.Println("A connected to B")
 	end := A.Run(runA)
 	wgProto2.Done()
 	return &end
 }
 
 func runA(a *A.Init) A.End {
-	pay := []messages.Bar{messages.Bar{"1"}, messages.Bar{"2"}, messages.Bar{"3"}}
-	end := *a.B_1toK_Scatter_Bar(pay)
-	fmt.Println("A scattered Bar:", pay)
+	pay1 := []messages.Bar{messages.Bar{"1"}}
+	a2 := *a.B_1to1_Scatter_Bar(pay1)
+	fmt.Println("A scattered Bar:", pay1)
+	pay2 := []messages.Bar{messages.Bar{"2"}}
+	end := *a2.B_1to1_Scatter_Bar(pay2)
+	fmt.Println("A scattered Bar:", pay2)
 	return end
 }
 
-func serverS(wgProto1 *sync.WaitGroup, port int, K int) *S.End {
+/*func serverS(wgProto1 *sync.WaitGroup, port int, K int) *S.End {
 	var err error
 	P1 := Proto1.New()
 	epS := P1.New_S_1to1(1)
@@ -152,8 +150,7 @@ func runS(s *S.Init, K int) S.End {
 	if err != nil {
 		panic(err)
 	}
-	//defer ss.Close()
-	fmt.Println("S/B accepting connection from A")
+	defer ss.Close()
 	if err := epB.A_1to1_Accept(1, ss, FORMATTER()); err != nil {
 		panic(err)
 	}
@@ -183,15 +180,13 @@ func runW(w *W.Init) W.End {
 	fmt.Println("W received Foo(Proto1@B[K]):")
 	runB(pay[0])  // FIXME: Close?
 	return *end
-}
+}*/
 
-func testProto2(K int) {
+func testProto2() {
 	wgProto2 := new(sync.WaitGroup)
-	wgProto2.Add(1+K)
-	for j := 1; j <= K; j++ {
-		go serverB(wgProto2, K, j)
-	}
+	wgProto2.Add(1+1)
+	go serverB(wgProto2)
 	time.Sleep(100 * time.Millisecond)
-	go clientA(wgProto2, K)
+	go clientA(wgProto2)
 	wgProto2.Wait()
 }
