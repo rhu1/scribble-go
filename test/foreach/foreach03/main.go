@@ -81,14 +81,14 @@ func serverCode(wg *sync.WaitGroup, K1 int, K2 int, self int) *S_1toK1.End {
 	//fmt.Println("S ready to run")
 	end := S.Run(runS)
 	wg.Done()
-	return end
+	return &end
 }
 
 func runS(s *S_1toK1.Init) S_1toK1.End {
 	return *s.Foreach(nested)
 }
 
-func nested(s *S_1toK1.Init_14) S_1toK1.End {
+func nested(s *S_1toK1.Init_16) S_1toK1.End {
 	data := []int { 2, 3, 5, 7, 11, 13 }
 	Self := s.Ept.Self 
 	j := s.Ept.K2*(Self-1) + s.Ept.Params["I2"]-1
@@ -110,14 +110,14 @@ func clientCode(wg *sync.WaitGroup, K1 int, K2 int, self int) *W_1toK2.End {
 	//fmt.Println("W(" + strconv.Itoa(W.Self) + ") ready to run")
 	end := W.Run(runW)
 	wg.Done()
-	return end
+	return &end
 }
 
 func runW(w *W_1toK2.Init) W_1toK2.End {
 	return *w.Foreach(gather)
 }
 
-func gather(w *W_1toK2.Init_6) W_1toK2.End {
+func gather(w *W_1toK2.Init_7) W_1toK2.End {
 	pay := make([]int, w.Ept.K1)
 	end := w.S_I1toI1_Gather_A(pay)
 	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") gathered:", pay)

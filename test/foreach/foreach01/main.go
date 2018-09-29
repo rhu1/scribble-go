@@ -79,14 +79,14 @@ func serverCode(wg *sync.WaitGroup, K int) *S_1.End {
 	//fmt.Println("S ready to run")
 	end := S.Run(runS)
 	wg.Done()
-	return end
+	return &end
 }
 
 func runS(s *S_1.Init) S_1.End {
 	return *s.Foreach(nested)
 }
 
-func nested(s *S_1.Init_10) S_1.End {
+func nested(s *S_1.Init_11) S_1.End {
 	data := []int { 2, 3, 5, 7, 11, 13 }
 	K := s.Ept.K  // Good API? -- generate param values as direct fields? (instead of generic map)
 	pay := data[0:K]
@@ -105,7 +105,7 @@ func clientCode(wg *sync.WaitGroup, K int, self int) *W_1toK.End {
 	//fmt.Println("W(" + strconv.Itoa(W.Self) + ") ready to run")
 	end := W.Run(runW)
 	wg.Done()
-	return end
+	return &end
 }
 
 func runW(w *W_1toK.Init) W_1toK.End {

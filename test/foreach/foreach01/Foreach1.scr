@@ -11,7 +11,7 @@ module Foreach1;
 type <go> "int" from "..." as int;  // FIXME: use sig as default
 
 
-// i.e., Scatter by S -- A(int) from S[1.1] to W[1,K]
+// i.e., Scatter by S -- A(int) from S[1,1] to W[1,K]
 global protocol Proto1(role S, role W)
 {
 	foreach W[I:1,K]

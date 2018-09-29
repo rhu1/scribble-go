@@ -98,7 +98,7 @@ func (ln *ShmListener) Accept() (transport2.BinChannel, error) {
 	return &c, nil
 }
 
-func (ln *Listener) Close() error {
+func (ln *ShmListener) Close() error {
 	ports.mu.Lock()
 	defer ports.mu.Unlock()
 	delete(ports.chans, ln.port)

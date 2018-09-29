@@ -83,7 +83,7 @@ func serverCode(wg *sync.WaitGroup, K int) *S_1.End {
 	//fmt.Println("S ready to run")
 	end := S.Run(runS)
 	wg.Done()
-	return end
+	return &end
 }
 
 func runS(s *S_1.Init) S_1.End {
@@ -94,7 +94,7 @@ func runS(s *S_1.Init) S_1.End {
 	return *end
 }
 
-func nested(s *S_1.Init_16) S_1.End {
+func nested(s *S_1.Init_17) S_1.End {
 	data := []int { 2, 3, 5, 7, 11, 13 }
 	pay := data[0:s.Ept.K]
 	end := s.W_ItoI_Scatter_A(pay)
@@ -112,7 +112,7 @@ func client1Code(wg *sync.WaitGroup, K int) *W_1.End {
 	//fmt.Println("W(" + strconv.Itoa(W.Self) + ") ready to run")
 	end := W.Run(runW1)
 	wg.Done()
-	return end
+	return &end
 }
 
 func runW1(w *W_1.Init) W_1.End {
@@ -134,7 +134,7 @@ func client2KCode(wg *sync.WaitGroup, K int, self int) *W_2K.End {
 	//fmt.Println("W(" + strconv.Itoa(W.Self) + ") ready to run")
 	end := W.Run(runW)
 	wg.Done()
-	return end
+	return &end
 }
 
 func runW(w *W_2K.Init) W_2K.End {
