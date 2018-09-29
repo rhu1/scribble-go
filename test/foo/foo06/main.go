@@ -28,7 +28,7 @@ var _ = tcp.Dial
 var _ = shm.Dial
 
 
-/*
+//*
 var LISTEN = tcp.Listen
 var DIAL = tcp.Dial
 var FORMATTER = func() *session2.GobFormatter { return new(session2.GobFormatter) } 
@@ -80,7 +80,7 @@ func server(wg *sync.WaitGroup, K int) *S_1.End {
 	}
 	end := S.Run(runS)
 	wg.Done()
-	return end
+	return &end
 }
 
 func runS(s *S_1.Init) S_1.End {
@@ -110,7 +110,7 @@ func client(wg *sync.WaitGroup, K int, self int) *W_1toK.End {
 	}
 	end := W.Run(runW)
 	wg.Done()
-	return end
+	return &end
 }
 
 func runW(w *W_1toK.Init) W_1toK.End {
