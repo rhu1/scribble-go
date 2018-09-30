@@ -30,6 +30,7 @@ var _ = shm.Dial
 var _ = tcp.Dial
 
 
+// FIXME: tcp broken -- panic: EOF main.go:126
 /*
 var LISTEN = tcp.Listen
 var DIAL = tcp.Dial
@@ -46,7 +47,6 @@ const PORT = 8888
 
 
 
-// FIXME: tcp not working -- panic: EOF main.go:126
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
@@ -68,6 +68,7 @@ func main() {
 	wg.Wait()
 }
 
+// self = K
 func server_right(wg *sync.WaitGroup, K int, self int) *Right.End {
 	P1 := Proto1.New()
 	R := P1.New_family_1_W_2toK_not_1toKsub1(K, self)

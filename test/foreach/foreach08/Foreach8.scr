@@ -20,13 +20,23 @@ global protocol Proto1(role W)
 }
 
 
-// family1 ring
+
+
+
+
+
+
+
+// family1 ring -- FIXME: tcp broken
 // ring with branch+recursion
 // fix rolename-foreachvar binding check in WF
 // param val runtime checks
 // check foreachvar WF
 // foreach with multi-param iteration (add thirdparty to Ring loop -- may need merge)
 
+// duplicate message labels in protocol and branching
 // fancy API
 // short endpoint kind type names, e.g., 1to1 -- cf., already shortened I/O method names
 // reconsider common endpoint kind factoring and dial/accept -- e.g., pipeline dial/accept variants, cf., dial/accept neighbour
+
+// duck typing as "trait subtyping" ?

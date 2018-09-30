@@ -117,7 +117,7 @@ func runW(w *W_1toK.Init) W_1toK.End {
 	pay := make([]int, 1)
 	var x int
 	for {
-		w2 := w.S_1to1_Gather_A(pay)
+		w2 := w.S_1_Gather_A(pay)
 
 		/*
 		select {
@@ -130,15 +130,15 @@ func runW(w *W_1toK.Init) W_1toK.End {
 			return *end
 		}
 		/*/
-		switch c := w2.S_1to1_Branch().(type) {
+		switch c := w2.S_1_Branch().(type) {
 		case *W_1toK.B: 
 			w3 := c.Recv_B(&x)
 			fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received B:", x)
-			w = w3.S_1to1_Scatter_C(pay)
+			w = w3.S_1_Scatter_C(pay)
 		case *W_1toK.D: 
 			w4 := c.Recv_D(&x)
 			fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received D:", x)
-			end := w4.S_1to1_Scatter_E(pay) 
+			end := w4.S_1_Scatter_E(pay) 
 			return *end
 		}
 		//*/
