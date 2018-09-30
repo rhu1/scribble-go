@@ -90,17 +90,17 @@ func serverCode(wg *sync.WaitGroup, K int) *S_1.End {
 
 func runS(s *S_1.Init) S_1.End {
 	pay := []int{123}
-	s1 := s.W_1to1_Scatter_A(pay)
+	s1 := s.W_1_Scatter_A(pay)
 	fmt.Println("S scattered A:", pay)
 	end := s1.Foreach(nested).
-	          W_1to1_Gather_C(pay)
+	          W_1_Gather_C(pay)
 	fmt.Println("S gathered C:", pay)
 	return *end
 }
 
 func nested(s *S_1.Init_8) S_1.End {
 	pay := make([]int, 1)
-	end := s.W_ItoI_Gather_B(pay)
+	end := s.W_I_Gather_B(pay)
 	fmt.Println("S gathered B:", pay)
 	return *end
 }
@@ -120,13 +120,13 @@ func client1Code(wg *sync.WaitGroup, K int) *W_1.End {
 
 func runW1(w *W_1.Init) W_1.End {
 	pay := make([]int, 1)
-	w2 := w.S_1to1_Gather_A(pay)
+	w2 := w.S_1_Gather_A(pay)
 	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") gathered A:", pay)
 	rep := []int{w.Ept.Self}
-	w3 := w2.S_1to1_Scatter_B(rep)
+	w3 := w2.S_1_Scatter_B(rep)
 	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") scattered B:", rep)
 	rep = []int{pay[0]*pay[0]}
-	end := w3.S_1to1_Scatter_C(pay)
+	end := w3.S_1_Scatter_C(pay)
 	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") scattered C:", rep)
 	return *end
 }
@@ -145,7 +145,7 @@ func client2KCode(wg *sync.WaitGroup, K int, self int) *W_2K.End {
 
 func runW(w *W_2K.Init) W_2K.End {
 	pay := []int{w.Ept.Self}
-	end := w.S_1to1_Scatter_B(pay)
+	end := w.S_1_Scatter_B(pay)
 	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") scattered B:", pay)
 	return *end
 }

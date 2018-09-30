@@ -24,4 +24,9 @@ global protocol Proto1(role W)
 // ring with branch+recursion
 // fix rolename-foreachvar binding check in WF
 // param val runtime checks
+// check foreachvar WF
+// foreach with multi-param iteration (add thirdparty to Ring loop -- may need merge)
+
 // fancy API
+// short endpoint kind type names, e.g., 1to1 -- cf., already shortened I/O method names
+// reconsider common endpoint kind factoring and dial/accept -- e.g., pipeline dial/accept variants, cf., dial/accept neighbour
