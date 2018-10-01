@@ -1,0 +1,38 @@
+//Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/foreach/foreach12/Foreach12.scr -d test/foreach/foreach12/ -param Proto1 github.com/rhu1/scribble-go-runtime/test/foreach/foreach12/Foreach12 -param-api W
+
+
+// http://sandbox.kidstrythisathome.com/erdos/
+
+
+module Foreach12;
+
+
+sig <go> "messages.Foo" from "github.com/rhu1/scribble-go-runtime/test/foreach/foreach12/messages" as Foo;
+sig <go> "messages.Bar" from "github.com/rhu1/scribble-go-runtime/test/foreach/foreach12/messages" as Bar;
+
+
+// Families: K=3 and K>3
+global protocol Proto1(role W)
+{
+	choice at W[1]
+	{
+		Foo from W[1] to W[2];
+		foreach W[I:2,K-1], W[J:3,K]
+		{
+			Foo from W[I] to W[J];
+		}
+		Foo from W[K] to W[1];
+		do Proto1(W);
+	}
+	or
+	{
+		Bar from W[1] to W[2];
+		foreach W[I:2,K-1], W[J:3,K]
+		{
+			Bar from W[I] to W[J];
+		}
+		Bar from W[K] to W[1];
+	}
+}
+

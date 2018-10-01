@@ -1,6 +1,6 @@
 //rhu@HZHL4 ~/code/go
-//$ go install github.com/rhu1/scribble-go-runtime/test/foreach/foreach11
-//$ bin/foreach11.exe
+//$ go install github.com/rhu1/scribble-go-runtime/test/foreach/foreach12
+//$ bin/foreach12.exe
 
 package main
 
@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"reflect"
 	"strconv"
 	"sync"
 	"time"
@@ -18,12 +19,12 @@ import (
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2/shm"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2/tcp"
 
-	"github.com/rhu1/scribble-go-runtime/test/foreach/foreach11/messages"
-	"github.com/rhu1/scribble-go-runtime/test/foreach/foreach11/Foreach11/Proto1"
-	W2 "github.com/rhu1/scribble-go-runtime/test/foreach/foreach11/Foreach11/Proto1/family_1/W_2to2and2toKsub1_not_1to1and3toKandKtoK"
-	WK "github.com/rhu1/scribble-go-runtime/test/foreach/foreach11/Foreach11/Proto1/family_1/W_3toKandKtoK_not_1to1and2to2and2toKsub1"
-	W1 "github.com/rhu1/scribble-go-runtime/test/foreach/foreach11/Foreach11/Proto1/W_1to1_not_2to2and2toKsub1and3toKandKtoK"
-	W3toKsub1 "github.com/rhu1/scribble-go-runtime/test/foreach/foreach11/Foreach11/Proto1/W_2toKsub1and3toK_not_1to1and2to2andKtoK"
+	"github.com/rhu1/scribble-go-runtime/test/foreach/foreach12/messages"
+	"github.com/rhu1/scribble-go-runtime/test/foreach/foreach12/Foreach12/Proto1"
+	W2 "github.com/rhu1/scribble-go-runtime/test/foreach/foreach12/Foreach12/Proto1/family_1/W_2to2and2toKsub1_not_1to1and3toKandKtoK"
+	WK "github.com/rhu1/scribble-go-runtime/test/foreach/foreach12/Foreach12/Proto1/family_1/W_3toKandKtoK_not_1to1and2to2and2toKsub1"
+	W1 "github.com/rhu1/scribble-go-runtime/test/foreach/foreach12/Foreach12/Proto1/W_1to1_not_2to2and2toKsub1and3toKandKtoK"
+	W3toKsub1 "github.com/rhu1/scribble-go-runtime/test/foreach/foreach12/Foreach12/Proto1/W_2toKsub1and3toK_not_1to1and2to2andKtoK"
 
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
@@ -111,8 +112,9 @@ func runWK(s *WK.Init) WK.End {
 		s2 := c.Recv_Foo(&x)
 		fmt.Println("WK (" + strconv.Itoa(s.Ept.Self) + ") received Foo:", x)
 		pay := []messages.Foo{messages.Foo{s.Ept.Self}}
-		end = s2.W_1_Scatter_Foo(pay)
+		s = s2.W_1_Scatter_Foo(pay)
 		fmt.Println("W[3,K-1] (" + strconv.Itoa(s.Ept.Self) + ") scattered Foo:", pay)
+		return runWK(s)
 	case *WK.Bar_W_Init: 
 		var x messages.Bar
 		s3 := c.Recv_Bar(&x)
@@ -120,6 +122,9 @@ func runWK(s *WK.Init) WK.End {
 		pay := []messages.Bar{messages.Bar{strconv.Itoa(s.Ept.Self)}}
 		end = s3.W_1_Scatter_Bar(pay)
 		fmt.Println("W[3,K-1] (" + strconv.Itoa(s.Ept.Self) + ") scattered Foo:", pay)
+		return *end
+	default:
+		log.Fatal("Shouldn't get in here: ", reflect.TypeOf(c))
 	}
 	return *end
 }
@@ -167,20 +172,24 @@ func server_W3toKsub1(wg *sync.WaitGroup, K int, self int) *W3toKsub1.End {
 func runW3toKsub1(s *W3toKsub1.Init) W3toKsub1.End {
 	var end *W3toKsub1.End
 	switch c := s.W_selfplus2sub3_Branch().(type) {
-	case *W3toKsub1.Foo:  // CHECKME: case type name vs. serverWK
+	case *W3toKsub1.Foo_W_Init:  // CHECKME: case type name vs. serverWK
 		var x messages.Foo
 		s2 := c.Recv_Foo(&x)
 		fmt.Println("W[3,K-1] (" + strconv.Itoa(s.Ept.Self) + ") received Foo:", x)
 		pay := []messages.Foo{messages.Foo{s.Ept.Self}}
-		end = s2.W_selfplus3sub2_Scatter_Foo(pay)
+		s = s2.W_selfplus3sub2_Scatter_Foo(pay)
 		fmt.Println("W[3,K-1] (" + strconv.Itoa(s.Ept.Self) + ") scattered Foo:", pay)
-	case *W3toKsub1.Bar:
+		return runW3toKsub1(s)
+	case *W3toKsub1.Bar_W_Init:
 		var x messages.Bar
 		s3 := c.Recv_Bar(&x)
 		fmt.Println("W[3,K-1] (" + strconv.Itoa(s.Ept.Self) + ") received Bar:", x)
 		pay := []messages.Bar{messages.Bar{strconv.Itoa(s.Ept.Self)}}
 		end = s3.W_selfplus3sub2_Scatter_Bar(pay)
 		fmt.Println("W[3,K-1] (" + strconv.Itoa(s.Ept.Self) + ") scattered Foo:", pay)
+		return *end
+	default:
+		log.Fatal("Shouldn't get in here: ", reflect.TypeOf(c))
 	}
 	return *end
 }
@@ -220,20 +229,24 @@ func server_W2(wg *sync.WaitGroup, K int, self int) *W2.End {
 func runW2(s *W2.Init) W2.End {
 	var end *W2.End
 	switch c := s.W_1_Branch().(type) {
-	case *W2.Foo_W_Init:
+	case *W2.Foo:
 		var x messages.Foo
 		s2 := c.Recv_Foo(&x)
 		fmt.Println("W2 (" + strconv.Itoa(s.Ept.Self) + ") received Foo:", x)
 		pay := []messages.Foo{messages.Foo{s.Ept.Self}}
-		end = s2.W_selfplus3sub2_Scatter_Foo(pay)
+		s = s2.W_selfplus3sub2_Scatter_Foo(pay)
 		fmt.Println("W2 (" + strconv.Itoa(s.Ept.Self) + ") scattered Foo:", pay)
-	case *W2.Bar_W_Init:
+		return runW2(s)
+	case *W2.Bar:
 		var x messages.Bar
 		s3 := c.Recv_Bar(&x)
 		fmt.Println("W2 (" + strconv.Itoa(s.Ept.Self) + ") received Bar:", x)
 		pay := []messages.Bar{messages.Bar{strconv.Itoa(s.Ept.Self)}}
-		end = s3.W_selfplus3sub2_Scatter_Bar(pay)
+		end := s3.W_selfplus3sub2_Scatter_Bar(pay)
 		fmt.Println("W2 (" + strconv.Itoa(s.Ept.Self) + ") scattered Foo:", pay)
+		return *end
+	default:
+		log.Fatal("Shouldn't get in here: ", reflect.TypeOf(c))
 	}
 	return *end
 }
@@ -263,22 +276,26 @@ func client_W1(wg *sync.WaitGroup, K int, self int) *W1.End {
 	return &end
 }
 
+var seed = rand.NewSource(time.Now().UnixNano())
+var rnd = rand.New(seed)
+var count = 1
+
 func runW1(s *W1.Init) W1.End {
-	seed := rand.NewSource(time.Now().UnixNano())
-	rnd := rand.New(seed)
-	var end *W1.End
+	//var end *W1.End
 	if rnd.Intn(2) < 1 {
 		pay := []messages.Foo{messages.Foo{s.Ept.Self}}
 		s2 := s.W_2_Scatter_Foo(pay)
-		fmt.Println("W1 (" + strconv.Itoa(s.Ept.Self) + ") scattered Foo:", pay)
-		end = s2.W_K_Gather_Foo(pay)
+		fmt.Println("W1 (" + strconv.Itoa(s.Ept.Self) + ") scattered Foo #" + strconv.Itoa(count) + ":", pay)
+		s = s2.W_K_Gather_Foo(pay)
 		fmt.Println("W1 (" + strconv.Itoa(s.Ept.Self) + ") gathered:", pay)
+		count = count+1
+		return runW1(s)
 	} else {
 		pay := []messages.Bar{messages.Bar{strconv.Itoa(s.Ept.Self)}}
 		s3 := s.W_2_Scatter_Bar(pay)
 		fmt.Println("W1 (" + strconv.Itoa(s.Ept.Self) + ") scattered Bar:", pay)
-		end = s3.W_K_Gather_Bar(pay)
+		end := s3.W_K_Gather_Bar(pay)
 		fmt.Println("W1 (" + strconv.Itoa(s.Ept.Self) + ") gathered:", pay)
+		return *end
 	}
-	return *end
 }
