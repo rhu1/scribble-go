@@ -5,6 +5,7 @@
 package main
 
 import (
+	"encoding/gob"
 	"fmt"
 	"log"
 	"strconv"
@@ -30,8 +31,7 @@ var _ = shm.Dial
 var _ = tcp.Dial
 
 
-// FIXME: tcp broken -- panic: EOF main.go:126
-/*
+//*
 var LISTEN = tcp.Listen
 var DIAL = tcp.Dial
 var FORMATTER = func() *session2.GobFormatter { return new(session2.GobFormatter) } 
@@ -44,6 +44,11 @@ var FORMATTER = func() *session2.PassByPointer { return new(session2.PassByPoint
 
 
 const PORT = 8888
+
+func init() {
+	var foo messages.Foo
+	gob.Register(&foo)
+}
 
 
 

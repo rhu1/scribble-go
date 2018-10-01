@@ -42,6 +42,9 @@ test/foreach/foreach05/Foreach5/
 test/foreach/foreach06/Foreach6/
 test/foreach/foreach07/Foreach7/
 test/foreach/foreach08/Foreach8/
+test/foreach/foreach09/Foreach9/
+test/foreach/foreach010/Foreach10/
+test/foreach/foreach011/Foreach11/
 
 test/deleg/deleg01/Deleg1/
 test/deleg/deleg02/Deleg2/

@@ -34,6 +34,7 @@ global protocol Proto1(role W)
 // check foreachvar WF
 // foreach with multi-param iteration (add thirdparty to Ring loop -- may need merge)
 
+// godoc for APIs
 // duplicate message labels in protocol and branching
 // fancy API
 // short endpoint kind type names, e.g., 1to1 -- cf., already shortened I/O method names
