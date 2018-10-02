@@ -1,8 +1,8 @@
+// Package shm provides a shared memory transport implementation.
 package shm
 
 import (
 	"fmt"
-	"io"
 	"sync"
 
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2"
@@ -64,7 +64,7 @@ func (c *Channel) Write(b []byte) (n int, err error) {
 	return n, nil
 }
 
-// Close channel terminates a channel.
+// Close terminates a channel.
 func (c *Channel) Close() error {
 	return nil
 }
@@ -82,13 +82,15 @@ func (c *Channel) WritePointer(m interface{}) {
 	c.wrPtr <- m
 }
 
-// Listener is a server-side shared memory listener
+// ShmListener is a server-side shared memory listener
 // which implements transport.ScribListener.
 type ShmListener struct {
 	port int
 	ch   *sharedChan
 }
 
+// Accept waits for and accepts incoming connection.
+// It blocks until connection is established.
 func (ln *ShmListener) Accept() (transport2.BinChannel, error) {
 	c := Channel{
 		rdRx: ln.ch.cb1, rdTx: ln.ch.cn1, rdPtr: ln.ch.cp1,
@@ -98,6 +100,10 @@ func (ln *ShmListener) Accept() (transport2.BinChannel, error) {
 	return &c, nil
 }
 
+// Close terminates a listening shm connection.
+//
+// The port the listener is listening on is freed
+// and available again after a Close.
 func (ln *ShmListener) Close() error {
 	ports.mu.Lock()
 	defer ports.mu.Unlock()
@@ -128,7 +134,7 @@ func init() {
 	}
 }
 
-// Listen creates a new listener at with port as identifier.
+// Listen creates a new listener at port.
 func Listen(port int) (*ShmListener, error) {
 	ports.mu.Lock()
 	defer ports.mu.Unlock()
@@ -140,11 +146,14 @@ func Listen(port int) (*ShmListener, error) {
 	return &ShmListener{port: port, ch: shared}, nil
 }
 
+// BListen creates a new listener at port.
+//
 // FIXME HACK -- simply replace existing Listen signature with this one?
 func BListen(port int) (transport2.ScribListener, error) {
-	return Listen(port)	
+	return Listen(port)
 }
 
+// Dial uses the given port to establish a shm connection.
 func Dial(_ string, port int) (transport2.BinChannel, error) {
 	ports.mu.Lock()
 	defer ports.mu.Unlock()
