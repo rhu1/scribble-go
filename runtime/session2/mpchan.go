@@ -2,28 +2,25 @@ package session2
 
 import (
 	"encoding/gob"
-	"fmt"
 	"sync"
-	//"strconv"
 
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2"
 )
 
-var _ = fmt.Print
-
 func init() {
-	gob.Register(wrapper{})	
+	gob.Register(wrapper{})
 }
 
 type wrapper struct {
 	Msg interface{}
 }
 
-//func (*wrapper) GetOp() string {
 func (wrapper) GetOp() string {
-	return "_wrapper"	
+	return "_wrapper"
 }
 
+// MPChan represents a multiparty channel, it contains
+// metadata and the connections to all connected parties.
 type MPChan struct {
 	// ConnWg tracks initiated but un-established connections.
 	// Connections functions (Dial/Accept) must manually call
@@ -38,9 +35,10 @@ type MPChan struct {
 	ConnWg sync.WaitGroup
 
 	Fmts  map[string](map[int]ScribMessageFormatter)
-	Conns map[string](map[int]transport2.BinChannel) // Don't need to export, wrapped by Fmts
+	Conns map[string](map[int]transport2.BinChannel)
 }
 
+// NewMPChan returns a new initialised multiparty channel instance.
 func NewMPChan(self int, rolenames []string) *MPChan {
 	fmts := make(map[string]map[int]ScribMessageFormatter)
 	conns := make(map[string]map[int]transport2.BinChannel)
@@ -48,46 +46,55 @@ func NewMPChan(self int, rolenames []string) *MPChan {
 		conns[r] = make(map[int]transport2.BinChannel)
 		fmts[r] = make(map[int]ScribMessageFormatter)
 	}
-	return &MPChan{
-		Fmts:  fmts,
-		Conns: conns,
-	}
+	return &MPChan{Fmts: fmts, Conns: conns}
 }
 
-// Pre: msg is a pointer value
-func (ep *MPChan) ISend(rolename string, i int, msg interface{}) error {
-	//fmt.Printf("ISend %v %T\n", msg, msg)
-	return ep.MSend(rolename, i, wrapper{Msg: msg}) // CHECKME: &wrapper?
+// ISend sends a message msg to role r[i].
+// The parameter msg should be a pointer type, for example,
+//
+//     var i int = 42
+//     c.ISend("Foo", 1, &i) // sends 42 to Foo[1]
+//
+func (c *MPChan) ISend(r string, i int, msg interface{}) error {
+	return c.MSend(r, i, wrapper{Msg: msg})
 }
 
-// Could just use interface{}?  but specify *interface{} as typing info?
-// N.B. the "interface{}" part is itself a pointer, cf. ISend
-func (ep *MPChan) IRecv(rolename string, i int, msg interface{}) error {
+// IRecv receives a message msg from role r[i].
+// The parameter msg should be a pointer type and should be
+// allocated, for example,
+//
+//    var val T
+//    c.IRecv("Foo", 2, &val) // receives from Foo[2] into v
+//
+//    var ptr *T = new(T) // allocate for memory ptr points to
+//    c.IRecv("Foo", 2, ptr) // receives from Foo[2] into *ptr
+//
+func (c *MPChan) IRecv(r string, i int, msg interface{}) error {
+	// IRecv uses the underlying MRecv to receive messages
+	// since MRecv expects a ScribMessage, a wrapper w of
+	// that type is created as a container to temporarily
+	// store the msg pointer to cross the function boundary.
+	// The wrapper is ignored after receiving the value.
 	var w ScribMessage = wrapper{msg}
-	err := ep.MRecv(rolename, i, &w)
-	//fmt.Printf("IRecv %v %T \n", w.(wrapper).Msg, w.(wrapper).Msg)
-	return err
+	return c.MRecv(r, i, &w)
 }
 
-// *Foo is coming here
-func (ep *MPChan) MSend(rolename string, i int, msg ScribMessage) error {
-	//fmt.Printf("MSend %v %T %v %T\n", msg, msg, msg.(wrapper).Msg, msg.(wrapper).Msg)
-	return ep.Fmts[rolename][i].Serialize(msg)
+// MSend sends a Scribble message msg to role r[i].
+func (c *MPChan) MSend(r string, i int, msg ScribMessage) error {
+	return c.Fmts[r][i].Serialize(msg)
 }
 
-func (ep *MPChan) MRecv(rolename string, i int, msg *ScribMessage) error {
-	err := ep.Fmts[rolename][i].Deserialize(msg)
-
-	//fmt.Printf("MRecv %v %T\n", *msg, *msg)//, (*msg).(wrapper).Msg, (*msg).(wrapper).Msg)
-
-	return err
-//MSend {0xc0420ea080} session2.wrapper 0xc0420ea080 *string
-//MRecv {A} session2.wrapper A string  // XXX gob converts Msg pointer field to non-pointer?
+// MRecv receives a Scribble message msg from role r[i].
+//
+// The Scribble message msg is a pointer to a pre-allocated ScribMessage.
+func (c *MPChan) MRecv(rolename string, i int, msg *ScribMessage) error {
+	return c.Fmts[rolename][i].Deserialize(msg)
 }
 
-func (e *MPChan) Close() error {
+// Close closes all connected channels.
+func (c *MPChan) Close() error {
 	var err error
-	for _, cs := range e.Conns {
+	for _, cs := range c.Conns {
 		for _, c := range cs {
 			if e := c.Close(); err == nil && e != nil {
 				err = e
@@ -98,45 +105,6 @@ func (e *MPChan) Close() error {
 }
 
 // CheckConnection waits for initiated connection to be established.
-func (ep *MPChan) CheckConnection() {
-	ep.ConnWg.Wait()
+func (c *MPChan) CheckConnection() {
+	c.ConnWg.Wait()
 }
-
-/*// Or could make ScribMessage wrappers...
-func (ep *MPChan) SendString(rolename string, i int, msg string) error {
-	return ep.SendBytes(rolename, i, []byte(msg))
-}
-
-func (ep *MPChan) RecvString(rolename string, i int, msg *string) error {
-	var bs []byte
-	err := ep.RecvBytes(rolename, i, &bs)
-	if err == nil {
-		*msg = string(bs)
-	}
-	return err
-}
-
-func (ep *MPChan) SendInt(rolename string, i int, msg int) error {
-	return ep.SendString(rolename, i, strconv.Itoa(msg))
-}
-
-func (ep *MPChan) RecvInt(rolename string, i int, msg *int) error {
-	var tmp string
-	err := ep.RecvString(rolename, i, &tmp)
-	if err == nil {
-		*msg, _ = strconv.Atoi(tmp)
-	}
-	return err
-}
-
-func (ep *MPChan) SendBytes(rolename string, i int, bs []byte) error {
-	return ep.Fmts[rolename][i].EncodeBytes(bs)
-}
-
-func (ep *MPChan) RecvBytes(rolename string, i int, bs *[]byte) error {
-	tmp, err := ep.Fmts[rolename][i].DecodeBytes()
-	if err == nil {
-		*bs = tmp
-	}
-	return err
-}*/
