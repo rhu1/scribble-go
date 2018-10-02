@@ -95,7 +95,7 @@ func serverB(wgProto2 *sync.WaitGroup, port int) *B.End {
 
 func runB(b *B.Init) B.End {
 	pay := make([]messages.Bar, 1)
-	end := *b.A_1to1_Gather_Bar(pay)
+	end := *b.A_1_Gather_Bar(pay)
 	fmt.Println("B gathered Bar:", pay)
 	return end
 }
@@ -114,7 +114,7 @@ func clientA(wgProto2 *sync.WaitGroup, port int) *A.End {
 func runA(a *A.Init) A.End {
 	data := []messages.Bar{messages.Bar{"a"}, messages.Bar{"b"}, messages.Bar{"c"}}
 	pay := data[1:2]
-	end := *a.B_1to1_Scatter_Bar(pay)
+	end := *a.B_1_Scatter_Bar(pay)
 	fmt.Println("A scattered Bar:", pay)
 	return end
 }
@@ -144,7 +144,7 @@ func runS(s *S.Init) S.End {
 	}
 	//defer epA.Close()  // FIXME
 	pay := []*A.Init{epA.Init()}
-	end := s.W_1to1_Scatter_Foo(pay)
+	end := s.W_1_Scatter_Foo(pay)
 	fmt.Println("S delegated Foo(Proto1@A):")
 	return *end
 }
@@ -163,7 +163,7 @@ func clientW(wgProto1 *sync.WaitGroup, wgProto2 *sync.WaitGroup, port int) *W.En
 
 func runW(w *W.Init) W.End {
 	pay := make([]*A.Init, 1)
-	end := w.S_1to1_Gather_Foo(pay)
+	end := w.S_1_Gather_Foo(pay)
 	runA(pay[0])  // FIXME: Close?
 	return *end
 }
