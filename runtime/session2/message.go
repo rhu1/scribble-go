@@ -49,15 +49,13 @@ type GobFormatter struct {
 	c   transport2.BinChannel
 	enc *gob.Encoder
 	dec *gob.Decoder
-	rdr io.Reader
 }
 
 // Wrap wraps a binary channel for gob encoding.
 func (f *GobFormatter) Wrap(c transport2.BinChannel) {
 	f.c = c
-	f.enc = gob.NewEncoder(c.GetWriter())
-	f.rdr = c.GetReader()
-	f.dec = gob.NewDecoder(f.rdr)
+	f.enc = gob.NewEncoder(c)
+	f.dec = gob.NewDecoder(c)
 }
 
 // Serialize encodes a ScribMessage m using gob.

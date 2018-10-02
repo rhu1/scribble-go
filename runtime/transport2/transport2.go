@@ -14,13 +14,7 @@ type ScribListener interface {
 // BinChannel is a generic binary channel
 // implemented by all Scribble transports.
 type BinChannel interface {
-	//io.Closer
-
-	// Conn implements the Reader and Writer interfaces -- can use with gob
-	//GetConn() net.Conn
-	GetReader() io.Reader	
-	GetWriter() io.Writer	
-	/*Write(bs []byte) error
-	Read(bs []byte) error  // Read fully*/
-	Close() error
+	// ReadWriteCloser is the standard binary channel interface in Go.
+	// It contains Read/Write/Close method.
+	io.ReadWriteCloser
 }

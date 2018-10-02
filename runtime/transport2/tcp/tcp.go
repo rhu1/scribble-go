@@ -71,15 +71,12 @@ type TcpChannel struct {
 	conn net.Conn
 }
 
-/*func (c *TcpChannel) GetConn() net.Conn {
-	return c.conn
-}*/
-func (c *TcpChannel) GetReader() io.Reader {
-	return c.conn
+func (c *TcpChannel) Read(b []byte) (n int, err error) {
+	return c.conn.Read(b)
 }
 
-func (c *TcpChannel) GetWriter() io.Writer {
-	return c.conn
+func (c *TcpChannel) Write(b []byte) (n int, err error) {
+	return c.conn.Write(b)
 }
 
 // Close terminates a TCP channel.

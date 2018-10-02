@@ -69,9 +69,6 @@ func (c *Channel) Close() error {
 	return nil
 }
 
-func (c *Channel) GetReader() io.Reader { return c }
-func (c *Channel) GetWriter() io.Writer { return c }
-
 // ReadPointer is for receiving pointer over an untyped channel.
 func (c *Channel) ReadPointer(m *interface{}) {
 	*m = <-c.rdPtr
