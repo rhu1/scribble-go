@@ -1,0 +1,19 @@
+//Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/foo/foo13/Foo13.scr -d test/foo/foo13/ -param Proto1 github.com/rhu1/scribble-go-runtime/test/foo/foo13/Foo13 -param-api S -param-api W
+
+
+// http://sandbox.kidstrythisathome.com/erdos/
+
+
+module Foo13;
+
+
+
+
+
+
+global protocol Proto1(role S, role W)
+{
+	Foo() from S[1] to W[1,K];
+}
+
