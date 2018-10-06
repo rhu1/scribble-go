@@ -1,0 +1,44 @@
+//Raymond@HZHL3 ~/code/go/src/github.com/nickng/scribble-go-examples
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/pget/PGet.scr -d test/pget/ -param Foreach github.com/rhu1/scribble-go-runtime/test/pget/PGet -param-api M -param-api F -param-api S
+
+
+module PGet;
+
+
+
+/*global protocol Basic(role M, role F, role S) {
+  // Get metadata (size)
+  Head from F[1] to S[1];
+  Res  from S[1] to F[1];
+  Meta from F[1] to M[1];
+
+  // Send jobs.
+  Job from M[1] to F[1,K];
+  Get from F[1,K] to S[1];
+  Res from S[1] to F[1,K];
+  Data from F[1,K] to M[1];
+
+  //Sync(Sync@A) from F[1,K] to M[1];
+}*/
+
+/*global protocol Sync(role A, role B) {
+  Done from A[1] to B[1];
+}*/
+
+global protocol Foreach(role M, role F, role S)
+{
+  // Get metdata (size)
+  Head() from F[1] to S[1];
+  Res()  from S[1] to F[1];
+  Meta() from F[1] to M[1];
+
+  Job() from M[1] to F[1,K];
+  // Send jobs.
+  foreach F[I:1,K]
+  {
+    Get() from F[I] to S[1];
+    Res() from S[1] to F[I];
+  }
+  Data() from F[1,K] to M[1];
+  //Sync(Sync@A) from F[1,K] to M[1];
+}
