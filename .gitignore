@@ -33,6 +33,8 @@ test/foo/foo09/Foo9/
 test/foo/foo10/Foo10/
 test/foo/foo11/Foo11/
 test/foo/foo12/Foo12/
+test/foo/foo13/Foo13/
+test/foo/foo15/Foo15/
 
 test/foreach/foreach01/Foreach1/
 test/foreach/foreach02/Foreach2/
@@ -43,9 +45,11 @@ test/foreach/foreach06/Foreach6/
 test/foreach/foreach07/Foreach7/
 test/foreach/foreach08/Foreach8/
 test/foreach/foreach09/Foreach9/
+test/foreach/foreach09/Foreach9/
 test/foreach/foreach10/Foreach10/
 test/foreach/foreach11/Foreach11/
 test/foreach/foreach12/Foreach12/
+test/foreach/foreach13/Foreach13/
 
 test/deleg/deleg01/Deleg1/
 test/deleg/deleg02/Deleg2/
@@ -60,4 +64,6 @@ test/shm/shm05/Shm5/
 test/shm/shm06/Shm6/
 
 test/sigs/sigs01/Sigs1/
+
+test/pget/PGet/
 

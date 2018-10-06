@@ -45,7 +45,7 @@ var DIAL_FS = shm.Dial
 var FORMATTER_FS = func() *session2.PassByPointer { return new(session2.PassByPointer) } 
 //*/
 
-//*
+/*
 var LISTEN_MF = tcp.Listen
 var DIAL_MF = tcp.Dial
 var FORMATTER_MF = func() *session2.GobFormatter { return new(session2.GobFormatter) } 
@@ -100,7 +100,7 @@ func server_S(wg *sync.WaitGroup, K int, self int) *S.End {
 		}
 		defer as[j-1].Close()
 	}
-	if err = S.F_1to1and1toK_Accept(1, as[1], FORMATTER_FS()); err != nil {
+	if err = S.F_1to1and1toK_Accept(1, as[0], FORMATTER_FS()); err != nil {
 		panic(err)
 	}
 	fmt.Println("S (" + strconv.Itoa(S.Self) + ") accepted F (" + strconv.Itoa(1) + ") on", PORT_S+1)
@@ -116,7 +116,9 @@ func server_S(wg *sync.WaitGroup, K int, self int) *S.End {
 }
 
 func runS(s *S.Init) S.End {
-	end := s.F_1_Gather_Head().F_1_Scatter_Res()
+	end := s.F_1_Gather_Head().F_1_Scatter_Res().  // N.B. End_25 has the Foreach (not just "End") -- FIXME: make more obvious?
+			Foreach(nestedS)
+	fmt.Println("S (" + strconv.Itoa(s.Ept.Self) + ") done")
 	return *end
 }
 
@@ -141,14 +143,16 @@ func server_F2K(wg *sync.WaitGroup, K int, self int) *F2K.End {
 	if err = F.S_1to1_Dial(1, "localhost", PORT_S+self, DIAL_FS, FORMATTER_FS()); err != nil {
 		panic(err)
 	}
-	fmt.Println("F (" + strconv.Itoa(F.Self) + ") connmected S (1) on", PORT_S+self)
+	fmt.Println("F (" + strconv.Itoa(F.Self) + ") connected S (1) on", PORT_S+self)
 	end := F.Run(runF2K)
 	wg.Done()
 	return &end
 }
 
 func runF2K(s *F2K.Init) F2K.End {
-	return *s.M_1_Gather_Job().S_1_Scatter_Get().S_1_Gather_Res().M_1_Scatter_Data()
+	end := s.M_1_Gather_Job().S_1_Scatter_Get().S_1_Gather_Res().M_1_Scatter_Data()
+	fmt.Println("F (" + strconv.Itoa(s.Ept.Self) + ") done")
+	return *end
 }
 
 // self = 1
@@ -168,7 +172,7 @@ func server_F1(wg *sync.WaitGroup, K int, self int) *F1.End {
 	if err = F.S_1to1_Dial(1, "localhost", PORT_S+self, DIAL_FS, FORMATTER_FS()); err != nil {
 		panic(err)
 	}
-	fmt.Println("F (" + strconv.Itoa(F.Self) + ") connmected S (1) on", PORT_S+self)
+	fmt.Println("F (" + strconv.Itoa(F.Self) + ") connected S (1) on", PORT_S+self)
 	end := F.Run(runF1)
 	wg.Done()
 	return &end
@@ -176,14 +180,13 @@ func server_F1(wg *sync.WaitGroup, K int, self int) *F1.End {
 
 func runF1(s *F1.Init) F1.End {
 	end := s.S_1_Scatter_Head().S_1_Gather_Res().M_1_Scatter_Meta().M_1_Gather_Job().S_1_Scatter_Get().S_1_Gather_Res().M_1_Scatter_Data()
+	fmt.Println("F (" + strconv.Itoa(s.Ept.Self) + ") done")
 	return *end
 }
 
 func client_M(wg *sync.WaitGroup, K, self int) *M.End {
 	P1 := Foreach.New()
 	M := P1.New_family_1_M_1to1(K, self)
-	var ss transport2.ScribListener
-	var err error
 	if err := M.F_1to1and1toK_Dial(1, "localhost", PORT_F+1, DIAL_MF, FORMATTER_MF()); err != nil {
 		panic(err)
 	}
@@ -201,5 +204,6 @@ func client_M(wg *sync.WaitGroup, K, self int) *M.End {
 
 func runM(s *M.Init) M.End {
 	end := s.F_1_Gather_Meta().F_1toK_Scatter_Job().F_1toK_Gather_Data()
+	fmt.Println("M (" + strconv.Itoa(s.Ept.Self) + ") done")
 	return *end
 }
