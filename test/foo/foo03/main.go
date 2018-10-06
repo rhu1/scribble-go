@@ -34,10 +34,11 @@ var LISTEN = tcp.Listen
 var DIAL = tcp.Dial
 var FORMATTER = func() *session2.GobFormatter { return new(session2.GobFormatter) } 
 /*/
-var LISTEN = shm.Listen
+var LISTEN = shm.Listen  // FIXME: shm -- panic: Shouldn't get in here:  [empty label?] -- W_1toK/Init.go:37
 var DIAL = shm.Dial
 var FORMATTER = func() *session2.PassByPointer { return new(session2.PassByPointer) } 
 //*/
+
 
 
 
