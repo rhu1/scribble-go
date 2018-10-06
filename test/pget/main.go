@@ -155,7 +155,7 @@ func runF2K(s *F2K.Init) F2K.End {
 	return *end
 }
 
-// self = 1
+// self == 1
 func server_F1(wg *sync.WaitGroup, K int, self int) *F1.End {
 	P1 := Foreach.New()
 	F := P1.New_F_1to1and1toK(K, self)
