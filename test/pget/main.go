@@ -30,6 +30,7 @@ import (
 )
 
 
+var _ = gob.Register
 var _ = shm.Dial
 var _ = tcp.Dial
 
@@ -60,10 +61,10 @@ const PORT_S = 9999
 
 
 
-func init() {
+/*func init() {
 	var foo messages.Foo
 	gob.Register(&foo)
-}
+}*/
 
 
 func main() {
@@ -72,13 +73,13 @@ func main() {
 	K := 4
 
 	wg := new(sync.WaitGroup)
-	wg.Add(KA+KB)
+	wg.Add(K+1+1)
 
 	go server_S(wg, K, 1)
 
 	go server_F1(wg, K, 1)
 	for j := 2; j <= K; j++ {
-		go server_F2k(wg, K, j)
+		go server_F2K(wg, K, j)
 	}
 
 	time.Sleep(100 * time.Millisecond)
@@ -115,10 +116,11 @@ func server_S(wg *sync.WaitGroup, K int, self int) *S.End {
 }
 
 func runS(s *S.Init) S.End {
-	return *s.F_1_Gather_Head().F_1_Scatter_Res()
+	end := s.F_1_Gather_Head().F_1_Scatter_Res()
+	return *end
 }
 
-func nestedS(s *S.Init_22) S.End {
+func nestedS(s *S.Init_18) S.End {
 	return *s.F_I_Gather_Get().F_I_Scatter_Res()
 }
 
@@ -145,7 +147,7 @@ func server_F2K(wg *sync.WaitGroup, K int, self int) *F2K.End {
 	return &end
 }
 
-func runF2k(s *F2K.Init) F2K.End {
+func runF2K(s *F2K.Init) F2K.End {
 	return *s.M_1_Gather_Job().S_1_Scatter_Get().S_1_Gather_Res().M_1_Scatter_Data()
 }
 
@@ -167,13 +169,14 @@ func server_F1(wg *sync.WaitGroup, K int, self int) *F1.End {
 		panic(err)
 	}
 	fmt.Println("F (" + strconv.Itoa(F.Self) + ") connmected S (1) on", PORT_S+self)
-	end := F.Run(runF2K)
+	end := F.Run(runF1)
 	wg.Done()
 	return &end
 }
 
 func runF1(s *F1.Init) F1.End {
-	return *s.S_1_Scatter_Head().S_1_Gather_Res().M_1_Gather_Job().S_1_Scatter_Get().S_1_Gather_Res().M_1_Scatter_Data()
+	end := s.S_1_Scatter_Head().S_1_Gather_Res().M_1_Scatter_Meta().M_1_Gather_Job().S_1_Scatter_Get().S_1_Gather_Res().M_1_Scatter_Data()
+	return *end
 }
 
 func client_M(wg *sync.WaitGroup, K, self int) *M.End {
@@ -186,10 +189,10 @@ func client_M(wg *sync.WaitGroup, K, self int) *M.End {
 	}
 	fmt.Println("M (" + strconv.Itoa(M.Self) + ") connected to F(1) on", PORT_F+1)
 	for j := 2; j <= K; j++ {
-		if err := M.F_1toK_not_1to1(j, "localhost", PORT+j, DIAL_MF, FORMATTER_MF()); err != nil {
+		if err := M.F_1toK_not_1to1_Dial(j, "localhost", PORT_F+j, DIAL_MF, FORMATTER_MF()); err != nil {
 			panic(err)
 		}
-		fmt.Println("M (" + strconv.Itoa(A.Self) + ") connected to F(" + strconv.Itoa(j) + ") on", PORT+j)
+		fmt.Println("M (" + strconv.Itoa(M.Self) + ") connected to F(" + strconv.Itoa(j) + ") on", PORT_F+j)
 	}
 	end := M.Run(runM)
 	wg.Done()
@@ -197,12 +200,6 @@ func client_M(wg *sync.WaitGroup, K, self int) *M.End {
 }
 
 func runM(s *M.Init) M.End {
-	s.F_1_Gather_Meta().F_1toK_Scatter_Job()
-}
-
-/*func nestedM(s *M.Init_8) M.End {
-	pay := []messages.Foo{messages.Foo{s.Ept.Self}}
-	end := s.B_J_Scatter_Foo(pay)
-	fmt.Println("A (" + strconv.Itoa(s.Ept.Self) + ") scattered to B (" + strconv.Itoa(s.Ept.Params["J"]) + ") Foo:", pay)
+	end := s.F_1_Gather_Meta().F_1toK_Scatter_Job().F_1toK_Gather_Data()
 	return *end
-}*/
+}
