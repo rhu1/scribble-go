@@ -13,6 +13,8 @@ import (
 	"time"
 
 	"github.com/rhu1/scribble-go-runtime/runtime/session2"
+	"github.com/rhu1/scribble-go-runtime/runtime/transport2"
+	"github.com/rhu1/scribble-go-runtime/runtime/transport2/shm"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2/tcp"
 
 	"github.com/rhu1/scribble-go-runtime/test/foo/foo03/Foo3/Proto1"
@@ -21,7 +23,29 @@ import (
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 
+
+var _ = strconv.Itoa
+var _ = tcp.Dial
+var _ = shm.Dial
+
+
+/*
+var LISTEN = tcp.Listen
+var DIAL = tcp.Dial
+var FORMATTER = func() *session2.GobFormatter { return new(session2.GobFormatter) } 
+/*/
+var LISTEN = shm.Listen
+var DIAL = shm.Dial
+var FORMATTER = func() *session2.PassByPointer { return new(session2.PassByPointer) } 
+//*/
+
+
+
 const PORT = 8888
+
+
+
+
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
@@ -46,22 +70,22 @@ func server(wg *sync.WaitGroup, K int) *S_1.End {
 	var err error
 	P1 := Proto1.New()
 	S := P1.New_S_1to1(K, 1)
-	as := make([]*tcp.TcpListener, K)
+	as := make([]transport2.ScribListener, K)
 	for j := 1; j <= K; j++ {
-		as[j-1], err = tcp.Listen(PORT+j)
+		as[j-1], err = LISTEN(PORT+j)
 		if err != nil {
 			panic(err)
 		}
 		defer as[j-1].Close()
 	}
 	for j := 1; j <= K; j++ {
-		if err = S.W_1toK_Accept(j, as[j-1], new(session2.GobFormatter)); err != nil {
+		if err = S.W_1toK_Accept(j, as[j-1], FORMATTER()); err != nil {
 			panic(err)
 		}
 	}
 	end := S.Run(runS)
 	wg.Done()
-	return end
+	return &end
 }
 
 func runS(s *S_1.Init) S_1.End {
@@ -85,13 +109,13 @@ func runS(s *S_1.Init) S_1.End {
 func client(wg *sync.WaitGroup, K int, self int) *W_1toK.End {
 	P1 := Proto1.New()
 	W := P1.New_W_1toK(K, self)
-	err := W.S_1to1_Dial(1, util.LOCALHOST, PORT+self, tcp.Dial, new(session2.GobFormatter))
+	err := W.S_1to1_Dial(1, util.LOCALHOST, PORT+self, DIAL, FORMATTER())
 	if err != nil {
 		panic(err)
 	}
 	end := W.Run(runW)
 	wg.Done()
-	return end
+	return &end
 }
 
 func runW(w *W_1toK.Init) W_1toK.End {
@@ -106,7 +130,7 @@ func runW(w *W_1toK.Init) W_1toK.End {
 		fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received B:", x)
 	}
 	/*/
-	switch c := w.S_1to1_Branch().(type) {
+	switch c := w.S_1_Branch().(type) {
 	case *W_1toK.A: var x int
                   end = c.Recv_A(&x)
 	                fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received A:", x)
