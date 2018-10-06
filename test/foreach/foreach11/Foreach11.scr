@@ -23,7 +23,6 @@ global protocol Proto1(role W)
 			Foo from W[I] to W[J];
 		}
 		Foo from W[K] to W[1];
-		//do Proto1(W);
 	}
 	or
 	{

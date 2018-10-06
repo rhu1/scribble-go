@@ -22,8 +22,6 @@ global protocol Proto1(role W)
 		{
 			Foo from W[I] to W[J];
 		}
-		//Foo from W[K] to W[1];
-		//do Proto1(W);
 	}
 	or
 	{
@@ -32,7 +30,13 @@ global protocol Proto1(role W)
 		{
 			Bar from W[I] to W[J];
 		}
-		//Bar from W[K] to W[1];
 	}
 }
+
+/*
+W2 W_2to2and2toKsub1_not_1to1and3toK
+WK W_3toK_not_1to1and2to2and2toKsub1
+W1 W_1to1_not_2to2and2toKsub1and3toK
+M  W_2toKsub1and3toK_not_1to1and2to2
+*/
 

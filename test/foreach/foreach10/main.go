@@ -23,8 +23,9 @@ import (
 	W2 "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1/family_1/W_2to2and2toKsub1_not_1to1and3toK"  
 			// FIXME: should be same as M
 	WK "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1/family_1/W_3toK_not_1to1and2to2and2toKsub1"
-	W1 "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1/W_1to1_not_2to2and2toKsub1and3toK"
-	M "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1/W_2toKsub1and3toK_not_1to1and2to2"
+
+	W1 "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1/family_1/W_1to1_not_2to2and2toKsub1and3toK"
+	M "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1/family_1/W_2toKsub1and3toK_not_1to1and2to2"
 
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
@@ -105,7 +106,7 @@ func server_WK(wg *sync.WaitGroup, K int, self int) *WK.End {
 
 func runWK(s *WK.Init) WK.End {
 	var end *WK.End
-	switch c := s.W_selfplus2sub3_Branch().(type) {
+	switch c := s.W_selfsub1_Branch().(type) {
 	case *WK.Foo: 
 		var x messages.Foo
 		end = c.Recv_Foo(&x)
@@ -121,7 +122,7 @@ func runWK(s *WK.Init) WK.End {
 // K > 3
 func server_M(wg *sync.WaitGroup, K int, self int) *M.End {
 	P1 := Proto1.New()
-	M := P1.New_W_2toKsub1and3toK_not_1to1and2to2(K, self)
+	M := P1.New_family_1_W_2toKsub1and3toK_not_1to1and2to2(K, self)
 	var ss transport2.ScribListener
 	var err error
 	if ss, err = LISTEN(PORT+self); err != nil {
@@ -158,20 +159,20 @@ func server_M(wg *sync.WaitGroup, K int, self int) *M.End {
 
 func runM(s *M.Init) M.End {
 	var end *M.End
-	switch c := s.W_selfplus2sub3_Branch().(type) {
+	switch c := s.W_selfsub1_Branch().(type) {
 	case *M.Foo_W_Init:  // CHECKME: case type name vs. serverWK -- "repeat" message labels already supported?
 		var x messages.Foo
 		s2 := c.Recv_Foo(&x)
 		fmt.Println("M (" + strconv.Itoa(s.Ept.Self) + ") received Foo:", x)
 		pay := []messages.Foo{messages.Foo{s.Ept.Self}}
-		end = s2.W_selfplus3sub2_Scatter_Foo(pay)
+		end = s2.W_selfplus1_Scatter_Foo(pay)
 		fmt.Println("M (" + strconv.Itoa(s.Ept.Self) + ") scattered Foo:", pay)
 	case *M.Bar_W_Init:
 		var x messages.Bar
 		s3 := c.Recv_Bar(&x)
 		fmt.Println("M (" + strconv.Itoa(s.Ept.Self) + ") received Bar:", x)
 		pay := []messages.Bar{messages.Bar{strconv.Itoa(s.Ept.Self)}}
-		end = s3.W_selfplus3sub2_Scatter_Bar(pay)
+		end = s3.W_selfplus1_Scatter_Bar(pay)
 		fmt.Println("M (" + strconv.Itoa(s.Ept.Self) + ") scattered Foo:", pay)
 	}
 	return *end
@@ -217,14 +218,14 @@ func runW2(s *W2.Init) W2.End {
 		s2 := c.Recv_Foo(&x)
 		fmt.Println("W2 (" + strconv.Itoa(s.Ept.Self) + ") received Foo:", x)
 		pay := []messages.Foo{messages.Foo{s.Ept.Self}}
-		end = s2.W_selfplus3sub2_Scatter_Foo(pay)
+		end = s2.W_3_Scatter_Foo(pay)
 		fmt.Println("W2 (" + strconv.Itoa(s.Ept.Self) + ") scattered Foo:", pay)
 	case *W2.Bar_W_Init:
 		var x messages.Bar
 		s3 := c.Recv_Bar(&x)
 		fmt.Println("W2 (" + strconv.Itoa(s.Ept.Self) + ") received Bar:", x)
 		pay := []messages.Bar{messages.Bar{strconv.Itoa(s.Ept.Self)}}
-		end = s3.W_selfplus3sub2_Scatter_Bar(pay)
+		end = s3.W_3_Scatter_Bar(pay)
 		fmt.Println("W2 (" + strconv.Itoa(s.Ept.Self) + ") scattered Foo:", pay)
 	}
 	return *end
@@ -233,7 +234,7 @@ func runW2(s *W2.Init) W2.End {
 // self == 1
 func client_W1(wg *sync.WaitGroup, K int, self int) *W1.End {
 	P1 := Proto1.New()
-	W1 := P1.New_W_1to1_not_2to2and2toKsub1and3toK(K, self)
+	W1 := P1.New_family_1_W_1to1_not_2to2and2toKsub1and3toK(K, self)
 	if err := W1.W_2to2and2toKsub1_not_1to1and3toK_Dial(self+1, util.LOCALHOST, PORT+self+1, DIAL, FORMATTER());
 			err != nil {
 		panic(err)
