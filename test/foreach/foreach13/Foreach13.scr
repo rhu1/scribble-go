@@ -1,0 +1,24 @@
+//Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/foreach/foreach13/Foreach13.scr -d test/foreach/foreach13/ -param Proto1 github.com/rhu1/scribble-go-runtime/test/foreach/foreach13/Foreach13 -param-api A -param-api B
+
+
+// http://sandbox.kidstrythisathome.com/erdos/
+
+
+module Foreach13;
+
+
+sig <go> "messages.Foo" from "github.com/rhu1/scribble-go-runtime/test/foreach/foreach13/messages" as Foo;
+
+
+global protocol Proto1(role A, role B)
+{
+	foreach A[I:1,KA]
+	{
+		foreach B[J:1,KB]
+		{
+			Foo from A[I] to B[J];
+		}
+	}
+}
+
