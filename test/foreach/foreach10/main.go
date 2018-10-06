@@ -20,10 +20,11 @@ import (
 
 	"github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/messages"
 	"github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1"
-	W2 "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1/family_1/W_2to2and2toKsub1_not_1to1and3toK"
+	W2 "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1/family_1/W_2to2and2toKsub1_not_1to1and3toK"  
+			// FIXME: should be same as M
 	WK "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1/family_1/W_3toK_not_1to1and2to2and2toKsub1"
 	W1 "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1/W_1to1_not_2to2and2toKsub1and3toK"
-	W3toKsub1 "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1/W_2toKsub1and3toK_not_1to1and2to2"
+	M "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1/W_2toKsub1and3toK_not_1to1and2to2"
 
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
@@ -69,7 +70,7 @@ func main() {
 	go server_WK(wg, K, K)
 
 	for j := 3; j <= K-1; j++ {
-		go server_W3toKsub1(wg, K, j)
+		go server_M(wg, K, j)
 	}
 
 	go server_W2(wg, K, 2)
@@ -91,7 +92,7 @@ func server_WK(wg *sync.WaitGroup, K int, self int) *WK.End {
 		panic(err)
 	}
 	defer ss.Close()
-	// family 1: K > 3 -- so must accept from W3toKsub1 -- but could also use "interoperably" between families
+	// family 1: K > 3 -- so must accept from M -- but could also use "interoperably" between families
 	if err = WK.W_2toKsub1and3toK_not_1to1and2to2_Accept(self-1, ss, FORMATTER());
 			err != nil {
 		panic(err)
@@ -118,7 +119,7 @@ func runWK(s *WK.Init) WK.End {
 }
 
 // K > 3
-func server_W3toKsub1(wg *sync.WaitGroup, K int, self int) *W3toKsub1.End {
+func server_M(wg *sync.WaitGroup, K int, self int) *M.End {
 	P1 := Proto1.New()
 	M := P1.New_W_2toKsub1and3toK_not_1to1and2to2(K, self)
 	var ss transport2.ScribListener
@@ -133,48 +134,45 @@ func server_W3toKsub1(wg *sync.WaitGroup, K int, self int) *W3toKsub1.End {
 			panic(err)
 		}
 	} else {
-		if err = M.W_2to2and2toKsub1_not_1to1and3toK_Accept(self-1, ss, FORMATTER()); err != nil {
-					// FIXME: should be W_2toKsub1and3toK_not_1to1and2to2_Accept -- probably need to check dial/accept between same variant
+		if err = M.W_2toKsub1and3toK_not_1to1and2to2_Accept(self-1, ss, FORMATTER()); err != nil {
 			panic(err)
 		}
 	}
-	//CHECKME: W_1to1_not_2to2and2toKsub1and3toK_Accept  // Should not be possible?
-	fmt.Println("W[3,K-1] (" + strconv.Itoa(M.Self) + ") accepted", self-1, "on", PORT+self)
+	fmt.Println("M (" + strconv.Itoa(M.Self) + ") accepted", self-1, "on", PORT+self)
 
 	if self == K-1 {
 		if err := M.W_3toK_not_1to1and2to2and2toKsub1_Dial(self+1, util.LOCALHOST, PORT+self+1, DIAL, FORMATTER()); err != nil {
 			panic(err)
 		}
 	} else {
-		if err := M.W_3toK_not_1to1and2to2and2toKsub1_Dial(self+1, util.LOCALHOST, PORT+self+1, DIAL, FORMATTER()); err != nil {
-					// FIXME: should be W_2toKsub1and3toK_not_1to1and2to2_Dial -- similarly to above
+		if err := M.W_2toKsub1and3toK_not_1to1and2to2_Dial(self+1, util.LOCALHOST, PORT+self+1, DIAL, FORMATTER()); err != nil {
 			panic(err)
 		}
 	}
-	fmt.Println("W[3,K-1] (" + strconv.Itoa(M.Self) + ") connected to", self+1, "on", PORT+self+1)
+	fmt.Println("M (" + strconv.Itoa(M.Self) + ") connected to", self+1, "on", PORT+self+1)
 
-	end := M.Run(runW3toKsub1)
+	end := M.Run(runM)
 	wg.Done()
 	return &end
 }
 
-func runW3toKsub1(s *W3toKsub1.Init) W3toKsub1.End {
-	var end *W3toKsub1.End
+func runM(s *M.Init) M.End {
+	var end *M.End
 	switch c := s.W_selfplus2sub3_Branch().(type) {
-	case *W3toKsub1.Foo_W_Init:  // CHECKME: case type name vs. serverWK -- "repeat" message labels already supported?
+	case *M.Foo_W_Init:  // CHECKME: case type name vs. serverWK -- "repeat" message labels already supported?
 		var x messages.Foo
 		s2 := c.Recv_Foo(&x)
-		fmt.Println("W[3,K-1] (" + strconv.Itoa(s.Ept.Self) + ") received Foo:", x)
+		fmt.Println("M (" + strconv.Itoa(s.Ept.Self) + ") received Foo:", x)
 		pay := []messages.Foo{messages.Foo{s.Ept.Self}}
 		end = s2.W_selfplus3sub2_Scatter_Foo(pay)
-		fmt.Println("W[3,K-1] (" + strconv.Itoa(s.Ept.Self) + ") scattered Foo:", pay)
-	case *W3toKsub1.Bar_W_Init:
+		fmt.Println("M (" + strconv.Itoa(s.Ept.Self) + ") scattered Foo:", pay)
+	case *M.Bar_W_Init:
 		var x messages.Bar
 		s3 := c.Recv_Bar(&x)
-		fmt.Println("W[3,K-1] (" + strconv.Itoa(s.Ept.Self) + ") received Bar:", x)
+		fmt.Println("M (" + strconv.Itoa(s.Ept.Self) + ") received Bar:", x)
 		pay := []messages.Bar{messages.Bar{strconv.Itoa(s.Ept.Self)}}
 		end = s3.W_selfplus3sub2_Scatter_Bar(pay)
-		fmt.Println("W[3,K-1] (" + strconv.Itoa(s.Ept.Self) + ") scattered Foo:", pay)
+		fmt.Println("M (" + strconv.Itoa(s.Ept.Self) + ") scattered Foo:", pay)
 	}
 	return *end
 }
