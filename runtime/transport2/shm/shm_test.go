@@ -23,12 +23,12 @@ func TestRoundTrip(t *testing.T) {
 		}
 		r := bytes.NewReader(input)
 		inputLen := int64(len(input))
-		n, err := io.CopyN(server.GetWriter(), r, inputLen) // message to server
+		n, err := io.CopyN(server, r, inputLen) // message to server
 		if err != nil {
 			t.Error(err)
 		}
 		t.Logf("Server received %d bytes", n)
-		n, err = io.CopyN(server.GetWriter(), server.GetReader(), inputLen) // server to client
+		n, err = io.CopyN(server, server, inputLen) // server to client
 		if err != nil {
 			t.Error(err)
 		}
@@ -40,13 +40,13 @@ func TestRoundTrip(t *testing.T) {
 	}
 
 	inputLen := int64(len(input))
-	n, err := io.CopyN(client.GetWriter(), client.GetReader(), inputLen)
+	n, err := io.CopyN(client, client, inputLen)
 	if err != nil {
 		t.Error(err)
 	}
 	t.Logf("Client forwarded %d bytes", n)
 	var b bytes.Buffer
-	n, err = io.CopyN(&b, client.GetReader(), inputLen)
+	n, err = io.CopyN(&b, client, inputLen)
 	if err != nil {
 		t.Error(err)
 	}

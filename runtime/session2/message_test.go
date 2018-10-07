@@ -3,7 +3,6 @@ package session2
 import (
 	"bytes"
 	"encoding/gob"
-	"io"
 	"testing"
 )
 
@@ -15,11 +14,11 @@ type fakeChan struct {
 func newFakeChan(N int) *fakeChan {
 	return &fakeChan{new(bytes.Buffer), make(chan interface{}, N)}
 }
-func (c *fakeChan) GetReader() io.Reader       { return c.buf }
-func (c *fakeChan) GetWriter() io.Writer       { return c.buf }
-func (c *fakeChan) Close() error               { return nil }
-func (c *fakeChan) ReadPointer(m *interface{}) { *m = <-c.ptr }
-func (c *fakeChan) WritePointer(m interface{}) { c.ptr <- m }
+func (c *fakeChan) Read(p []byte) (int, error)  { return c.buf.Read(p) }
+func (c *fakeChan) Write(p []byte) (int, error) { return c.buf.Write(p) }
+func (c *fakeChan) Close() error                { return nil }
+func (c *fakeChan) ReadPointer(m *interface{})  { *m = <-c.ptr }
+func (c *fakeChan) WritePointer(m interface{})  { c.ptr <- m }
 
 func mockMPChan(fmtr ScribMessageFormatter) *MPChan {
 	mpc := NewMPChan(0, []string{""})
@@ -49,34 +48,129 @@ func newFakeTransports(N int) []transport {
 func TestSerialisePrimitiveType(t *testing.T) {
 	transports := newFakeTransports(3)
 
-	toSend := []int{1, 2, 3}
-	toRecv := make([]int, 3)
+	t.Run("int", func(t *testing.T) {
+		toSend := []int{1, 2, 3}
+		toRecv := make([]int, 3)
 
-	for _, transport := range transports {
-		t.Run(transport.name, func(t *testing.T) {
-			mpc := mockMPChan(transport.sFmt)
-			// Send
-			for i := range toSend {
-				if err := mpc.ISend("", 0, &toSend[i]); err != nil {
-					t.Errorf("serialise failed: %v", err)
+		for _, transport := range transports {
+			t.Run(transport.name, func(t *testing.T) {
+				mpc := mockMPChan(transport.sFmt)
+				// Send
+				for i := range toSend {
+					if err := mpc.ISend("", 0, &toSend[i]); err != nil {
+						t.Errorf("serialise failed: %v", err)
+					}
 				}
-			}
-			// Receive
-			for i := range toRecv {
-				if err := mpc.IRecv("", 0, &toRecv[i]); err != nil {
-					t.Errorf("deserialise failed: %v", err)
+				// Receive
+				for i := range toRecv {
+					if err := mpc.IRecv("", 0, &toRecv[i]); err != nil {
+						t.Errorf("deserialise failed: %v", err)
+					}
 				}
-			}
-			if want, got := len(toSend), len(toRecv); want != got {
-				t.Errorf("mismatch: sent %d items but received %d", want, got)
-			}
-			for i := range toSend {
-				if want, got := toSend[i], toRecv[i]; want != got {
-					t.Errorf("mismatch at %d: sent %#v but got %#v", i, want, got)
+				if want, got := len(toSend), len(toRecv); want != got {
+					t.Errorf("mismatch: sent %d items but received %d", want, got)
 				}
-			}
-		})
-	}
+				for i := range toSend {
+					if want, got := toSend[i], toRecv[i]; want != got {
+						t.Errorf("mismatch at %d: sent %#v but got %#v", i, want, got)
+					}
+				}
+			})
+		}
+	})
+	t.Run("float32", func(t *testing.T) {
+		toSend := []float32{0.01, 0.02, 0.03}
+		toRecv := make([]float32, 3)
+
+		for _, transport := range transports {
+			t.Run(transport.name, func(t *testing.T) {
+				mpc := mockMPChan(transport.sFmt)
+				// Send
+				for i := range toSend {
+					if err := mpc.ISend("", 0, &toSend[i]); err != nil {
+						t.Errorf("serialise failed: %v", err)
+					}
+				}
+				// Receive
+				for i := range toRecv {
+					if err := mpc.IRecv("", 0, &toRecv[i]); err != nil {
+						t.Errorf("deserialise failed: %v", err)
+					}
+				}
+				if want, got := len(toSend), len(toRecv); want != got {
+					t.Errorf("mismatch: sent %d items but received %d", want, got)
+				}
+				for i := range toSend {
+					if want, got := toSend[i], toRecv[i]; want != got {
+						t.Errorf("mismatch at %d: sent %#v but got %#v", i, want, got)
+					}
+				}
+			})
+		}
+	})
+	t.Run("byte", func(t *testing.T) {
+		toSend := []byte("abc")
+		toRecv := make([]byte, 3)
+
+		for _, transport := range transports {
+			t.Run(transport.name, func(t *testing.T) {
+				mpc := mockMPChan(transport.sFmt)
+				// Send
+				for i := range toSend {
+					if err := mpc.ISend("", 0, &toSend[i]); err != nil {
+						t.Errorf("serialise failed: %v", err)
+					}
+				}
+				// Receive
+				for i := range toRecv {
+					if err := mpc.IRecv("", 0, &toRecv[i]); err != nil {
+						t.Errorf("deserialise failed: %v", err)
+					}
+				}
+				if want, got := len(toSend), len(toRecv); want != got {
+					t.Errorf("mismatch: sent %d items but received %d", want, got)
+				}
+				for i := range toSend {
+					if want, got := toSend[i], toRecv[i]; want != got {
+						t.Errorf("mismatch at %d: sent %#v but got %#v", i, want, got)
+					}
+				}
+			})
+		}
+	})
+	t.Run("string", func(t *testing.T) {
+		toSend := []string{"AAA", "BBB", "CCC"}
+		toRecv := make([]string, 3)
+		toRecv[0] = "D"
+		toRecv[1] = "EEE"
+		toRecv[2] = "FF"
+
+		for _, transport := range transports {
+			t.Run(transport.name, func(t *testing.T) {
+				mpc := mockMPChan(transport.sFmt)
+				// Send
+				for i := range toSend {
+					if err := mpc.ISend("", 0, &toSend[i]); err != nil {
+						t.Errorf("serialise failed: %v", err)
+					}
+				}
+				// Receive
+				for i := range toRecv {
+					if err := mpc.IRecv("", 0, &toRecv[i]); err != nil {
+						t.Errorf("deserialise failed: %v", err)
+					}
+				}
+				if want, got := len(toSend), len(toRecv); want != got {
+					t.Errorf("mismatch: sent %d items but received %d", want, got)
+				}
+				for i := range toSend {
+					if want, got := toSend[i], toRecv[i]; want != got {
+						t.Errorf("mismatch at %d: sent %#v but got %#v", i, want, got)
+					}
+				}
+			})
+		}
+	})
 }
 
 // This covers the cases when the message is of format: Label(StructType)

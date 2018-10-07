@@ -1,115 +1,136 @@
 package session2
 
 import (
-	//"bytes"
-	//"encoding/base64"
 	"encoding/gob"
-	"fmt"
-	"io"
 	"unsafe"
 
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2"
 )
 
-var _ = fmt.Print
-
-
-// cf. org.scribble.runtime.net.ScribMessage
+// ScribMessage represents a basic message.
+//
+// Corresponds to Scribble Java runtime's
+// org.scribble.runtime.net.ScribMessage class
 type ScribMessage interface {
 	GetOp() string
 }
 
-// cf. org.scribble.runtime.net.ScribMessageFormatter
+// ScribMessageFormatter represents a message formatter (or serialiser).
+//
+// Corresponds to Scribble Java runtime's
+// org.scribble.runtime.net.ScribMessageFormatter class
 type ScribMessageFormatter interface {
-	Wrap(transport2.BinChannel) 	
-	Serialize(ScribMessage) error
-	Deserialize(*ScribMessage) error
+	// Wrap wraps a given binary channel with the formatter.
+	// The channel is the target input and output stream for
+	// serialisation and deserialisation using the formatter.
+	Wrap(c transport2.BinChannel)
 
-	/*EncodeInt(int) error
-	DecodeInt() (int, error)
-	EncodeString(string) error
-	DecodeString() (string, error)
-	EncodeBytes([]byte) error
-	DecodeBytes() ([]byte, error)*/
-	
-	/*GetEnc() *gob.Encoder
-	GetDec() *gob.Decoder*/
+	// Serialize serialises the given message m the writes to
+	// the underlying output stream.
+	Serialize(m ScribMessage) error
+
+	// Deserialize read from the underlying input stream and
+	// deserialises the message into the message container m.
+	Deserialize(m *ScribMessage) error
 }
 
-
-/**
- * N.B. must do gob.Register on _pointer_ to message types (cf. sigs02, shm03) -- because MPChan MSend/Receive communicate by pointer (for efficient transparency with shm)
- */
+// GobFormatter is an implementation of a ScribMessageFormatter using
+// Go's "encoding/gob" package.
+//
+// User must manually run gob.Register on the message type pointer
+// to register the message type for encoding.
+//
+//     // T is type being sent/received
+//     gob.Register(new(T))
+//
+// The snippet above registers type T for sending and receiving.
+//
 type GobFormatter struct {
-	c transport2.BinChannel
+	c   transport2.BinChannel
 	enc *gob.Encoder
 	dec *gob.Decoder
-	rdr io.Reader
 }
 
+// Wrap wraps a binary channel for gob encoding.
 func (f *GobFormatter) Wrap(c transport2.BinChannel) {
 	f.c = c
-	f.enc = gob.NewEncoder(c.GetWriter())
-	f.rdr = c.GetReader()
-	f.dec = gob.NewDecoder(f.rdr)
+	f.enc = gob.NewEncoder(c)
+	f.dec = gob.NewDecoder(c)
 }
 
+// Serialize encodes a ScribMessage m using gob.
+//
+// The message type implementing ScribMessage should be
+// registered before calling this method.
 func (f *GobFormatter) Serialize(m ScribMessage) error {
-	//fmt.Printf("Serialize: %v %T\n", m, m)
+	// If the message is recognised as a special message type,
+	// use special encoding strategy.
 	switch smsg := m.(type) {
 	case wrapper:
 		return f.enc.Encode(smsg.Msg)
-	default:
-		return f.enc.Encode(&m) // Encode *ScribMessage  // CHECKME just m? not &m
 	}
-	// "val" should be m
+	// Encode ScribMessage as-is.
+	return f.enc.Encode(&m)
 }
 
+// Deserialize decode a ScribMessage m using gob.
+//
+// The message type implementing ScribMessage should be
+// registered before calling this method.
 func (f *GobFormatter) Deserialize(m *ScribMessage) error {
-	//fmt.Printf("Deserialize1: %v %T\n", *m, *m)
-	//b := make([]byte, 100)
-	//f.rdr.Read(b)
-	//fmt.Printf("To deserialise\n", b)
-
+	// If the message container is recognised as a special message type,
+	// use special decoding strategy.
 	switch smeg := (*m).(type) {
 	case wrapper:
 		msg := smeg.Msg
 		return f.dec.Decode(msg)
-	default:
-		return f.dec.Decode(m) // Decode *ScribMessage
 	}
-	// pointer, "m" is *
-
-	//fmt.Printf("Deserialize2: %v %T\n", *m, *m)
+	// Decode ScribMessage as-is.
+	return f.dec.Decode(m)
 }
 
 // PointerWriter is an interface for writing a pointer ptr to a channel.
+//
+// Transports supporting transparent movement
+// of memory should implement this interface.
 type PointerWriter interface {
 	WritePointer(ptr interface{})
 }
 
 // PointerReader is an interface for reading a pointer from a channel
 // and write the received content to ptr.
+//
+// Transports supporting transparent movement
+// of memory should implement this interface.
 type PointerReader interface {
 	ReadPointer(ptr *interface{})
 }
 
 // PointerReadWriter is an interface for reading and writing
 // a pointer over a channel.
+//
+// Transports supporting transparent movement
+// of memory should implement this interface.
 type PointerReadWriter interface {
 	PointerWriter
 	PointerReader
 }
 
-// FIXME: (rename?) and move to shm package
+// PassByPointer is an implementation of ScribMessageFormatter
+// using pointer passing.
+//
+// This is formatter is only available for transports
+// implementing PointerReadWriter.
 type PassByPointer struct {
 	c PointerReadWriter
 }
 
+// Wrap wraps a binary channel for pointer encoding.
 func (f *PassByPointer) Wrap(c transport2.BinChannel) {
 	f.c = c.(PointerReadWriter)
 }
 
+// Serialize encodes a ScribMessage m as pointer.
 func (f *PassByPointer) Serialize(m ScribMessage) error {
 	switch m := m.(type) {
 	case wrapper:
@@ -121,6 +142,7 @@ func (f *PassByPointer) Serialize(m ScribMessage) error {
 	return nil
 }
 
+// Deserialize decodes a ScribMessage m as pointer.
 func (f *PassByPointer) Deserialize(m *ScribMessage) error {
 	switch smsg := (*m).(type) {
 	case wrapper:
@@ -137,11 +159,23 @@ func (f *PassByPointer) Deserialize(m *ScribMessage) error {
 		ptrToMsg := derefIface(msg)
 		ptrToRcvd := derefIface(rcvd)
 
-		// This assignment is equivalent to
-		// *msg = *rcvd
-		// except msg and *rcvd are both hidden under interface{}
-		*(**unsafe.Pointer)(unsafe.Pointer(uintptr(ptrToMsg))) =
-			*(**unsafe.Pointer)(unsafe.Pointer(uintptr(ptrToRcvd)))
+		if src, ok := rcvd.(*string); ok {
+			// The pointer assignment below does not work for string variables
+			// as string is represented as a 2-word data structure, the length
+			// (2nd word) also needs to be updated for a successful assignment
+			//
+			//    *s = [ ptr | len ]
+			//
+			// this workround treats *string as *string (not just a pointer)
+			// and handles the 2-word write correctly.
+			*smsg.Msg.(*string) = *src
+		} else {
+			// This assignment is equivalent to
+			// *msg = *rcvd
+			// except msg and *rcvd are both hidden under interface{}
+			*(**unsafe.Pointer)(unsafe.Pointer(uintptr(ptrToMsg))) =
+				*(**unsafe.Pointer)(unsafe.Pointer(uintptr(ptrToRcvd)))
+		}
 	default:
 		var ptr interface{}
 		f.c.ReadPointer(&ptr)
@@ -158,41 +192,3 @@ func derefIface(iface interface{}) unsafe.Pointer {
 	// contains pointer to the underlying value in the interface{} variable
 	return *(*unsafe.Pointer)(unsafe.Pointer(uintptr(unsafe.Pointer(&iface)) + unsafe.Sizeof(word)))
 }
-
-/*func (f *GobFormatter) EncodeInt(m int) error {
-	return f.enc.Encode(&m)
-}
-
-func (f *GobFormatter) DecodeInt() (int, error) {
-	var m int
-	err := f.dec.Decode(&m)
-	return m, err
-}
-
-func (f *GobFormatter) EncodeString(m string) error {
-	return f.enc.Encode(&m)
-}
-
-func (f *GobFormatter) DecodeString() (string, error) {
-	var m string
-	err := f.dec.Decode(&m)
-	return m, err
-}
-
-func (f *GobFormatter) EncodeBytes(m []byte) error {
-	return f.enc.Encode(&m)
-}
-
-func (f *GobFormatter) DecodeBytes() ([]byte, error) {
-	var m []byte
-	err := f.dec.Decode(&m)
-	return m, err
-}*/
-
-/*func (f *GobFormatter) GetEnc() *gob.Encoder {
-	return f.enc
-}
-
-func (f *GobFormatter) GetDec() *gob.Decoder {
-	return f.dec
-}*/
