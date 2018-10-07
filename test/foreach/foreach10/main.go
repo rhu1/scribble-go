@@ -20,10 +20,10 @@ import (
 
 	"github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/messages"
 	"github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1"
-	W1 "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1/family_1/W_1to1_not_2to2and2toKsub1and3toK"
-	W2 "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1/family_1/W_2to2and2toKsub1_not_1to1and3toK"  
-	M  "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1/family_1/W_2toKsub1and3toK_not_1to1and2to2"
-	WK "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1/family_1/W_3toK_not_1to1and2to2and2toKsub1"
+	W1 "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1/family_2/W_1to1_not_2to2and2toKsub1and3toK"
+	//W2 "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1/family_1/W_2to2and2toKsub1_not_1to1and3toK"  
+	M  "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1/family_2/W_2toKsub1and3toK_not_1to1and2to2"
+	WK "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1/family_2/W_3toK_not_1to1and2to2and2toKsub1"
 
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
@@ -72,7 +72,8 @@ func main() {
 		go server_M(wg, K, j)
 	}
 
-	go server_W2(wg, K, 2)
+	//go server_W2(wg, K, 2)
+	go server_M(wg, K, 2)
 
 	time.Sleep(100 * time.Millisecond)
 
@@ -84,7 +85,7 @@ func main() {
 // self = K
 func server_WK(wg *sync.WaitGroup, K int, self int) *WK.End {
 	P1 := Proto1.New()
-	WK := P1.New_family_1_W_3toK_not_1to1and2to2and2toKsub1(K, self)
+	WK := P1.New_family_2_W_3toK_not_1to1and2to2and2toKsub1(K, self)
 	var ss transport2.ScribListener
 	var err error
 	if ss, err = LISTEN(PORT+self); err != nil {
@@ -96,6 +97,7 @@ func server_WK(wg *sync.WaitGroup, K int, self int) *WK.End {
 			err != nil {
 		panic(err)
 	}
+			// FIXME: W_3toK_not_1to1and2to2and2toKsub1_Accept ??
 	fmt.Println("WK (" + strconv.Itoa(WK.Self) + ") accepted", self-1, "on", PORT+self)
 	end := WK.Run(runWK)
 	wg.Done()
@@ -120,7 +122,7 @@ func runWK(s *WK.Init) WK.End {
 // K > 3
 func server_M(wg *sync.WaitGroup, K int, self int) *M.End {
 	P1 := Proto1.New()
-	M := P1.New_family_1_W_2toKsub1and3toK_not_1to1and2to2(K, self)
+	M := P1.New_family_2_W_2toKsub1and3toK_not_1to1and2to2(K, self)
 	var ss transport2.ScribListener
 	var err error
 	if ss, err = LISTEN(PORT+self); err != nil {
@@ -128,15 +130,15 @@ func server_M(wg *sync.WaitGroup, K int, self int) *M.End {
 	}
 	defer ss.Close()
 
-	if self == 3 {
-		if err = M.W_2to2and2toKsub1_not_1to1and3toK_Accept(self-1, ss, FORMATTER()); err != nil {
+	/*if self == 3 {
+		if err = M.W_2to2and2toKsub1_not_1to1and3toK_Accept(self-1, ss, FORMATTER()); err != nil {  // FIXME: shouldn't have
 			panic(err)
 		}
-	} else {
+	} else {*/
 		if err = M.W_2toKsub1and3toK_not_1to1and2to2_Accept(self-1, ss, FORMATTER()); err != nil {
 			panic(err)
 		}
-	}
+	//}
 	fmt.Println("M (" + strconv.Itoa(M.Self) + ") accepted", self-1, "on", PORT+self)
 
 	if self == K-1 {
@@ -176,6 +178,7 @@ func runM(s *M.Init) M.End {
 	return *end
 }
 
+/*
 // self == 2
 func server_W2(wg *sync.WaitGroup, K int, self int) *W2.End {
 	P1 := Proto1.New()
@@ -228,12 +231,13 @@ func runW2(s *W2.Init) W2.End {
 	}
 	return *end
 }
+//*/
 
 // self == 1
 func client_W1(wg *sync.WaitGroup, K int, self int) *W1.End {
 	P1 := Proto1.New()
-	W1 := P1.New_family_1_W_1to1_not_2to2and2toKsub1and3toK(K, self)
-	if err := W1.W_2to2and2toKsub1_not_1to1and3toK_Dial(self+1, util.LOCALHOST, PORT+self+1, DIAL, FORMATTER());
+	W1 := P1.New_family_2_W_1to1_not_2to2and2toKsub1and3toK(K, self)
+	if err := W1.W_2toKsub1and3toK_not_1to1and2to2_Dial(self+1, util.LOCALHOST, PORT+self+1, DIAL, FORMATTER());
 			err != nil {
 		panic(err)
 	}
