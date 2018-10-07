@@ -115,7 +115,7 @@ func clientCode(wg *sync.WaitGroup, K int, self int) *W_1K.End {
 
 func runW(w *W_1K.Init) W_1K.End {
 	data := make([]int, 1)
-	end := w.S_1to1_Gather_A(data)  // FIXME: panic: interface conversion: interface {} is int, not *int -- cf. gob.Register in commented init() ?
+	end := w.S_1_Gather_A(data)  // FIXME: panic: interface conversion: interface {} is int, not *int -- cf. gob.Register in commented init() ?
 	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") gathered:", data)
 	return *end
 }

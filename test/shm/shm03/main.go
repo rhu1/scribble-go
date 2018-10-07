@@ -30,7 +30,7 @@ var _ = shm.Dial
 var _ = tcp.Dial
 
 
-//*
+/*
 var LISTEN = tcp.Listen
 var DIAL = tcp.Dial
 var FORMATTER = func() *session2.GobFormatter { return new(session2.GobFormatter) } 
@@ -112,7 +112,7 @@ func clientCode(wg *sync.WaitGroup, K int, self int) *W_1K.End {
 
 func runW(w *W_1K.Init) W_1K.End {
 	data := make([]messages.Foo, 1)
-	end := w.S_1to1_Gather_Foo(data)
+	end := w.S_1_Gather_Foo(data)
 	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") gathered:", data)
 	return *end
 }
