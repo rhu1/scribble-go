@@ -159,11 +159,23 @@ func (f *PassByPointer) Deserialize(m *ScribMessage) error {
 		ptrToMsg := derefIface(msg)
 		ptrToRcvd := derefIface(rcvd)
 
-		// This assignment is equivalent to
-		// *msg = *rcvd
-		// except msg and *rcvd are both hidden under interface{}
-		*(**unsafe.Pointer)(unsafe.Pointer(uintptr(ptrToMsg))) =
-			*(**unsafe.Pointer)(unsafe.Pointer(uintptr(ptrToRcvd)))
+		if src, ok := rcvd.(*string); ok {
+			// The pointer assignment below does not work for string variables
+			// as string is represented as a 2-word data structure, the length
+			// (2nd word) also needs to be updated for a successful assignment
+			//
+			//    *s = [ ptr | len ]
+			//
+			// this workround treats *string as *string (not just a pointer)
+			// and handles the 2-word write correctly.
+			*smsg.Msg.(*string) = *src
+		} else {
+			// This assignment is equivalent to
+			// *msg = *rcvd
+			// except msg and *rcvd are both hidden under interface{}
+			*(**unsafe.Pointer)(unsafe.Pointer(uintptr(ptrToMsg))) =
+				*(**unsafe.Pointer)(unsafe.Pointer(uintptr(ptrToRcvd)))
+		}
 	default:
 		var ptr interface{}
 		f.c.ReadPointer(&ptr)
