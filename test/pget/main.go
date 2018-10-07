@@ -21,10 +21,10 @@ import (
 
 	//"github.com/rhu1/scribble-go-runtime/test/pget/messages"
 	"github.com/rhu1/scribble-go-runtime/test/pget/PGet/Foreach"
-	F1 "github.com/rhu1/scribble-go-runtime/test/pget/PGet/Foreach/F_1to1and1toK"
-	F2K "github.com/rhu1/scribble-go-runtime/test/pget/PGet/Foreach/F_1toK_not_1to1"
-	M "github.com/rhu1/scribble-go-runtime/test/pget/PGet/Foreach/family_1/M_1to1"
-	S "github.com/rhu1/scribble-go-runtime/test/pget/PGet/Foreach/family_1/S_1to1"
+	F1  "github.com/rhu1/scribble-go-runtime/test/pget/PGet/Foreach/family_1/F_1to1and1toK"
+	F2K "github.com/rhu1/scribble-go-runtime/test/pget/PGet/Foreach/family_1/F_1toK_not_1to1"
+	M   "github.com/rhu1/scribble-go-runtime/test/pget/PGet/Foreach/family_1/M_1to1"
+	S   "github.com/rhu1/scribble-go-runtime/test/pget/PGet/Foreach/family_1/S_1to1"
 
 	//"github.com/rhu1/scribble-go-runtime/test/util"
 )
@@ -129,7 +129,7 @@ func nestedS(s *S.Init_18) S.End {
 // K > 1
 func server_F2K(wg *sync.WaitGroup, K int, self int) *F2K.End {
 	P1 := Foreach.New()
-	F := P1.New_F_1toK_not_1to1(K, self)
+	F := P1.New_family_1_F_1toK_not_1to1(K, self)
 	var ss transport2.ScribListener
 	var err error
 	if ss, err = LISTEN_MF(PORT_F+self); err != nil {
@@ -158,7 +158,7 @@ func runF2K(s *F2K.Init) F2K.End {
 // self == 1
 func server_F1(wg *sync.WaitGroup, K int, self int) *F1.End {
 	P1 := Foreach.New()
-	F := P1.New_F_1to1and1toK(K, self)
+	F := P1.New_family_1_F_1to1and1toK(K, self)
 	var ss transport2.ScribListener
 	var err error
 	if ss, err = LISTEN_MF(PORT_F+self); err != nil {
