@@ -12,7 +12,7 @@ sig <go> "messages.Foo" from "github.com/rhu1/scribble-go-runtime/test/foreach/f
 sig <go> "messages.Bar" from "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/messages" as Bar;
 
 
-// Families: K=3 and K>3
+// Families: K=3 and K>3 -- N.B. cf. K=2 and K>2
 global protocol Proto1(role W)
 {
 	choice at W[1]
@@ -32,11 +32,4 @@ global protocol Proto1(role W)
 		}
 	}
 }
-
-/*
-W2 W_2to2and2toKsub1_not_1to1and3toK
-WK W_3toK_not_1to1and2to2and2toKsub1
-W1 W_1to1_not_2to2and2toKsub1and3toK
-M  W_2toKsub1and3toK_not_1to1and2to2
-*/
 
