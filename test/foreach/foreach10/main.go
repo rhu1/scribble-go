@@ -20,12 +20,10 @@ import (
 
 	"github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/messages"
 	"github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1"
-	W2 "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1/family_1/W_2to2and2toKsub1_not_1to1and3toK"  
-			// FIXME: should be same as M
-	WK "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1/family_1/W_3toK_not_1to1and2to2and2toKsub1"
-
 	W1 "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1/family_1/W_1to1_not_2to2and2toKsub1and3toK"
-	M "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1/family_1/W_2toKsub1and3toK_not_1to1and2to2"
+	W2 "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1/family_1/W_2to2and2toKsub1_not_1to1and3toK"  
+	M  "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1/family_1/W_2toKsub1and3toK_not_1to1and2to2"
+	WK "github.com/rhu1/scribble-go-runtime/test/foreach/foreach10/Foreach10/Proto1/family_1/W_3toK_not_1to1and2to2and2toKsub1"
 
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )

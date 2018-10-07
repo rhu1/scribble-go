@@ -23,7 +23,8 @@ import (
 	Left "github.com/rhu1/scribble-go-runtime/test/foreach/foreach08/Foreach8/Proto1/family_1/W_1toKsub1_not_2toK"
 	//Right "github.com/rhu1/scribble-go-runtime/test/foreach/foreach08/Foreach8/Proto1/family_2/W_2toK_not_1toKsub1"
 	Right "github.com/rhu1/scribble-go-runtime/test/foreach/foreach08/Foreach8/Proto1/family_1/W_2toK_not_1toKsub1"
-	Middle "github.com/rhu1/scribble-go-runtime/test/foreach/foreach08/Foreach8/Proto1/W_1toKsub1and2toK"
+	//Middle "github.com/rhu1/scribble-go-runtime/test/foreach/foreach08/Foreach8/Proto1/W_1toKsub1and2toK"
+	Middle "github.com/rhu1/scribble-go-runtime/test/foreach/foreach08/Foreach8/Proto1/family_1/W_1toKsub1and2toK"
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 
@@ -97,14 +98,14 @@ func server_right(wg *sync.WaitGroup, K int, self int) *Right.End {
 
 func runRight(s *Right.Init) Right.End {
 	pay := make([]messages.Foo, 1)
-	end := s.W_selfplus1sub2_Gather_Foo(pay)
+	end := s.W_selfsub1_Gather_Foo(pay)
 	fmt.Println("Right (" + strconv.Itoa(s.Ept.Self) + ") gathered:", pay)
 	return *end
 }
 
 func server_middle(wg *sync.WaitGroup, K int, self int) *Middle.End {
 	P1 := Proto1.New()
-	M := P1.New_W_1toKsub1and2toK(K, self)
+	M := P1.New_family_1_W_1toKsub1and2toK(K, self)
 	var ss transport2.ScribListener
 	var err error
 	if ss, err = LISTEN(PORT+self); err != nil {
@@ -126,10 +127,10 @@ func server_middle(wg *sync.WaitGroup, K int, self int) *Middle.End {
 
 func runMiddle(s *Middle.Init) Middle.End {
 	pay := make([]messages.Foo, 1)
-	s2 := s.W_selfplus1sub2_Gather_Foo(pay)
+	s2 := s.W_selfsub1_Gather_Foo(pay)
 	fmt.Println("Middle (" + strconv.Itoa(s.Ept.Self) + ") gathered:", pay)
 	pay = []messages.Foo{messages.Foo{s.Ept.Self}}
-	end := s2.W_selfplus2sub1_Scatter_Foo(pay)
+	end := s2.W_selfplus1_Scatter_Foo(pay)
 	fmt.Println("Middle (" + strconv.Itoa(s.Ept.Self) + ") scattered Foo:", pay)
 	return *end
 }
@@ -151,7 +152,7 @@ func client_left(wg *sync.WaitGroup, K int, self int) *Left.End {
 
 func runL(s *Left.Init) Left.End {
 	pay := []messages.Foo{messages.Foo{s.Ept.Self}}
-	end := s.W_selfplus2sub1_Scatter_Foo(pay)
+	end := s.W_selfplus1_Scatter_Foo(pay)
 	fmt.Println("Left (" + strconv.Itoa(s.Ept.Self) + ") scattered Foo:", pay)
 	return *end
 }
