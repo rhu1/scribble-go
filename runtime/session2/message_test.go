@@ -3,7 +3,6 @@ package session2
 import (
 	"bytes"
 	"encoding/gob"
-	"io"
 	"testing"
 )
 
@@ -15,11 +14,11 @@ type fakeChan struct {
 func newFakeChan(N int) *fakeChan {
 	return &fakeChan{new(bytes.Buffer), make(chan interface{}, N)}
 }
-func (c *fakeChan) GetReader() io.Reader       { return c.buf }
-func (c *fakeChan) GetWriter() io.Writer       { return c.buf }
-func (c *fakeChan) Close() error               { return nil }
-func (c *fakeChan) ReadPointer(m *interface{}) { *m = <-c.ptr }
-func (c *fakeChan) WritePointer(m interface{}) { c.ptr <- m }
+func (c *fakeChan) Read(p []byte) (int, error)  { return c.buf.Read(p) }
+func (c *fakeChan) Write(p []byte) (int, error) { return c.buf.Write(p) }
+func (c *fakeChan) Close() error                { return nil }
+func (c *fakeChan) ReadPointer(m *interface{})  { *m = <-c.ptr }
+func (c *fakeChan) WritePointer(m interface{})  { c.ptr <- m }
 
 func mockMPChan(fmtr ScribMessageFormatter) *MPChan {
 	mpc := NewMPChan(0, []string{""})
