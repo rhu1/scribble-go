@@ -18,8 +18,8 @@ import (
 
 	"github.com/rhu1/scribble-go-runtime/test/foreach/foreach06/Foreach6/Proto1"
 	S_1  "github.com/rhu1/scribble-go-runtime/test/foreach/foreach06/Foreach6/Proto1/family_1/S_1to1"
-	W_1  "github.com/rhu1/scribble-go-runtime/test/foreach/foreach06/Foreach6/Proto1/W_1to1and1toK"
-	W_2K "github.com/rhu1/scribble-go-runtime/test/foreach/foreach06/Foreach6/Proto1/W_1toK_not_1to1"
+	W_1  "github.com/rhu1/scribble-go-runtime/test/foreach/foreach06/Foreach6/Proto1/family_1/W_1to1and1toK"
+	W_2K "github.com/rhu1/scribble-go-runtime/test/foreach/foreach06/Foreach6/Proto1/family_1/W_1toK_not_1to1"
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 
@@ -108,7 +108,7 @@ func nested(s *S_1.Init_8) S_1.End {
 func client1Code(wg *sync.WaitGroup, K int) *W_1.End {
 	self := 1
 	P1 := Proto1.New()
-	W := P1.New_W_1to1and1toK(K, self)  // Endpoint needs n to check self
+	W := P1.New_family_1_W_1to1and1toK(K, self)  // Endpoint needs n to check self
 	if err := W.S_1to1_Dial(1, util.LOCALHOST, PORT+self, DIAL, FORMATTER()); err != nil {
 		panic(err)
 	}
@@ -133,7 +133,7 @@ func runW1(w *W_1.Init) W_1.End {
 
 func client2KCode(wg *sync.WaitGroup, K int, self int) *W_2K.End {
 	P1 := Proto1.New()
-	W := P1.New_W_1toK_not_1to1(K, self)  // Endpoint needs n to check self
+	W := P1.New_family_1_W_1toK_not_1to1(K, self)  // Endpoint needs n to check self
 	if err := W.S_1to1_Dial(1, util.LOCALHOST, PORT+self, DIAL, FORMATTER()); err != nil {
 		panic(err)
 	}

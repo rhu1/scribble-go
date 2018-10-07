@@ -82,7 +82,7 @@ func main() {
 	wg.Wait()
 }
 
-// self = K
+// self == K
 func server_WK(wg *sync.WaitGroup, K int, self int) *WK.End {
 	P1 := Proto1.New()
 	WK := P1.New_family_2_W_3toK_not_1to1and2to2and2toKsub1(K, self)
