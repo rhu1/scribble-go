@@ -1,32 +1,29 @@
 //Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
-//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/auction/Auction.scr -d test/auction/ -param Proto -param-api Auctioneer
-
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/auction/Auction.scr -d test/auction/ -param Proto1 github.com/rhu1/scribble-go-runtime/test/auction/Auction -param-api Auctioneer -param-api Bidder
 
 module Auction;
 
-type <go> "int"    from "..." as int;
-//type <go> "myintslice"    from "..." as myintslice;
-type <go> "string" from "..." as string;
+// Vickrey Auction between Auctioneer and k Bidders
 
-global protocol Proto(role Auctioneer(k), role Bidder(k))
-{
-  (int) from Bidder[1..k] to Auctioneer[1..1];
-  (int) from Auctioneer[1..1] to Bidder[1..k];
-  //do MoreBid(Auctioneer[1..k], Bidder[1..1]);
-  do MoreBid(Auctioneer, Bidder);
+sig <go> "message.Initial" from "github.com/nickng/scribble-go-examples/10_auction/message" as InitialBid;
+sig <go> "message.Highest" from "github.com/nickng/scribble-go-examples/10_auction/message" as HighestBid;
+sig <go> "message.BidOrSkip" from "github.com/nickng/scribble-go-examples/10_auction/message" as BidOrSkip;
+sig <go> "message.Winner" from "github.com/nickng/scribble-go-examples/10_auction/message" as Winner;
+
+global protocol Proto1(role Auctioneer, role Bidder) {
+  InitialBid from Bidder[1,K] to Auctioneer[1];
+  HighestBid from Auctioneer[1] to Bidder[1,K];
+  do Bids(Auctioneer, Bidder);
 }
 
-aux global protocol MoreBid(role Auctioneer(k), role Bidder(k)) {
-  // This should be marked as union type.
-  //(IntOrBool) from Bidder[1..k] to Auctioneer[1..1];
-  (int) from Bidder[1..k] to Auctioneer[1..1];
-
-  // Auctioneer reply with either new highest bid or declare winner.
+aux global protocol Bids(role Auctioneer, role Bidder) {
+  foreach Bidder[I:1,K] {
+    BidOrSkip from Bidder[I] to Auctioneer[1];
+  }
   choice at Auctioneer[1] {
-    highest(int) from Auctioneer[1..1] to Bidder[1..k];
-    //do MoreBid(Auctioneer[1..1], Bidder[1..k]);
-    do MoreBid(Auctioneer, Bidder);
+    HighestBid from Auctioneer[1] to Bidder[1,K];
+    do Bids(Auctioneer, Bidder);
   } or {
-    winner(string) from Auctioneer[1..1] to Bidder[1..k];
+    Winner from Auctioneer[1] to Bidder[1,K];
   }
 }

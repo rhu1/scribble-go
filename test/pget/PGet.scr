@@ -25,7 +25,7 @@ module PGet;
   Done from A[1] to B[1];
 }*/
 
-global protocol Foreach(role M, role F, role S)
+global protocol Proto1(role M, role F, role S)
 {
   // Get metdata (size)
   Head() from F[1] to S[1];
