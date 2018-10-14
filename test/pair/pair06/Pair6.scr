@@ -1,0 +1,19 @@
+//Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/pair/pair06/Pair6.scr -d test/pair/pair06/ -param Proto1 github.com/rhu1/scribble-go-runtime/test/pair/pair06/Pair6 -param-api W
+
+
+module Pair6;
+
+
+//type <go> "int" from "..." as int;
+type <go> "string" from "..." as string;
+
+// Families: x = 2, or x > 2 -- y doesn't matter
+global protocol Proto1(role W)
+{
+	foreach W[I1:(1,1),K-(1,0)], W[I2:(1,1)+(1,0),K]
+	{
+		Foo(string) from W[I1] to W[I2];
+	}	
+}
+
