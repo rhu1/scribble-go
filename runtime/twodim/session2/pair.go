@@ -17,17 +17,18 @@ func (p1 Pair) Lte(p2 Pair) bool {
 }
 
 func (p Pair) Inc(max Pair) Pair {
-	if 	p.X < max.X {
-		return XY(p.X+1, p.Y)	
+	if 	p.Y < max.Y {
+		return XY(p.X, p.Y+1)	
 	} else {//if p.Y < max.Y {
-		return XY(1, p.Y+1)	
+		return XY(p.X+1, 1)	
 	} /*else {
 		panic("Bad inc:")  // Inconvenient in for-loops
 	}*/
 }
 
+// Assumes base default is (1, 1), and count (1,1), (1,2), (1,3), ..., (2,1), ...
 func (p Pair) Flatten(max Pair) int {
-	return p.X * max.Y + max.Y;
+	return ((p.X-1) * max.Y) + p.Y;
 }
 
 func (p Pair) Tostring() string {
