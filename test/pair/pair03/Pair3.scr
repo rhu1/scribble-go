@@ -1,0 +1,23 @@
+//Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/pair/pair03/Pair3.scr -d test/pair/pair03/ -param Proto1 github.com/rhu1/scribble-go-runtime/test/pair/pair03/Pair3 -param-api S -param-api W
+
+
+module Pair3;
+
+
+type <go> "int" from "..." as int;
+type <go> "string" from "..." as string;
+
+global protocol Proto1(role S, role W)
+{
+	choice at S[(1,1)]
+	{
+		Foo(int) from S[(1,1)] to W[(1,1),K];
+	} 
+	or
+	{
+		Bar(string) from S[(1,1)] to W[(1,1),K];
+	}
+}
+
+

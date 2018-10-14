@@ -1,8 +1,8 @@
 //rhu@HZHL4 ~/code/go
-//$ go install github.com/rhu1/scribble-go-runtime/test/pair/pair02
-//$ bin/pair02.exe
+//$ go install github.com/rhu1/scribble-go-runtime/test/pair/pair03
+//$ bin/pair03.exe
 
-//go:generate scribblec-param.sh Pair2.scr -d . -param Proto1 github.com/rhu1/scribble-go-runtime/test/pair/pair02/Pair2 -param-api S -param-api W
+//go:generate scribblec-param.sh Pair3.scr -d . -param Proto1 github.com/rhu1/scribble-go-runtime/test/pair/pair03/Pair3 -param-api S -param-api W
 
 package main
 
@@ -10,6 +10,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"log"
+	"math/rand"
 	//"strconv"
 	"sync"
 	"time"
@@ -19,9 +20,9 @@ import (
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2/shm"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2/tcp"
 
-	"github.com/rhu1/scribble-go-runtime/test/pair/pair02/Pair2/Proto1"
-	S11 "github.com/rhu1/scribble-go-runtime/test/pair/pair02/Pair2/Proto1/S_l1r1tol1r1"
-	W11_K "github.com/rhu1/scribble-go-runtime/test/pair/pair02/Pair2/Proto1/W_l1r1toK"
+	"github.com/rhu1/scribble-go-runtime/test/pair/pair03/Pair3/Proto1"
+	S11 "github.com/rhu1/scribble-go-runtime/test/pair/pair03/Pair3/Proto1/S_l1r1tol1r1"
+	W11_K "github.com/rhu1/scribble-go-runtime/test/pair/pair03/Pair3/Proto1/W_l1r1toK"
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 
@@ -89,13 +90,22 @@ func server_S11(wg *sync.WaitGroup, K session2.Pair) *S11.End {
 	return &end
 }
 
+var seed = rand.NewSource(time.Now().UnixNano())
+var rnd = rand.New(seed)
+var count = 1
 
 func runS(s *S11.Init) S11.End {
-	data := []int{2, 3, 5}
-	end := s.W_l1r1toK_Scatter_Foo(data)
-	fmt.Println("S scattered:", data)
+	var end *S11.End
+	if rnd.Intn(2) < 1 {
+		data := []int{2, 3, 5}
+		end = s.W_l1r1toK_Scatter_Foo(data)
+	} else {
+		data := []string{"a", "b", "c"}   // FIXME: for shm
+		end = s.W_l1r1toK_Scatter_Bar(data)
+	}
 	return *end
 }
+
 
 func clientCode(wg *sync.WaitGroup, K session2.Pair, self session2.Pair) *W11_K.End {
 	P1 := Proto1.New()
@@ -110,8 +120,16 @@ func clientCode(wg *sync.WaitGroup, K session2.Pair, self session2.Pair) *W11_K.
 }
 
 func runW(w *W11_K.Init) W11_K.End {
-	data := make([]int, 1)
-	end := w.S_l1r1_Gather_Foo(data)  // FIXME: panic: interface conversion: interface {} is int, not *int -- cf. gob.Register in commented init() ?
-	fmt.Println("W(" + w.Ept.Self.Tostring() + ") gathered:", data)
+	var end *W11_K.End
+	switch c := w.S_l1r1_Branch().(type) {
+	case *W11_K.Foo:
+		var x int
+		end = c.Recv_Foo(&x)
+		fmt.Println("W(" + w.Ept.Self.Tostring() + ") received Foo:", x)
+	case *W11_K.Bar: 
+		var x string
+		end = c.Recv_Bar(&x)
+		fmt.Println("W(" + w.Ept.Self.Tostring() + ") received Bar:", x)
+	}
 	return *end
 }
