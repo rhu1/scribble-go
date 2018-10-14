@@ -94,7 +94,7 @@ func server_A(wg *sync.WaitGroup, K session2.Pair, self session2.Pair) *A.End {
 	if err != nil {
 		panic(err)
 	}
-	//fmt.Println("S ready to run")
+	//fmt.Println("A ready to run")
 	end := A.Run(runA)
 	wg.Done()
 	return &end
@@ -120,7 +120,7 @@ func server_B(wg *sync.WaitGroup, K session2.Pair, self session2.Pair) *B.End {
 	if err != nil {
 		panic(err)
 	}
-	//fmt.Println("S ready to run")
+	//fmt.Println("B ready to run")
 	end := B.Run(runB)
 	wg.Done()
 	return &end
@@ -131,12 +131,11 @@ func runB(s *B.Init) B.End {
 	return *s.C_selfplusl0r0_Scatter_Val(data)
 }
 
-var seed = rand.NewSource(time.Now().UnixNano())
+
+/*var seed = rand.NewSource(time.Now().UnixNano())
 var rnd = rand.New(seed)
-//var count = 1
+//var count = 1*/
 
-
-// self > (1, 1)
 func client_C(wg *sync.WaitGroup, K session2.Pair, self session2.Pair) *C.End {
 	P1 := Proto1.New()
 	C := P1.New_C_l1r1toK(K, self)
