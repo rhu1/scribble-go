@@ -13,26 +13,32 @@ func XY(x, y int) Pair {
 }
 
 func (p1 Pair) Lte(p2 Pair) bool {
-	return p1.X <= p2.X && p1.Y <= p2.Y;	
+	return p1.X <= p2.X && p1.Y <= p2.Y
 }
 
 func (p Pair) Inc(max Pair) Pair {
-	if 	p.Y < max.Y {
-		return XY(p.X, p.Y+1)	
-	} else {//if p.Y < max.Y {
-		return XY(p.X+1, 1)	
-	} /*else {
-		panic("Bad inc:")  // Inconvenient in for-loops
-	}*/
+	if p.Y < max.Y {
+		return XY(p.X, p.Y+1)
+	} else {
+		return XY(p.X+1, 1)
+	}
 }
 
-// Assumes base default is (1, 1), and count (1,1), (1,2), (1,3), ..., (2,1), ...
+// Flatten converts p into an ordinal number.
+//
+// Couting starts from (1,1) and stays within
+// the bounds of (1,1) and max. An example of
+// counting order is:
+//
+// (1,1), (1,2), (1,3), ..., (2,1), ...
+//
 func (p Pair) Flatten(max Pair) int {
-	return ((p.X-1) * max.Y) + p.Y;
+	return ((p.X - 1) * max.Y) + p.Y
 }
 
-func (p Pair) Tostring() string {
-	return "(" + strconv.Itoa(p.X) + ", " + strconv.Itoa(p.Y) + ")";
+// String returns the string representation.
+func (p Pair) String() string {
+	return "(" + strconv.Itoa(p.X) + ", " + strconv.Itoa(p.Y) + ")"
 }
 
 func (p1 Pair) Plus(p2 Pair) Pair {

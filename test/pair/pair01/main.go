@@ -112,6 +112,6 @@ func clientCode(wg *sync.WaitGroup, p11 session2.Pair) *W11.End {
 func runW(w *W11.Init) W11.End {
 	data := make([]int, 1)
 	end := w.S_l1r1_Gather_Foo(data)
-	fmt.Println("W(" + w.Ept.Self.Tostring() + ") gathered:", data)
+	fmt.Println("W("+w.Ept.Self.String()+") gathered:", data)
 	return *end
 }
