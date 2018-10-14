@@ -1,0 +1,48 @@
+//Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/pair/pair01/Pair1.scr -d test/pair/pair01/ -param Proto1 github.com/rhu1/scribble-go-runtime/test/pair/pair01/Pair1 -param-api S -param-api W
+
+
+module Pair1;
+
+
+type <go> "int" from "..." as int;
+
+global protocol Proto1(role S, role W)
+{
+	Foo(int) from S[(1,1)] to W[(1,1)];
+}
+
+
+
+
+/*..HERE
+- do pair runtime API gen
+- do 2d max project2
+- do mesh with foreach separated
+- fix dial/accept -- do simple to all family members, but self?
+- do runtime param checks
+- do sequenced foreach
+- do original mesh
+
+
+https://github.com/nickng/scribble-go/tree/2dgrid/runtime/twodim/session2
+
+What do you think of this.
+instead of
+github.com/rhu1/scribble-go-runtime/runtime/session2
+
+use 
+[21:41:02] Nicholas N: github.com/rhu1/scribble-go-runtime/runtime/pair/session2
+[21:42:34 | Edited 21:43:07] Nicholas N: the new package has
+
+session2.XY(1,2) // gives you Pair{1,2}
+or just session2.Pair{1,2}
+
+when you need to construct a pair for
+Init() --> NewMPChan(session2.Pair{1,2}, ...)
+ISend/MSend/IRecv/MRecv
+[21:48:36] Ray: https://github.com/nickng/scribble-go-examples/blob/quotereq/11_quote-request/QuoteRequest.scr
+[22:00:00 | Edited 22:00:22] Nicholas N: Oh Ray - for the pair/session2 package, using the XY function is preferred, makes future merging of the two session2 package versions slightly easier
+
+(XY() can do the "hashing" in place)
+*/
