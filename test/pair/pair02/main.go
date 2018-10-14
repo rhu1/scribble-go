@@ -47,7 +47,9 @@ const PORT = 8888
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	K := session2.XY(1, 3)
+	//K := session2.XY(1, 3)
+	//K := session2.XY(3, 1)
+	K := session2.XY(2, 3)
 
 	wg := new(sync.WaitGroup)
 	wg.Add(K.Flatten(K) + 1)
@@ -91,7 +93,7 @@ func server_S11(wg *sync.WaitGroup, K session2.Pair) *S11.End {
 
 
 func runS(s *S11.Init) S11.End {
-	data := []int{2, 3, 5}
+	data := []int{2, 3, 5, 7, 11, 13, 17, 19, 23, 29}
 	end := s.W_l1r1toK_Scatter_Foo(data)
 	fmt.Println("S scattered:", data)
 	return *end

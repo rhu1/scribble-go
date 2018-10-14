@@ -34,3 +34,11 @@ func (p Pair) Flatten(max Pair) int {
 func (p Pair) Tostring() string {
 	return "(" + strconv.Itoa(p.X) + ", " + strconv.Itoa(p.Y) + ")";
 }
+
+func (p1 Pair) Plus(p2 Pair) Pair {
+	return XY(p1.X+p2.X, p1.Y+p2.Y)
+}
+
+func (p1 Pair) Sub(p2 Pair) Pair {
+	return XY(p1.X-p2.X, p1.Y-p2.Y)
+}

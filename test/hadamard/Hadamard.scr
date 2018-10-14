@@ -1,0 +1,17 @@
+//Raymond@HZHL3 ~/code/go/src/github.com/nickng/scribble-go-examples
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/hadamard/Hadamard.scr -d test/hadamard/ -param Proto1 github.com/rhu1/scribble-go-runtime/test/hadamard/Hadamard -param-api A -param-api B -param-api C
+
+// Hadamard product (coordinate-wise product)
+
+module Hadamard;
+
+sig <go> "message.Val" from "github.com/rhu1/scribble-go-runtime/test/hadamard/message" as Val;
+
+global protocol Proto1(role A, role B, role C)
+{
+  foreach A[I1:(1,1),K], B[I2:(1,1),K], C[I:(1,1),K]
+  {
+    Val from A[I1] to C[I];
+    Val from B[I2] to C[I];
+  }
+}
