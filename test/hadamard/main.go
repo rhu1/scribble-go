@@ -10,7 +10,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"log"
-	"math/rand"
+	//"math/rand"
 	//"strconv"
 	"sync"
 	"time"
