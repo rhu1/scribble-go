@@ -37,6 +37,11 @@ var _ = tcp.Dial
 var LISTEN = tcp.Listen
 var DIAL = tcp.Dial
 var FORMATTER = func() *session2.GobFormatter { return new(session2.GobFormatter) } 
+
+func init() {
+	var tmp message.Val
+	gob.Register(&tmp)
+}
 /*/
 var LISTEN = shm.Listen
 var DIAL = shm.Dial
