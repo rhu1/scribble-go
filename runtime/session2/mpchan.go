@@ -2,6 +2,7 @@ package session2
 
 import (
 	"encoding/gob"
+	"fmt"
 	"sync"
 
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2"
@@ -81,14 +82,30 @@ func (c *MPChan) IRecv(r string, i int, msg interface{}) error {
 
 // MSend sends a Scribble message msg to role r[i].
 func (c *MPChan) MSend(r string, i int, msg ScribMessage) error {
-	return c.Fmts[r][i].Serialize(msg)
+	rmap, hasRole := c.Fmts[r]
+	if !hasRole {
+		return fmt.Errorf("cannot send: role %s does not exist (typo?)", r)
+	}
+	fmtrmap, hasFmtr := rmap[i]
+	if !hasFmtr {
+		return fmt.Errorf("cannot send: role %s[%d] is not connected", r, i)
+	}
+	return fmtrmap.Serialize(msg)
 }
 
 // MRecv receives a Scribble message msg from role r[i].
 //
 // The Scribble message msg is a pointer to a pre-allocated ScribMessage.
-func (c *MPChan) MRecv(rolename string, i int, msg *ScribMessage) error {
-	return c.Fmts[rolename][i].Deserialize(msg)
+func (c *MPChan) MRecv(r string, i int, msg *ScribMessage) error {
+	rmap, hasRole := c.Fmts[r]
+	if !hasRole {
+		return fmt.Errorf("cannot recv: role %s does not exist (typo?)", r)
+	}
+	fmtrmap, hasFmtr := rmap[i]
+	if !hasFmtr {
+		return fmt.Errorf("cannot recv: role %s[%d] is not connected", r, i)
+	}
+	return fmtrmap.Deserialize(msg)
 }
 
 // Close closes all connected channels.
