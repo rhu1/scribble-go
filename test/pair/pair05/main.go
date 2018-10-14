@@ -1,8 +1,8 @@
 //rhu@HZHL4 ~/code/go
-//$ go install github.com/rhu1/scribble-go-runtime/test/pair/pair03
-//$ bin/pair03.exe
+//$ go install github.com/rhu1/scribble-go-runtime/test/pair/pair05
+//$ bin/pair05.exe
 
-//go:generate scribblec-param.sh Pair3.scr -d . -param Proto1 github.com/rhu1/scribble-go-runtime/test/pair/pair03/Pair3 -param-api S -param-api W
+//go:generate scribblec-param.sh Pair5.scr -d . -param Proto1 github.com/rhu1/scribble-go-runtime/test/pair/pair05/Pair5 -param-api S -param-api W
 
 package main
 
@@ -20,9 +20,9 @@ import (
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2/shm"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2/tcp"
 
-	"github.com/rhu1/scribble-go-runtime/test/pair/pair03/Pair3/Proto1"
-	S11 "github.com/rhu1/scribble-go-runtime/test/pair/pair03/Pair3/Proto1/S_l1r1tol1r1"
-	W11_K "github.com/rhu1/scribble-go-runtime/test/pair/pair03/Pair3/Proto1/W_l1r1toK"
+	"github.com/rhu1/scribble-go-runtime/test/pair/pair05/Pair5/Proto1"
+	S11 "github.com/rhu1/scribble-go-runtime/test/pair/pair05/Pair5/Proto1/S_l1r1tol1r1"
+	W11_K "github.com/rhu1/scribble-go-runtime/test/pair/pair05/Pair5/Proto1/W_l1r1toK"
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 
@@ -90,18 +90,22 @@ func server_S11(wg *sync.WaitGroup, K session2.Pair) *S11.End {
 	return &end
 }
 
+func runS(s *S11.Init) S11.End {
+	return *s.Foreach(nested)
+}
+
 var seed = rand.NewSource(time.Now().UnixNano())
 var rnd = rand.New(seed)
 //var count = 1
 
-func runS(s *S11.Init) S11.End {
+func nested(s *S11.Init_6) S11.End {
 	var end *S11.End
 	if rnd.Intn(2) < 1 {
-		data := []int{2, 3, 5}
-		end = s.W_l1r1toK_Scatter_Foo(data)
+		data := []int{2}
+		end = s.W_I_Scatter_Foo(data)
 	} else {
-		data := []string{"a", "b", "c"}   // FIXME: for shm
-		end = s.W_l1r1toK_Scatter_Bar(data)
+		data := []string{"a"}   // FIXME: for shm
+		end = s.W_I_Scatter_Bar(data)
 	}
 	return *end
 }
