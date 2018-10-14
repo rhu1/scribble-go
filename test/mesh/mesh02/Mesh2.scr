@@ -1,0 +1,36 @@
+//Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/mesh/mesh02/Mesh2.scr -d test/mesh/mesh02/ -param Proto1 github.com/rhu1/scribble-go-runtime/test/mesh/mesh02/Mesh2 -param-api W
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/mesh/mesh02/Mesh2.scr -d test/mesh/mesh02/ -param Proto3 github.com/rhu1/scribble-go-runtime/test/mesh/mesh02/Mesh2 -param-api W
+
+
+module Mesh2;
+
+
+type <go> "string" from "..." as string;
+
+// Families: x = 2, or x > 2 -- y doesn't matter
+global protocol Proto1(role W)
+{
+	foreach W[I1:(1,1),Kwh-(1,0)], W[I2:(2,1),Kwh]
+	{
+		Foo(string) from W[I1] to W[I2];
+	}
+}
+
+/*global protocol Proto2(role W)
+{
+	foreach W[I1:Kw1,Kwh], W[I2:(1,1),K1h]
+	{
+		Foo(string) from W[I1] to W[I2];
+	}
+}*/
+
+// Families: y = 2, or y > 2 -- x doesn't matter
+global protocol Proto3(role W)
+{
+	foreach W[I1:(1,1),K1h-(0,1)], W[I2:(1,2),K1h]
+	{
+		Foo(string) from W[I1] to W[I2];
+	}
+}
+
