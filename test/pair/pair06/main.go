@@ -86,6 +86,7 @@ func server_T(wg *sync.WaitGroup, K session2.Pair, self session2.Pair) *T.End {
 		panic(err)
 	}
 	defer ss.Close()
+	// Accept from below
 	if err = T.W_l1r1plusl1r0toKandl1r1toKsubl1r0_Accept(self.Sub(session2.XY(1, 0)), ss, FORMATTER()); err != nil {
 		panic(err)
 	}
@@ -120,15 +121,17 @@ func server_M(wg *sync.WaitGroup, K session2.Pair, self session2.Pair) *M.End {
 		panic(err)
 	}
 	defer ss.Close()
+	// Accept from below
 	if (self.X == 2) {
 		if err = M.W_l1r1toKsubl1r0_not_l1r1plusl1r0toK_Accept(session2.XY(1, self.Y), ss, FORMATTER()); err != nil {
 			panic(err)
 		}
 	} else {
-		if err = M.W_l1r1toKsubl1r0_not_l1r1plusl1r0toK_Accept(self.Sub(session2.XY(1, 0)), ss, FORMATTER()); err != nil {
+		if err = M.W_l1r1plusl1r0toKandl1r1toKsubl1r0_Accept(self.Sub(session2.XY(1, 0)), ss, FORMATTER()); err != nil {
 			panic(err)
 		}
 	}
+	// Dial to above
 	if (self.X == K.X-1) {
 		peer := session2.XY(K.X, self.Y)
 		err := M.W_l1r1plusl1r0toKandl1r1toKsubl1r0_Dial(peer, util.LOCALHOST, PORT+peer.Flatten(K), DIAL, FORMATTER())
@@ -164,6 +167,7 @@ func client_B(wg *sync.WaitGroup, K session2.Pair, self session2.Pair) *B.End {
 	P1 := Proto1.New()
 	B := P1.New_family_1_W_l1r1toKsubl1r0_not_l1r1plusl1r0toK(K, self)
 	peer := session2.XY(2, self.Y)
+	// Dial to above
 	if err := B.W_l1r1plusl1r0toKandl1r1toKsubl1r0_Dial(peer, util.LOCALHOST, PORT+peer.Flatten(K), DIAL, FORMATTER()); err != nil {
 		panic(err)
 	}
