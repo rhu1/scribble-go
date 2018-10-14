@@ -10,7 +10,7 @@ type <go> "string" from "..." as string;
 // Families: x = 2, or x > 2 -- y doesn't matter
 global protocol Proto1(role W)
 {
-	foreach W[I1:(1,1),Kwh-(1,0)], W[I2:(2,1),Kwh]
+	foreach W[I1:(1,1),Khw-(1,0)], W[I2:(2,1),Khw]
 	{
 		Foo(string) from W[I1] to W[I2];
 	}	

@@ -21,9 +21,9 @@ import (
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2/tcp"
 
 	"github.com/rhu1/scribble-go-runtime/test/mesh/mesh01/Mesh1/Proto1"
-	B "github.com/rhu1/scribble-go-runtime/test/mesh/mesh01/Mesh1/Proto1/family_1/W_l1r1toKwhsubl1r0_not_l2r1toKwh"
-	M "github.com/rhu1/scribble-go-runtime/test/mesh/mesh01/Mesh1/Proto1/family_1/W_l1r1toKwhsubl1r0andl2r1toKwh"
-	T "github.com/rhu1/scribble-go-runtime/test/mesh/mesh01/Mesh1/Proto1/family_1/W_l2r1toKwh_not_l1r1toKwhsubl1r0"
+	B "github.com/rhu1/scribble-go-runtime/test/mesh/mesh01/Mesh1/Proto1/family_1/W_l1r1toKhwsubl1r0_not_l2r1toKhw"
+	M "github.com/rhu1/scribble-go-runtime/test/mesh/mesh01/Mesh1/Proto1/family_1/W_l1r1toKhwsubl1r0andl2r1toKhw"
+	T "github.com/rhu1/scribble-go-runtime/test/mesh/mesh01/Mesh1/Proto1/family_1/W_l2r1toKhw_not_l1r1toKhwsubl1r0"
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 
@@ -51,43 +51,43 @@ func main() {
 
 	h := 4;
 	w := 2;
-	Kwh := session2.XY(h, w)
+	Khw := session2.XY(h, w)
 
 	wg := new(sync.WaitGroup)
-	wg.Add(Kwh.Flatten(Kwh))
+	wg.Add(Khw.Flatten(Khw))
 
 	for j := 1; j <= w; j = j+1 {
-		go server_T(wg, Kwh, session2.XY(h, j))
+		go server_T(wg, Khw, session2.XY(h, j))
 	}
 
 	for i := 2; i < h; i = i+1 {
 		for j := 1; j <= w; j = j+1 {
-			go server_M(wg, Kwh, session2.XY(i, j))
+			go server_M(wg, Khw, session2.XY(i, j))
 		}
 	}
 
 	time.Sleep(100 * time.Millisecond) //2017/12/11 11:21:40 cannot connect to 127.0.0.1:8891: dial tcp 127.0.0.1:8891: connectex: No connection could be made because the target machine actively refused it.
 
 	for j := 1; j <= w; j = j+1 {
-		go client_B(wg, Kwh, session2.XY(1, j))
+		go client_B(wg, Khw, session2.XY(1, j))
 	}
 
 	wg.Wait()
 }
 
 
-// self.X == Kwh.X
-func server_T(wg *sync.WaitGroup, Kwh session2.Pair, self session2.Pair) *T.End {
+// self.X == Khw.X
+func server_T(wg *sync.WaitGroup, Khw session2.Pair, self session2.Pair) *T.End {
 	var err error
 	var ss transport2.ScribListener
 	P1 := Proto1.New()
-	T := P1.New_family_1_W_l2r1toKwh_not_l1r1toKwhsubl1r0(Kwh, self)
-	if ss, err = LISTEN(PORT+self.Flatten(Kwh)); err != nil {
+	T := P1.New_family_1_W_l2r1toKhw_not_l1r1toKhwsubl1r0(Khw, self)
+	if ss, err = LISTEN(PORT+self.Flatten(Khw)); err != nil {
 		panic(err)
 	}
 	defer ss.Close()
 	// Accept from below
-	if err = T.W_l1r1toKwhsubl1r0andl2r1toKwh_Accept(self.Sub(session2.XY(1, 0)), ss, FORMATTER()); err != nil {
+	if err = T.W_l1r1toKhwsubl1r0andl2r1toKhw_Accept(self.Sub(session2.XY(1, 0)), ss, FORMATTER()); err != nil {
 		panic(err)
 	}
 	//fmt.Println("T ready to run")
@@ -111,36 +111,36 @@ var rnd = rand.New(seed)
 */
 
 
-// self.X < Kwh.X
-func server_M(wg *sync.WaitGroup, Kwh session2.Pair, self session2.Pair) *M.End {
+// self.X < Khw.X
+func server_M(wg *sync.WaitGroup, Khw session2.Pair, self session2.Pair) *M.End {
 	var err error
 	var ss transport2.ScribListener
 	P1 := Proto1.New()
-	M := P1.New_family_1_W_l1r1toKwhsubl1r0andl2r1toKwh(Kwh, self)
-	if ss, err = LISTEN(PORT+self.Flatten(Kwh)); err != nil {
+	M := P1.New_family_1_W_l1r1toKhwsubl1r0andl2r1toKhw(Khw, self)
+	if ss, err = LISTEN(PORT+self.Flatten(Khw)); err != nil {
 		panic(err)
 	}
 	defer ss.Close()
 	// Accept from below
 	if (self.X == 2) {
-		if err = M.W_l1r1toKwhsubl1r0_not_l2r1toKwh_Accept(session2.XY(1, self.Y), ss, FORMATTER()); err != nil {
+		if err = M.W_l1r1toKhwsubl1r0_not_l2r1toKhw_Accept(session2.XY(1, self.Y), ss, FORMATTER()); err != nil {
 			panic(err)
 		}
 	} else {
-		if err = M.W_l1r1toKwhsubl1r0andl2r1toKwh_Accept(self.Sub(session2.XY(1, 0)), ss, FORMATTER()); err != nil {
+		if err = M.W_l1r1toKhwsubl1r0andl2r1toKhw_Accept(self.Sub(session2.XY(1, 0)), ss, FORMATTER()); err != nil {
 			panic(err)
 		}
 	}
 	// Dial to above
-	if (self.X == Kwh.X-1) {
-		peer := session2.XY(Kwh.X, self.Y)
-		err := M.W_l1r1toKwhsubl1r0_not_l2r1toKwh_Dial(peer, util.LOCALHOST, PORT+peer.Flatten(Kwh), DIAL, FORMATTER())
+	if (self.X == Khw.X-1) {
+		peer := session2.XY(Khw.X, self.Y)
+		err := M.W_l1r1toKhwsubl1r0_not_l2r1toKhw_Dial(peer, util.LOCALHOST, PORT+peer.Flatten(Khw), DIAL, FORMATTER())
 		if err != nil {
 			panic(err)
 		}
 	} else {
 		peer := self.Plus(session2.XY(1, 0))
-		err := M.W_l1r1toKwhsubl1r0andl2r1toKwh_Dial(peer, util.LOCALHOST, PORT+peer.Flatten(Kwh), DIAL, FORMATTER())
+		err := M.W_l1r1toKhwsubl1r0andl2r1toKhw_Dial(peer, util.LOCALHOST, PORT+peer.Flatten(Khw), DIAL, FORMATTER())
 		if err != nil {
 			panic(err)
 		}
@@ -163,12 +163,12 @@ func runM(s *M.Init) M.End {
 
 
 // self.X == 1
-func client_B(wg *sync.WaitGroup, Kwh session2.Pair, self session2.Pair) *B.End {
+func client_B(wg *sync.WaitGroup, Khw session2.Pair, self session2.Pair) *B.End {
 	P1 := Proto1.New()
-	B := P1.New_family_1_W_l1r1toKwhsubl1r0_not_l2r1toKwh(Kwh, self)
+	B := P1.New_family_1_W_l1r1toKhwsubl1r0_not_l2r1toKhw(Khw, self)
 	peer := session2.XY(2, self.Y)
 	// Dial to above
-	if err := B.W_l1r1toKwhsubl1r0andl2r1toKwh_Dial(peer, util.LOCALHOST, PORT+peer.Flatten(Kwh), DIAL, FORMATTER()); err != nil {
+	if err := B.W_l1r1toKhwsubl1r0andl2r1toKhw_Dial(peer, util.LOCALHOST, PORT+peer.Flatten(Khw), DIAL, FORMATTER()); err != nil {
 		panic(err)
 	}
 	end := B.Run(runB)
