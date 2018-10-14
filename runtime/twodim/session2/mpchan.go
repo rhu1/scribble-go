@@ -39,7 +39,7 @@ type MPChan struct {
 }
 
 // NewMPChan returns a new initialised multiparty channel instance.
-func NewMPChan(self int, rolenames []string) *MPChan {
+func NewMPChan(self Pair, rolenames []string) *MPChan {
 	fmts := make(map[string]map[Pair]ScribMessageFormatter)
 	conns := make(map[string]map[Pair]transport2.BinChannel)
 	for _, r := range rolenames {
