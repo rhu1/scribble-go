@@ -4,6 +4,25 @@ package util
 
 const LOCALHOST = "127.0.0.1"
 
+/*type IndexPair interface {
+	plus(IndexPair) IndexPair	
+	sub(IndexPair) IndexPair	
+}*/
+
+type IntPair struct {
+	Left int
+	Right int
+}
+
+func (p1 IntPair) Plus(p2 IntPair) IntPair {
+	return IntPair{p1.Left+p2.Left, p1.Right+p2.Right}	
+}
+
+func (p1 IntPair) Sub(p2 IntPair) IntPair {
+	return IntPair{p1.Left-p2.Left, p1.Right-p2.Right}	
+}
+
+
 func Copy(data int, i int) int {
 	return data
 }

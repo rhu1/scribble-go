@@ -97,7 +97,7 @@ func server_WK(wg *sync.WaitGroup, K int, self int) *WK.End {
 			err != nil {
 		panic(err)
 	}
-			// FIXME: W_3toK_not_1to1and2to2and2toKsub1_Accept ??
+	//FIXME: WK.W_3toK_not_1to1and2to2and2toKsub1_Accept ??
 	fmt.Println("WK (" + strconv.Itoa(WK.Self) + ") accepted", self-1, "on", PORT+self)
 	end := WK.Run(runWK)
 	wg.Done()

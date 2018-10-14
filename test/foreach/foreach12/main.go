@@ -266,7 +266,7 @@ func client_W1(wg *sync.WaitGroup, K int, self int) *W1.End {
 			err != nil {
 		panic(err)
 	}
-	// FIXME: W_1to1_not_2to2and2toKsub1and3toKandKtoK_Accept ??
+	//FIXME: W1.W_1to1_not_2to2and2toKsub1and3toKandKtoK_Accept ??
 	fmt.Println("W1 (" + strconv.Itoa(W1.Self) + ") connected to", self+1, "on", PORT+self+1)
 	if err = W1.W_3toKandKtoK_not_1to1and2to2and2toKsub1_Accept(self+K-1, ss, FORMATTER());
 			err != nil {
