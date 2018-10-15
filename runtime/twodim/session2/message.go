@@ -1,120 +1,16 @@
 package session2
 
 import (
-	"encoding/gob"
 	"unsafe"
 
+	"github.com/rhu1/scribble-go-runtime/runtime/session2"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2"
 )
 
-// ScribMessage represents a basic message.
-//
-// Corresponds to Scribble Java runtime's
-// org.scribble.runtime.net.ScribMessage class
-type ScribMessage interface {
-	GetOp() string
-}
-
-// ScribMessageFormatter represents a message formatter (or serialiser).
-//
-// Corresponds to Scribble Java runtime's
-// org.scribble.runtime.net.ScribMessageFormatter class
-type ScribMessageFormatter interface {
-	// Wrap wraps a given binary channel with the formatter.
-	// The channel is the target input and output stream for
-	// serialisation and deserialisation using the formatter.
-	Wrap(c transport2.BinChannel)
-
-	// Serialize serialises the given message m the writes to
-	// the underlying output stream.
-	Serialize(m ScribMessage) error
-
-	// Deserialize read from the underlying input stream and
-	// deserialises the message into the message container m.
-	Deserialize(m *ScribMessage) error
-}
-
-// GobFormatter is an implementation of a ScribMessageFormatter using
-// Go's "encoding/gob" package.
-//
-// User must manually run gob.Register on the message type pointer
-// to register the message type for encoding.
-//
-//     // T is type being sent/received
-//     gob.Register(new(T))
-//
-// The snippet above registers type T for sending and receiving.
-//
-type GobFormatter struct {
-	c   transport2.BinChannel
-	enc *gob.Encoder
-	dec *gob.Decoder
-}
-
-// Wrap wraps a binary channel for gob encoding.
-func (f *GobFormatter) Wrap(c transport2.BinChannel) {
-	f.c = c
-	f.enc = gob.NewEncoder(c)
-	f.dec = gob.NewDecoder(c)
-}
-
-// Serialize encodes a ScribMessage m using gob.
-//
-// The message type implementing ScribMessage should be
-// registered before calling this method.
-func (f *GobFormatter) Serialize(m ScribMessage) error {
-	// If the message is recognised as a special message type,
-	// use special encoding strategy.
-	switch smsg := m.(type) {
-	case wrapper:
-		return f.enc.Encode(smsg.Msg)
-	}
-	// Encode ScribMessage as-is.
-	return f.enc.Encode(&m)
-}
-
-// Deserialize decode a ScribMessage m using gob.
-//
-// The message type implementing ScribMessage should be
-// registered before calling this method.
-func (f *GobFormatter) Deserialize(m *ScribMessage) error {
-	// If the message container is recognised as a special message type,
-	// use special decoding strategy.
-	switch smeg := (*m).(type) {
-	case wrapper:
-		msg := smeg.Msg
-		return f.dec.Decode(msg)
-	}
-	// Decode ScribMessage as-is.
-	return f.dec.Decode(m)
-}
-
-// PointerWriter is an interface for writing a pointer ptr to a channel.
-//
-// Transports supporting transparent movement
-// of memory should implement this interface.
-type PointerWriter interface {
-	WritePointer(ptr interface{})
-}
-
-// PointerReader is an interface for reading a pointer from a channel
-// and write the received content to ptr.
-//
-// Transports supporting transparent movement
-// of memory should implement this interface.
-type PointerReader interface {
-	ReadPointer(ptr *interface{})
-}
-
-// PointerReadWriter is an interface for reading and writing
-// a pointer over a channel.
-//
-// Transports supporting transparent movement
-// of memory should implement this interface.
-type PointerReadWriter interface {
-	PointerWriter
-	PointerReader
-}
+type ScribMessage = session2.ScribMessage
+type ScribMessageFormatter = session2.ScribMessageFormatter
+type GobFormatter = session2.GobFormatter
+type PointerReadWriter = session2.PointerReadWriter
 
 // PassByPointer is an implementation of ScribMessageFormatter
 // using pointer passing.

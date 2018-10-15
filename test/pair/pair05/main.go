@@ -129,11 +129,11 @@ func runW(w *W11_K.Init) W11_K.End {
 	case *W11_K.Foo:
 		var x int
 		end = c.Recv_Foo(&x)
-		fmt.Println("W(" + w.Ept.Self.Tostring() + ") received Foo:", x)
-	case *W11_K.Bar: 
+		fmt.Println("W("+w.Ept.Self.String()+") received Foo:", x)
+	case *W11_K.Bar:
 		var x string
 		end = c.Recv_Bar(&x)
-		fmt.Println("W(" + w.Ept.Self.Tostring() + ") received Bar:", x)
+		fmt.Println("W("+w.Ept.Self.String()+") received Bar:", x)
 	}
 	return *end
 }

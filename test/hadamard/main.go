@@ -162,8 +162,8 @@ func client_C(wg *sync.WaitGroup, K session2.Pair, self session2.Pair) *C.End {
 func runC(c *C.Init) C.End {
 	pay := make([]message.Val, 1)
 	c2 := c.A_selfplusl0r0_Gather_Val(pay)
-	fmt.Println("C(" + c.Ept.Self.Tostring() + ") received from A:", pay)
+	fmt.Println("C("+c.Ept.Self.String()+") received from A:", pay)
 	end := c2.B_selfplusl0r0_Gather_Val(pay)
-	fmt.Println("C(" + c.Ept.Self.Tostring() + ") received from B:", pay)
+	fmt.Println("C("+c.Ept.Self.String()+") received from B:", pay)
 	return *end
 }
