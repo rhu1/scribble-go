@@ -19,19 +19,6 @@ func (ival IntInterval) IsEmpty() bool {
 	return ival.Start > ival.End;
 }
 
-type IntPairInterval struct {
-	Start	session2.Pair
-	End session2.Pair
-}
-
-/*func (ival IntPairInterval) String() string {
-
-}*/
-
-func (ival IntPairInterval) IsEmpty() bool {
-	return ival.Start.Gt(ival.End);
-}
-
 // Pre len(ivals) > 0
 func IsectIntIntervals(ivals []IntInterval) IntInterval {
 	if len(ivals) == 1 {
@@ -71,6 +58,64 @@ func min(x int, y int) int {
 
 func max(x int, y int) int {
 	if x > y {
+		return	x
+	}
+	return y
+}
+
+
+
+// All duplicated for another type, because Go
+type IntPairInterval struct {
+	Start	session2.Pair
+	End session2.Pair
+}
+
+func (ival IntPairInterval) String() string {
+	return "[" + ival.Start.String() + ", " + ival.End.String() + "]"
+}
+
+func (ival IntPairInterval) IsEmpty() bool {
+	return ival.Start.Gt(ival.End);
+}
+
+func IsectIntPairIntervals(ivals []IntPairInterval) IntPairInterval {
+	if len(ivals) == 1 {
+		return ivals[0]
+	} else {
+		ivals = isectIntPairInterval(ivals)
+		if ivals[0].IsEmpty() {
+			return ivals[0]
+		}
+		return IsectIntPairIntervals(ivals)
+	}
+}
+
+// Pre: len(ivals) > 1
+// Intersct ivals[0] and ivals[1] into ivals[1] and trim
+func isectIntPairInterval(ivals []IntPairInterval) []IntPairInterval {
+	if ivals[0].Start.Gt(ivals[1].End) {
+		ivals[1] = IntPairInterval{ivals[0].Start, ivals[1].End}
+	} else if ivals[1].Start.Gt(ivals[0].End) {
+		ivals[1] = IntPairInterval{ivals[1].Start, ivals[0].End}
+	} else {
+		start := maxIntPair(ivals[0].Start, ivals[1].Start)
+		end := minIntPair(ivals[1].End, ivals[0].End)
+		ivals[1] = IntPairInterval{start, end}
+	}
+	fmt.Println(ivals)
+	return ivals[1:]
+}
+
+func minIntPair(x session2.Pair, y session2.Pair) session2.Pair {
+	if x.Lt(y) {
+		return	x
+	}
+	return y
+}
+
+func maxIntPair(x session2.Pair, y session2.Pair) session2.Pair {
+	if x.Gt(y) {
 		return	x
 	}
 	return y

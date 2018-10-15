@@ -48,8 +48,8 @@ const PORT = 8888
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	h := 1;
-	w := 2;  // Implemented family_1 w > 2 -- but this code is interoperable
+	h := 4;
+	w := 3;
 	K1w := session2.XY(h, w)
 
 	wg := new(sync.WaitGroup)
