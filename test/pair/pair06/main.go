@@ -98,11 +98,10 @@ func server_T(wg *sync.WaitGroup, K session2.Pair, self session2.Pair) *T.End {
 
 func runT(s *T.Init) T.End {
 	pay := make([]string, 1)
-	end := s.W_selfpluslneg1r0_Gather_Foo(pay);
-	fmt.Println("T(" + s.Ept.Self.Tostring() + ") gathered Foo:", pay)
+	end := s.W_selfpluslneg1r0_Gather_Foo(pay)
+	fmt.Println("T("+s.Ept.Self.String()+") gathered Foo:", pay)
 	return *end
 }
-
 
 /*
 var seed = rand.NewSource(time.Now().UnixNano())
@@ -110,19 +109,18 @@ var rnd = rand.New(seed)
 //var count = 1
 */
 
-
 // self.X < K.X
 func server_M(wg *sync.WaitGroup, K session2.Pair, self session2.Pair) *M.End {
 	var err error
 	var ss transport2.ScribListener
 	P1 := Proto1.New()
 	M := P1.New_family_1_W_l1r1plusl1r0toKandl1r1toKsubl1r0(K, self)
-	if ss, err = LISTEN(PORT+self.Flatten(K)); err != nil {
+	if ss, err = LISTEN(PORT + self.Flatten(K)); err != nil {
 		panic(err)
 	}
 	defer ss.Close()
 	// Accept from below
-	if (self.X == 2) {
+	if self.X == 2 {
 		if err = M.W_l1r1toKsubl1r0_not_l1r1plusl1r0toK_Accept(session2.XY(1, self.Y), ss, FORMATTER()); err != nil {
 			panic(err)
 		}
@@ -153,14 +151,13 @@ func server_M(wg *sync.WaitGroup, K session2.Pair, self session2.Pair) *M.End {
 
 func runM(s *M.Init) M.End {
 	pay := make([]string, 1)
-	s2 := s.W_selfpluslneg1r0_Gather_Foo(pay);
-	fmt.Println("M(" + s.Ept.Self.Tostring() + ") gathered Foo:", pay)
-	pay = []string{pay[0] + "thenM" + s.Ept.Self.Tostring()}
+	s2 := s.W_selfpluslneg1r0_Gather_Foo(pay)
+	fmt.Println("M("+s.Ept.Self.String()+") gathered Foo:", pay)
+	pay = []string{pay[0] + "thenM" + s.Ept.Self.String()}
 	end := s2.W_selfplusl1r0_Scatter_Foo(pay)
-	fmt.Println("M(" + s.Ept.Self.Tostring() + ") scattered Foo:", pay)
+	fmt.Println("M("+s.Ept.Self.String()+") scattered Foo:", pay)
 	return *end
 }
-
 
 // self.X == 1
 func client_B(wg *sync.WaitGroup, K session2.Pair, self session2.Pair) *B.End {
@@ -177,8 +174,8 @@ func client_B(wg *sync.WaitGroup, K session2.Pair, self session2.Pair) *B.End {
 }
 
 func runB(s *B.Init) B.End {
-	pay := []string{"B" + s.Ept.Self.Tostring()}
+	pay := []string{"B" + s.Ept.Self.String()}
 	end := s.W_selfplusl1r0_Scatter_Foo(pay)
-	fmt.Println("B(" + s.Ept.Self.Tostring() + ") scattered Foo:", pay)
+	fmt.Println("B("+s.Ept.Self.String()+") scattered Foo:", pay)
 	return *end
 }

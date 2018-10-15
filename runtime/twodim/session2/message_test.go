@@ -21,8 +21,8 @@ func (c *fakeChan) ReadPointer(m *interface{})  { *m = <-c.ptr }
 func (c *fakeChan) WritePointer(m interface{})  { c.ptr <- m }
 
 func mockMPChan(fmtr ScribMessageFormatter) *MPChan {
-	mpc := NewMPChan(0, []string{""})
-	mpc.Fmts[""][0] = fmtr
+	mpc := NewMPChan(XY(0, 0), []string{""})
+	mpc.Fmts[""][XY(0, 0)] = fmtr
 	return mpc
 }
 
@@ -57,13 +57,13 @@ func TestSerialisePrimitiveType(t *testing.T) {
 				mpc := mockMPChan(transport.sFmt)
 				// Send
 				for i := range toSend {
-					if err := mpc.ISend("", 0, &toSend[i]); err != nil {
+					if err := mpc.ISend("", XY(0, 0), &toSend[i]); err != nil {
 						t.Errorf("serialise failed: %v", err)
 					}
 				}
 				// Receive
 				for i := range toRecv {
-					if err := mpc.IRecv("", 0, &toRecv[i]); err != nil {
+					if err := mpc.IRecv("", XY(0, 0), &toRecv[i]); err != nil {
 						t.Errorf("deserialise failed: %v", err)
 					}
 				}
@@ -87,13 +87,13 @@ func TestSerialisePrimitiveType(t *testing.T) {
 				mpc := mockMPChan(transport.sFmt)
 				// Send
 				for i := range toSend {
-					if err := mpc.ISend("", 0, &toSend[i]); err != nil {
+					if err := mpc.ISend("", XY(0, 0), &toSend[i]); err != nil {
 						t.Errorf("serialise failed: %v", err)
 					}
 				}
 				// Receive
 				for i := range toRecv {
-					if err := mpc.IRecv("", 0, &toRecv[i]); err != nil {
+					if err := mpc.IRecv("", XY(0, 0), &toRecv[i]); err != nil {
 						t.Errorf("deserialise failed: %v", err)
 					}
 				}
@@ -117,13 +117,13 @@ func TestSerialisePrimitiveType(t *testing.T) {
 				mpc := mockMPChan(transport.sFmt)
 				// Send
 				for i := range toSend {
-					if err := mpc.ISend("", 0, &toSend[i]); err != nil {
+					if err := mpc.ISend("", XY(0, 0), &toSend[i]); err != nil {
 						t.Errorf("serialise failed: %v", err)
 					}
 				}
 				// Receive
 				for i := range toRecv {
-					if err := mpc.IRecv("", 0, &toRecv[i]); err != nil {
+					if err := mpc.IRecv("", XY(0, 0), &toRecv[i]); err != nil {
 						t.Errorf("deserialise failed: %v", err)
 					}
 				}
@@ -150,13 +150,13 @@ func TestSerialisePrimitiveType(t *testing.T) {
 				mpc := mockMPChan(transport.sFmt)
 				// Send
 				for i := range toSend {
-					if err := mpc.ISend("", 0, &toSend[i]); err != nil {
+					if err := mpc.ISend("", XY(0, 0), &toSend[i]); err != nil {
 						t.Errorf("serialise failed: %v", err)
 					}
 				}
 				// Receive
 				for i := range toRecv {
-					if err := mpc.IRecv("", 0, &toRecv[i]); err != nil {
+					if err := mpc.IRecv("", XY(0, 0), &toRecv[i]); err != nil {
 						t.Errorf("deserialise failed: %v", err)
 					}
 				}
@@ -191,13 +191,13 @@ func TestSerialiseStructType(t *testing.T) {
 			gob.Register(new(StructType)) // Register type
 			// Send
 			for i := range toSend {
-				if err := mpc.ISend("", 0, &toSend[i]); err != nil {
+				if err := mpc.ISend("", XY(0, 0), &toSend[i]); err != nil {
 					t.Errorf("serialise failed: %v", err)
 				}
 			}
 			// Receive
 			for i := range toRecv {
-				if err := mpc.IRecv("", 0, &toRecv[i]); err != nil {
+				if err := mpc.IRecv("", XY(0, 0), &toRecv[i]); err != nil {
 					t.Errorf("deserialise failed: %v", err)
 				}
 			}
@@ -229,13 +229,13 @@ func TestSerialiseNamedSig(t *testing.T) {
 			gob.Register(new(NamedSig)) // Register type
 			// Send
 			for i := range toSend {
-				if err := mpc.ISend("", 0, &toSend[i]); err != nil {
+				if err := mpc.ISend("", XY(0, 0), &toSend[i]); err != nil {
 					t.Errorf("serialise failed: %v", err)
 				}
 			}
 			// Receive
 			for i := range toRecv {
-				if err := mpc.IRecv("", 0, &toRecv[i]); err != nil {
+				if err := mpc.IRecv("", XY(0, 0), &toRecv[i]); err != nil {
 					t.Errorf("deserialise failed: %v", err)
 				}
 			}
@@ -269,13 +269,13 @@ func TestSerialiseStructSig(t *testing.T) {
 			gob.Register(new(StructSig)) // Register type
 			// Send
 			for i := range toSend {
-				if err := mpc.ISend("", 0, &toSend[i]); err != nil {
+				if err := mpc.ISend("", XY(0, 0), &toSend[i]); err != nil {
 					t.Errorf("serialise failed: %v", err)
 				}
 			}
 			// Receive
 			for i := range toRecv {
-				if err := mpc.IRecv("", 0, &toRecv[i]); err != nil {
+				if err := mpc.IRecv("", XY(0, 0), &toRecv[i]); err != nil {
 					t.Errorf("deserialise failed: %v", err)
 				}
 			}
@@ -318,13 +318,13 @@ func TestSerialiseStructPtrFieldSig(t *testing.T) {
 			gob.Register(new(StructPtrFieldSig)) // Register type
 			// Send
 			for i := range toSend {
-				if err := mpc.ISend("", 0, &toSend[i]); err != nil {
+				if err := mpc.ISend("", XY(0, 0), &toSend[i]); err != nil {
 					t.Errorf("serialise failed: %v", err)
 				}
 			}
 			// Receive
 			for i := range toRecv {
-				if err := mpc.IRecv("", 0, &toRecv[i]); err != nil {
+				if err := mpc.IRecv("", XY(0, 0), &toRecv[i]); err != nil {
 					t.Errorf("deserialise failed: %v", err)
 				}
 			}
@@ -354,13 +354,13 @@ func TestSerialisePtrPrimitiveSig(t *testing.T) {
 			mpc := mockMPChan(transport.sFmt)
 			// Send
 			for i := range toSend {
-				if err := mpc.ISend("", 0, &toSend[i]); err != nil {
+				if err := mpc.ISend("", XY(0, 0), &toSend[i]); err != nil {
 					t.Errorf("serialise failed: %v", err)
 				}
 			}
 			// Receive
 			for i := range toRecv {
-				if err := mpc.IRecv("", 0, &toRecv[i]); err != nil {
+				if err := mpc.IRecv("", XY(0, 0), &toRecv[i]); err != nil {
 					t.Errorf("deserialise failed: %v", err)
 				}
 			}
@@ -373,5 +373,13 @@ func TestSerialisePtrPrimitiveSig(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestPairEquality(t *testing.T) {
+	if a, b := XY(0, 0), XY(0, 0); a != b {
+		t.Fatalf("%v != %v.\n", a, b)
+	} else {
+		t.Logf("%v == %v.\n", a, b)
 	}
 }

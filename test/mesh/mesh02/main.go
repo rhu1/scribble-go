@@ -8,15 +8,16 @@ import (
 	"encoding/gob"
 	"fmt"
 	"log"
+
 	//"math/rand"
 	//"strconv"
 	"sync"
 	"time"
 
-	"github.com/rhu1/scribble-go-runtime/runtime/twodim/session2"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2/shm"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2/tcp"
+	"github.com/rhu1/scribble-go-runtime/runtime/twodim/session2"
 
 	"github.com/rhu1/scribble-go-runtime/test/mesh/mesh02/Mesh2/Proto3"
 	L "github.com/rhu1/scribble-go-runtime/test/mesh/mesh02/Mesh2/Proto3/family_1/W_l1r1toK1wsubl0r1_not_l1r2toK1w"
@@ -96,8 +97,8 @@ func server_R(wg *sync.WaitGroup, K1w session2.Pair, self session2.Pair) *R.End 
 
 func runR(s *R.Init) R.End {
 	pay := make([]string, 1)
-	end := s.W_selfplusl0rneg1_Gather_Foo(pay);
-	fmt.Println("R(" + s.Ept.Self.Tostring() + ") gathered Foo:", pay)
+	end := s.W_selfplusl0rneg1_Gather_Foo(pay)
+	fmt.Println("R("+s.Ept.Self.String()+") gathered Foo:", pay)
 	return *end
 }
 
@@ -151,14 +152,13 @@ func server_M(wg *sync.WaitGroup, K1w session2.Pair, self session2.Pair) *M.End 
 
 func runM(s *M.Init) M.End {
 	pay := make([]string, 1)
-	s2 := s.W_selfplusl0rneg1_Gather_Foo(pay);
-	fmt.Println("M(" + s.Ept.Self.Tostring() + ") gathered Foo:", pay)
-	pay = []string{pay[0] + "thenM" + s.Ept.Self.Tostring()}
+	s2 := s.W_selfplusl0rneg1_Gather_Foo(pay)
+	fmt.Println("M("+s.Ept.Self.String()+") gathered Foo:", pay)
+	pay = []string{pay[0] + "thenM" + s.Ept.Self.String()}
 	end := s2.W_selfplusl0r1_Scatter_Foo(pay)
-	fmt.Println("M(" + s.Ept.Self.Tostring() + ") scattered Foo:", pay)
+	fmt.Println("M("+s.Ept.Self.String()+") scattered Foo:", pay)
 	return *end
 }
-
 
 // self.Y == 1
 func client_L(wg *sync.WaitGroup, K1w session2.Pair, self session2.Pair) *L.End {
@@ -175,8 +175,8 @@ func client_L(wg *sync.WaitGroup, K1w session2.Pair, self session2.Pair) *L.End 
 }
 
 func runL(s *L.Init) L.End {
-	pay := []string{"L" + s.Ept.Self.Tostring()}
+	pay := []string{"L" + s.Ept.Self.String()}
 	end := s.W_selfplusl0r1_Scatter_Foo(pay)
-	fmt.Println("L(" + s.Ept.Self.Tostring() + ") scattered Foo:", pay)
+	fmt.Println("L("+s.Ept.Self.String()+") scattered Foo:", pay)
 	return *end
 }

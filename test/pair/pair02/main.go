@@ -113,7 +113,7 @@ func clientCode(wg *sync.WaitGroup, K session2.Pair, self session2.Pair) *W11_K.
 
 func runW(w *W11_K.Init) W11_K.End {
 	data := make([]int, 1)
-	end := w.S_l1r1_Gather_Foo(data)  // FIXME: panic: interface conversion: interface {} is int, not *int -- cf. gob.Register in commented init() ?
-	fmt.Println("W(" + w.Ept.Self.Tostring() + ") gathered:", data)
+	end := w.S_l1r1_Gather_Foo(data) // FIXME: panic: interface conversion: interface {} is int, not *int -- cf. gob.Register in commented init() ?
+	fmt.Println("W("+w.Ept.Self.String()+") gathered:", data)
 	return *end
 }
