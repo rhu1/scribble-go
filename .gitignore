@@ -67,3 +67,17 @@ test/sigs/sigs01/Sigs1/
 
 test/pget/PGet/
 
+test/game/game01/
+
+test/hadamard/Hadamard/
+
+test/mesh/mesh01/Mesh1/
+test/mesh/mesh02/Mesh2/
+
+test/pair/pair01/Pair1/
+test/pair/pair02/Pair2/
+test/pair/pair03/Pair3/
+test/pair/pair05/Pair5/
+test/pair/pair06/Pair6/
+
+
