@@ -6,20 +6,20 @@ module PGet;
 
 
 
-/*global protocol Basic(role M, role F, role S) {
+global protocol Basic(role M, role F, role S) {
   // Get metadata (size)
-  Head from F[1] to S[1];
-  Res  from S[1] to F[1];
-  Meta from F[1] to M[1];
+  Head() from F[1] to S[1];
+  Res()  from S[1] to F[1];
+  Meta() from F[1] to M[1];
 
   // Send jobs.
-  Job from M[1] to F[1,K];
-  Get from F[1,K] to S[1];
-  Res from S[1] to F[1,K];
-  Data from F[1,K] to M[1];
+  Job() from M[1] to F[1,K];
+  Get() from F[1,K] to S[1];
+  Res() from S[1] to F[1,K];
+  Data() from F[1,K] to M[1];
 
   //Sync(Sync@A) from F[1,K] to M[1];
-}*/
+}
 
 /*global protocol Sync(role A, role B) {
   Done from A[1] to B[1];

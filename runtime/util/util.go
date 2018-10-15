@@ -49,6 +49,26 @@ func isectIntInterval(ivals []IntInterval) []IntInterval {
 	return ivals[1:]
 }
 
+/*func (this IntInterval) SubtIntIntervals(ivals []IntInterval) IntInterval {
+	if this.IsEmpty() {
+		return this
+	}
+	if len(ivals) == 0 {
+		return this
+	}
+	if this.Start <= ivals[0].End && ivals[0].Start <= this.End {
+		//return IntInterval{max(this.Start+1, ivals[0].Start), min(this.End-1, ivals[0].End)}.SubtIntIntervals(ivals[1:])
+		// set difference
+		var x int
+		var y int
+		if this.Start < ivals[0].Start {
+			x = this.Start
+			
+		}
+	}
+	return this.SubtIntIntervals(ivals[1:])
+}*/
+
 func min(x int, y int) int {
 	if x < y {
 		return	x
@@ -104,6 +124,10 @@ func isectIntPairInterval(ivals []IntPairInterval) []IntPairInterval {
 		ivals[1] = IntPairInterval{start, end}
 	}
 	return ivals[1:]
+}
+
+func SubtIntPairIntervals() {
+	
 }
 
 func minIntPair(x session2.Pair, y session2.Pair) session2.Pair {

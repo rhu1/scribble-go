@@ -108,7 +108,7 @@ func server_WK(wg *sync.WaitGroup, K int, self int) *WK.End {
 func runWK(s *WK.Init) WK.End {
 	var end *WK.End
 	switch c := s.W_selfsub1_Branch().(type) {
-	case *WK.Foo_W_Init: 
+	case *WK.Foo: 
 		var x messages.Foo
 		s2 := c.Recv_Foo(&x)
 		fmt.Println("WK (" + strconv.Itoa(s.Ept.Self) + ") received Foo:", x)
@@ -116,7 +116,7 @@ func runWK(s *WK.Init) WK.End {
 		s = s2.W_1_Scatter_Foo(pay)
 		fmt.Println("WK (" + strconv.Itoa(s.Ept.Self) + ") scattered Foo:", pay)
 		return runWK(s)
-	case *WK.Bar_W_Init: 
+	case *WK.Bar: 
 		var x messages.Bar
 		s3 := c.Recv_Bar(&x)
 		fmt.Println("WK (" + strconv.Itoa(s.Ept.Self) + ") received Bar:", x)

@@ -86,11 +86,11 @@ func runS(s *S_1.Init) S_1.End {
 	return *s.Foreach(nested)
 }
 
-func nested(s *S_1.Init_11) S_1.End {
+func nested(s *S_1.Init_6) S_1.End {
 	data := []int { 2, 3, 5, 7, 11, 13 }
 	K := s.Ept.K  // Good API? -- generate param values as direct fields? (instead of generic map)
 	pay := data[0:K]
-	end := s.W_ItoI_Scatter_A(pay)
+	end := s.W_I_Scatter_A(pay)
 	fmt.Println("S scattered A:", pay)
 	return *end
 }
@@ -110,7 +110,7 @@ func clientCode(wg *sync.WaitGroup, K int, self int) *W_1toK.End {
 
 func runW(w *W_1toK.Init) W_1toK.End {
 	pay := make([]int, 1)
-	end := w.S_1to1_Gather_A(pay)
+	end := w.S_1_Gather_A(pay)
 	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") gathered:", pay)
 	return *end
 }
