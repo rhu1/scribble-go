@@ -103,7 +103,6 @@ func isectIntPairInterval(ivals []IntPairInterval) []IntPairInterval {
 		end := minIntPair(ivals[1].End, ivals[0].End)
 		ivals[1] = IntPairInterval{start, end}
 	}
-	fmt.Println(ivals)
 	return ivals[1:]
 }
 

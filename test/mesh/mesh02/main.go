@@ -48,7 +48,7 @@ const PORT = 8888
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	h := 4;
+	h := 1;  // Must be 1 for this family -- CHECKME: currently caught by self check, not family check
 	w := 3;
 	K1w := session2.XY(h, w)
 

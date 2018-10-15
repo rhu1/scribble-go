@@ -13,7 +13,8 @@ func XY(x, y int) Pair {
 }
 
 func (p1 Pair) Lte(p2 Pair) bool {
-	return p1.X <= p2.X && p1.Y <= p2.Y
+	//return p1.X <= p2.X && p1.Y <= p2.Y
+	return p1.X < p2.X || (p1.X == p2.X && p1.Y <= p2.Y)
 }
 
 func (p1 Pair) Eq(p2 Pair) bool {
