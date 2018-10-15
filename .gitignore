@@ -67,7 +67,9 @@ test/sigs/sigs01/Sigs1/
 
 test/pget/PGet/
 
-test/game/game01/
+test/game/game01/Game1
+test/game/game01/Proto1
+
 
 test/hadamard/Hadamard/
 

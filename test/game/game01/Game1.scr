@@ -1,0 +1,31 @@
+//Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/game/game01/Game1.scr -d test/game/game01/ -param Game github.com/rhu1/scribble-go-runtime/test/game/game01/Game1 -param-api A -param-api B -param-api C
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/game/game01/Game1.scr -d test/game/game01/ -param Proto1 github.com/rhu1/scribble-go-runtime/test/game/game01/Game1 -param-api P -param-api Q
+
+
+module Game1;
+
+
+//type <go> "int" from "..." as int;
+//type <go> "string" from "..." as string;
+
+
+global protocol Proto1(role P, role Q)
+{
+	Play(Game@A) from Q[1] to P[1,K];
+}
+
+global protocol Game(role A, role B, role C)
+{
+	choice at A[1]
+	{
+		Foo() from A[1] to B[1];
+		Foo() from A[1] to C[1];
+		do Game(A, B, C);
+	}
+	or
+	{	
+		Bar() from A[1] to B[1];
+		Bar() from A[1] to C[1];
+	}
+}
