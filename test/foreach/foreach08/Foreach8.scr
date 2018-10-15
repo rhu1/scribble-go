@@ -19,9 +19,21 @@ global protocol Proto1(role W)
 	}
 }
 
+/*
+- check self and K against variant
+- check K against family?
 
 
+(assert (exists ((K Int)) (and (>= K 1) 
 
+(exists ((self Int)) (and (and (>= self 1) (<= self (- K 1)) (<= 1 (- K 1))) (and (>= self 2) (<= self K) (<= 2 K)))) 
+
+(exists ((self Int)) (and (and (>= self 2) (<= self K) (<= 2 K)) (and (not (and (>= self 1) (<= self (- K 1)))) (<= 1 (- K 1))))) 
+
+(not (exists ((self Int)) (and (and (>= self 1) (<= self (- K 1)) (<= 1 (- K 1))) (and (not (and (>= self 2) (<= self K))) (<= 2 K)))))
+
+)))
+*/
 
 
 

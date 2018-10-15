@@ -16,6 +16,22 @@ func (p1 Pair) Lte(p2 Pair) bool {
 	return p1.X <= p2.X && p1.Y <= p2.Y;	
 }
 
+func (p1 Pair) Eq(p2 Pair) bool {
+	return p1.X == p2.X && p1.Y == p2.Y;	
+}
+
+func (p1 Pair) Lt(p2 Pair) bool {
+	return p1.Lte(p2) && !p1.Eq(p2);	
+}
+
+func (p1 Pair) Gt(p2 Pair) bool {
+	return !p1.Lte(p2);	
+}
+
+func (p1 Pair) Gte(p2 Pair) bool {
+	return !p1.Lt(p2);	
+}
+
 func (p Pair) Inc(max Pair) Pair {
 	if 	p.Y < max.Y {
 		return XY(p.X, p.Y+1)	
