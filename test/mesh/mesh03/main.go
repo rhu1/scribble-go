@@ -77,7 +77,7 @@ func main() {
 }
 
 
-// self.X == Khw.X
+/*// self.X == Khw.X
 func server_T(wg *sync.WaitGroup, Khw session2.Pair, self session2.Pair) *T.End {
 	var err error
 	var ss transport2.ScribListener
@@ -96,6 +96,7 @@ func server_T(wg *sync.WaitGroup, Khw session2.Pair, self session2.Pair) *T.End 
 	wg.Done()
 	return &end
 }
+//*/
 
 func runT(s *T.Init) T.End {
 	pay := make([]string, 1)
@@ -163,7 +164,7 @@ func runM(s *M.Init) M.End {
 }
 
 
-// self.X == 1
+// self.X == 1, self_wrap.X == Khw.X
 func client_B(wg *sync.WaitGroup, Khw session2.Pair, self session2.Pair, self_wrap session2.Pair) *T.End {
 	var err error
 
