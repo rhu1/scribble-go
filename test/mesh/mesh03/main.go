@@ -70,7 +70,7 @@ func main() {
 	time.Sleep(100 * time.Millisecond) //2017/12/11 11:21:40 cannot connect to 127.0.0.1:8891: dial tcp 127.0.0.1:8891: connectex: No connection could be made because the target machine actively refused it.
 
 	for j := 1; j <= w; j = j+1 {
-		go client_B(wg, Khw, session2.XY(1, j), session2.XY(h+1, j))
+		go server_T_and_client_B(wg, Khw, session2.XY(1, j), session2.XY(h+1, j))
 	}
 
 	wg.Wait()
@@ -165,7 +165,7 @@ func runM(s *M.Init) M.End {
 
 
 // self.X == 1, self_wrap.X == Khw.X
-func client_B(wg *sync.WaitGroup, Khw session2.Pair, self session2.Pair, self_wrap session2.Pair) *T.End {
+func server_T_and_client_B(wg *sync.WaitGroup, Khw session2.Pair, self session2.Pair, self_wrap session2.Pair) *T.End {
 	var err error
 
 	var ss transport2.ScribListener
