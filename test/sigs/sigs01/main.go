@@ -75,7 +75,7 @@ func server(wg *sync.WaitGroup) *S_1.End {
 	S.W_1to1_Accept(1, ss, FORMATTER())
 	end := S.Run(runS)
 	wg.Done()
-	return end
+	return &end
 }
 
 func runS(s *S_1.Init) S_1.End {
@@ -88,11 +88,11 @@ func runS(s *S_1.Init) S_1.End {
 
 		//...FIXME: send should take pointers for interface compatibility with pointer-passing -- no? slice is already a pointer indirection?
 
-		end = s.W_1to1_Scatter_Foo(pay)
+		end = s.W_1_Scatter_Foo(pay)
 		fmt.Println("S scattered:", pay)
 	} else {
 		pay := []messages.Bar { messages.Bar{"abc"} }
-		end = s.W_1to1_Scatter_Bar(pay)
+		end = s.W_1_Scatter_Bar(pay)
 		fmt.Println("S scattered:", pay)
 	}
 	return *end
@@ -106,12 +106,12 @@ func client(wg *sync.WaitGroup) *W_1.End {
 	}
 	end := W.Run(runW)
 	wg.Done()
-	return end
+	return &end
 }
 
 func runW(w *W_1.Init) W_1.End {
 	var end *W_1.End
-	switch c := w.S_1to1_Branch().(type) {
+	switch c := w.S_1_Branch().(type) {
 	case *W_1.Foo:
 		var pay messages.Foo
 		end = c.Recv_Foo(&pay)
