@@ -133,13 +133,13 @@ func server_M(wg *sync.WaitGroup, K1w session2.Pair, self session2.Pair) *M.End 
 	// Dial to above
 	if (self.Y == K1w.Y-1) {
 		peer := session2.XY(self.X, K1w.Y)
-		err := M.W_l1r1toK1wsubl0r1andl1r2toK1w_Dial(peer, util.LOCALHOST, PORT+peer.Flatten(K1w), DIAL, FORMATTER())
+		err := M.W_l1r2toK1w_not_l1r1toK1wsubl0r1_Dial(peer, util.LOCALHOST, PORT+peer.Flatten(K1w), DIAL, FORMATTER())
 		if err != nil {
 			panic(err)
 		}
 	} else {
 		peer := self.Plus(session2.XY(0, 1))
-		err := M.W_l1r2toK1w_not_l1r1toK1wsubl0r1_Dial(peer, util.LOCALHOST, PORT+peer.Flatten(K1w), DIAL, FORMATTER())
+		err := M.W_l1r1toK1wsubl0r1andl1r2toK1w_Dial(peer, util.LOCALHOST, PORT+peer.Flatten(K1w), DIAL, FORMATTER())
 		if err != nil {
 			panic(err)
 		}

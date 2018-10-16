@@ -141,16 +141,16 @@ func server_M(wg *sync.WaitGroup, K int, self int) *M.End {
 	}
 	defer ss.Close()
 
-	if self > 3 {
+	if self > 2 {
 		if err = M.W_2toKsub1and3toK_not_1to1and2to2andKtoK_Accept(self-1, ss, FORMATTER()); err != nil {  // FIXME: shouldn't have
 			panic(err)
 		}
-	} else if self == 3 {
-		if err = M.W_2to2and2toKsub1_not_1to1and3toKandKtoK_Accept(self-1, ss, FORMATTER()); err != nil {
+	/*} else if self == 3 {
+		if err = M.  W_2to2and2toKsub1_not_1to1and3toKandKtoK_Accept(self-1, ss, FORMATTER()); err != nil {
 			panic(err)
-		}
+		}*/
 	} else {
-		if err = M.W_2to2and2toKsub1_not_1to1and3toKandKtoK_Accept(self-1, ss, FORMATTER()); err != nil {
+		if err = M.W_1to1_not_2to2and2toKsub1and3toKandKtoK_Accept(self-1, ss, FORMATTER()); err != nil {
 			panic(err)
 		}
 	}
