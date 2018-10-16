@@ -1,0 +1,31 @@
+//Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/mesh/mesh03/Mesh3.scr -d test/mesh/mesh03/ -param Proto1and2 github.com/rhu1/scribble-go-runtime/test/mesh/mesh03/Mesh3 -param-api W
+
+
+module Mesh3;
+
+
+type <go> "string" from "..." as string;
+
+// Families: x = 2, or x > 2 -- y doesn't matter
+global protocol Proto1and2(role W)
+{
+	foreach W[I1:(1,1),Khw-(1,0)], W[I2:(2,1),Khw]
+	//foreach W[I1:(1,1),Khw], W[I2:(2,1),Khw+(1,0)]
+	{
+		Foo(string) from W[I1] to W[I2];
+	}
+
+	/*foreach W[I1:1,Khw], W[I2:2,Khw+1]
+	{
+		Foo(string) from W[I1] to W[I2];
+	}*/
+}
+
+
+
+
+	/*foreach W[I1:Kh1,Khw], W[I2:Kh1+(1,0),Khw+(1,0)] {
+		Foo(string) from W[I1] to W[I2];
+	}*/	
+
