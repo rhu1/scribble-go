@@ -100,7 +100,7 @@ func runB(s *B.Init) B.End {
 	return *s.Foreach(nestedB)
 }
 
-func nestedB(s *B.Init_15) B.End {
+func nestedB(s *B.Init_14) B.End {
 	pay := make([]messages.Foo, 1)
 	end := s.A_I_Gather_Foo(pay)
 	fmt.Println("B (" + strconv.Itoa(s.Ept.Self) + ") gathered:", pay)
