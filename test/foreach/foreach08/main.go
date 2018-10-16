@@ -85,7 +85,7 @@ func server_right(wg *sync.WaitGroup, K int, self int) *Right.End {
 	}
 	defer ss.Close()
 	if err = R.
-			W_1toKsub1_not_2toK_Accept(self-1, ss, FORMATTER());
+			W_1toKsub1and2toK_Accept(self-1, ss, FORMATTER());
 			//W_1toKsub1_not_2toK_Accept(self-1, ss, FORMATTER());  // Target variant (L/M) not constrained, but safe to use either
 			err != nil {
 		panic(err)
@@ -112,12 +112,24 @@ func server_middle(wg *sync.WaitGroup, K int, self int) *Middle.End {
 		panic(err)
 	}
 	defer ss.Close()
-	if err = M.W_1toKsub1_not_2toK_Accept(self-1, ss, FORMATTER()); err != nil {
-		panic(err)
+	if self > 2 {
+		if err = M.W_1toKsub1and2toK_Accept(self-1, ss, FORMATTER()); err != nil {
+			panic(err)
+		}
+	} else {
+		if err = M.W_1toKsub1_not_2toK_Accept(self-1, ss, FORMATTER()); err != nil {
+			panic(err)
+		}
 	}
 	fmt.Println("Middle (" + strconv.Itoa(M.Self) + ") accepted", self-1, "on", PORT+self)
-	if err := M.W_2toK_not_1toKsub1_Dial(self+1, util.LOCALHOST, PORT+self+1, DIAL, FORMATTER()); err != nil {
-		panic(err)
+	if self == K-1 {
+		if err := M.W_2toK_not_1toKsub1_Dial(self+1, util.LOCALHOST, PORT+self+1, DIAL, FORMATTER()); err != nil {
+			panic(err)
+		}
+	} else {
+		if err := M.W_1toKsub1and2toK_Dial(self+1, util.LOCALHOST, PORT+self+1, DIAL, FORMATTER()); err != nil {
+			panic(err)
+		}
 	}
 	fmt.Println("Middle (" + strconv.Itoa(M.Self) + ") connected to", self+1, "on", PORT+self+1)
 	end := M.Run(runMiddle)

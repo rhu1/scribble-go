@@ -108,7 +108,7 @@ func server_WK(wg *sync.WaitGroup, K int, self int) *WK.End {
 func runWK(s *WK.Init) WK.End {
 	var end *WK.End
 	switch c := s.W_selfsub1_Branch().(type) {
-	case *WK.Foo: 
+	case *WK.Foo_W_Init: 
 		var x messages.Foo
 		s2 := c.Recv_Foo(&x)
 		fmt.Println("WK (" + strconv.Itoa(s.Ept.Self) + ") received Foo:", x)
@@ -116,7 +116,7 @@ func runWK(s *WK.Init) WK.End {
 		s = s2.W_1_Scatter_Foo(pay)
 		fmt.Println("WK (" + strconv.Itoa(s.Ept.Self) + ") scattered Foo:", pay)
 		return runWK(s)
-	case *WK.Bar: 
+	case *WK.Bar_W_Init: 
 		var x messages.Bar
 		s3 := c.Recv_Bar(&x)
 		fmt.Println("WK (" + strconv.Itoa(s.Ept.Self) + ") received Bar:", x)
@@ -141,15 +141,19 @@ func server_M(wg *sync.WaitGroup, K int, self int) *M.End {
 	}
 	defer ss.Close()
 
-	/*if self == 3 {
-		if err = M.W_2to2and2toKsub1_not_1to1and3toKandKtoK_Accept(self-1, ss, FORMATTER()); err != nil {  // FIXME: shouldn't have
+	if self > 3 {
+		if err = M.W_2toKsub1and3toK_not_1to1and2to2andKtoK_Accept(self-1, ss, FORMATTER()); err != nil {  // FIXME: shouldn't have
 			panic(err)
 		}
-	} else {*/
-		if err = M.W_2toKsub1and3toK_not_1to1and2to2andKtoK_Accept(self-1, ss, FORMATTER()); err != nil {
+	} else if self == 3 {
+		if err = M.W_2to2and2toKsub1_not_1to1and3toKandKtoK_Accept(self-1, ss, FORMATTER()); err != nil {
 			panic(err)
 		}
-	//}
+	} else {
+		if err = M.W_2to2and2toKsub1_not_1to1and3toKandKtoK_Accept(self-1, ss, FORMATTER()); err != nil {
+			panic(err)
+		}
+	}
 	fmt.Println("M (" + strconv.Itoa(M.Self) + ") accepted", self-1, "on", PORT+self)
 
 	if self == K-1 {

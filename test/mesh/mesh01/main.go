@@ -135,7 +135,7 @@ func server_M(wg *sync.WaitGroup, Khw session2.Pair, self session2.Pair) *M.End 
 	// Dial to above
 	if (self.X == Khw.X-1) {
 		peer := session2.XY(Khw.X, self.Y)
-		err := M.W_l1r1toKhwsubl1r0_not_l2r1toKhw_Dial(peer, util.LOCALHOST, PORT+peer.Flatten(Khw), DIAL, FORMATTER())
+		err := M.W_l2r1toKhw_not_l1r1toKhwsubl1r0_Dial(peer, util.LOCALHOST, PORT+peer.Flatten(Khw), DIAL, FORMATTER())
 		if err != nil {
 			panic(err)
 		}
