@@ -20,11 +20,11 @@ import (
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2/tcp"
 
 	//"github.com/rhu1/scribble-go-runtime/test/pget/messages"
-	"github.com/rhu1/scribble-go-runtime/test/pget/PGet/Foreach"
-	F1  "github.com/rhu1/scribble-go-runtime/test/pget/PGet/Foreach/family_1/F_1to1and1toK"
-	F2K "github.com/rhu1/scribble-go-runtime/test/pget/PGet/Foreach/family_1/F_1toK_not_1to1"
-	M   "github.com/rhu1/scribble-go-runtime/test/pget/PGet/Foreach/family_1/M_1to1"
-	S   "github.com/rhu1/scribble-go-runtime/test/pget/PGet/Foreach/family_1/S_1to1"
+	"github.com/rhu1/scribble-go-runtime/test/pget/PGet/Proto1"
+	F1  "github.com/rhu1/scribble-go-runtime/test/pget/PGet/Proto1/family_1/F_1to1and1toK"
+	F2K "github.com/rhu1/scribble-go-runtime/test/pget/PGet/Proto1/family_1/F_1toK_not_1to1"
+	M   "github.com/rhu1/scribble-go-runtime/test/pget/PGet/Proto1/family_1/M_1to1"
+	S   "github.com/rhu1/scribble-go-runtime/test/pget/PGet/Proto1/family_1/S_1to1"
 
 	//"github.com/rhu1/scribble-go-runtime/test/util"
 )
@@ -90,7 +90,7 @@ func main() {
 }
 
 func server_S(wg *sync.WaitGroup, K int, self int) *S.End {
-	P1 := Foreach.New()
+	P1 := Proto1.New()
 	S := P1.New_family_1_S_1to1(K, self)
 	var err error
 	as := make([]transport2.ScribListener, K)
@@ -122,13 +122,13 @@ func runS(s *S.Init) S.End {
 	return *end
 }
 
-func nestedS(s *S.Init_18) S.End {
+func nestedS(s *S.Init_43) S.End {
 	return *s.F_I_Gather_Get().F_I_Scatter_Res()
 }
 
 // K > 1
 func server_F2K(wg *sync.WaitGroup, K int, self int) *F2K.End {
-	P1 := Foreach.New()
+	P1 := Proto1.New()
 	F := P1.New_family_1_F_1toK_not_1to1(K, self)
 	var ss transport2.ScribListener
 	var err error
@@ -157,7 +157,7 @@ func runF2K(s *F2K.Init) F2K.End {
 
 // self == 1
 func server_F1(wg *sync.WaitGroup, K int, self int) *F1.End {
-	P1 := Foreach.New()
+	P1 := Proto1.New()
 	F := P1.New_family_1_F_1to1and1toK(K, self)
 	var ss transport2.ScribListener
 	var err error
@@ -185,7 +185,7 @@ func runF1(s *F1.Init) F1.End {
 }
 
 func client_M(wg *sync.WaitGroup, K, self int) *M.End {
-	P1 := Foreach.New()
+	P1 := Proto1.New()
 	M := P1.New_family_1_M_1to1(K, self)
 	if err := M.F_1to1and1toK_Dial(1, "localhost", PORT_F+1, DIAL_MF, FORMATTER_MF()); err != nil {
 		panic(err)
