@@ -117,7 +117,8 @@ func server_S(wg *sync.WaitGroup, K int, self int) *S.End {
 
 func runS(s *S.Init) S.End {
 	end := s.F_1_Gather_Head().F_1_Scatter_Res().  // N.B. End_25 has the Foreach (not just "End") -- FIXME: make more obvious?
-			Foreach(nestedS)
+			//Foreach(nestedS)
+			Parallel(nestedS)
 	fmt.Println("S (" + strconv.Itoa(s.Ept.Self) + ") done")
 	return *end
 }

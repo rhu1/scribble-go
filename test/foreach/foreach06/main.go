@@ -27,7 +27,7 @@ var _ = shm.Dial
 var _ = tcp.Dial
 
 
-//*
+/*
 var LISTEN = tcp.Listen
 var DIAL = tcp.Dial
 var FORMATTER = func() *session2.GobFormatter { return new(session2.GobFormatter) } 
@@ -92,8 +92,10 @@ func runS(s *S_1.Init) S_1.End {
 	pay := []int{123}
 	s1 := s.W_1_Scatter_A(pay)
 	fmt.Println("S scattered A:", pay)
-	end := s1.Foreach(nested).
-	          W_1_Gather_C(pay)
+	end := s1.
+					//Foreach(nested).
+					Parallel(nested).
+	         W_1_Gather_C(pay)
 	fmt.Println("S gathered C:", pay)
 	return *end
 }
