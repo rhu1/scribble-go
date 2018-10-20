@@ -98,7 +98,7 @@ func runS(s *S_1.Init) S_1.End {
 	return *end
 }
 
-func nested(s *S_1.Init_8) S_1.End {
+func nested(s *S_1.Init_7) S_1.End {
 	pay := make([]int, 1)
 	end := s.W_I_Gather_B(pay)
 	fmt.Println("S gathered B:", pay)
