@@ -27,6 +27,8 @@ global protocol Proto2(role W)
 	{
 		Foo(string) from W[I1] to W[I2];
 	}*/
+	// product order vs "alpha" order
+	// K1w = (1, w) // K1 <= (2,1)   // (2,1) <= (1,2) -- product:false, alpha(rt): true
 	foreach W[I1:(1,1),K1w], W[I2:(1,1)+Kh1,K1w+Kh1]
 	{
 		Foo(string) from W[I1] to W[I2];
