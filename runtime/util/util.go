@@ -49,25 +49,36 @@ func isectIntInterval(ivals []IntInterval) []IntInterval {
 	return ivals[1:]
 }
 
-/*func (this IntInterval) SubtIntIntervals(ivals []IntInterval) IntInterval {
-	if this.IsEmpty() {
-		return this
-	}
-	if len(ivals) == 0 {
-		return this
-	}
-	if this.Start <= ivals[0].End && ivals[0].Start <= this.End {
-		//return IntInterval{max(this.Start+1, ivals[0].Start), min(this.End-1, ivals[0].End)}.SubtIntIntervals(ivals[1:])
-		// set difference
-		var x int
-		var y int
-		if this.Start < ivals[0].Start {
-			x = this.Start
-			
+func (i1 IntInterval) SubIntInterval(i2 IntInterval) IntInterval {
+	var s int
+	var e int
+	if i1.Start < i2.Start {
+		s = i1.Start
+		if i2.Start <= i1.End {
+			if i2.End < i1.End {
+				panic("TODO: " + i1.String() + " - " + i2.String())
+			} else {  // i1.End <= i2.End
+				e = i2.Start - 1
+			}
+		}	else {  // i1.End < i2.Start
+			e = i1.End
+		}
+	}	else {  // i1.Start >= i2.Start
+		if i1.Start <= i2.End {
+			if i1.End <= i2.End {
+				s = 0	
+				e = -1
+			} else {  // i2.End < i1.End
+				s = i2.End + 1	
+				e = i1.End
+			}
+		} else {  // i2.End < i1.Start
+			s = i2.End + 1	
+			e = i1.End
 		}
 	}
-	return this.SubtIntIntervals(ivals[1:])
-}*/
+	return IntInterval{s, e}
+}
 
 func min(x int, y int) int {
 	if x < y {
@@ -124,10 +135,6 @@ func isectIntPairInterval(ivals []IntPairInterval) []IntPairInterval {
 		ivals[1] = IntPairInterval{start, end}
 	}
 	return ivals[1:]
-}
-
-func SubtIntPairIntervals() {
-	
 }
 
 func minIntPair(x session2.Pair, y session2.Pair) session2.Pair {
