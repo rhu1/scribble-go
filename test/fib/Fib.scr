@@ -1,0 +1,15 @@
+//Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/fib/Fib.scr -d test/fib -param Proto1 github.com/rhu1/scribble-go-runtime/test/fib/Fib -param-api Fib 
+
+// Fibonacci
+
+module Fib;
+
+type <go> "int" from "builtin" as int;
+
+global protocol Proto1(role Fib) {
+  foreach Fib[I2:1,K-2], Fib[I1:2,K-1], Fib[I:3,K] {
+    T(int) from Fib[I2] to Fib[I];
+    T(int) from Fib[I1] to Fib[I];
+  }
+}
