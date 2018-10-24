@@ -50,7 +50,7 @@ const PORT = 8888
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	h := 4;
+	h := 4;  // h > 2 for family_1
 	w := 2;
 	Khw := session2.XY(h, w)
 
