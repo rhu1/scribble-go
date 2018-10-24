@@ -66,6 +66,7 @@ test/shm/shm06/Shm6/
 test/sigs/sigs01/Sigs1/
 
 test/pget/PGet/
+test/fib/Fib/
 
 test/game/game01/Game1
 test/game/game01/Proto1
@@ -75,6 +76,7 @@ test/hadamard/Hadamard/
 
 test/mesh/mesh01/Mesh1/
 test/mesh/mesh02/Mesh2/
+test/mesh/mesh03/Mesh3/
 
 test/pair/pair01/Pair1/
 test/pair/pair02/Pair2/

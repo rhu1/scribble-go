@@ -45,8 +45,8 @@ var FORMATTER = func() *session2.PassByPointer { return new(session2.PassByPoint
 //*/
 
 
-const PORT1 = 33333
-const PORT2 = 44444
+const PORTsub2 = 33333  // For accepting/dialling self-/+2
+const PORTsub1 = 44444  // For accepting/dialling self-/+1
 
 
 func main() {
@@ -76,27 +76,30 @@ func main() {
 func serverFK(wg *sync.WaitGroup, K int) *FK.End {
 	P1 := Proto1.New()
 	FK := P1.New_family_1_Fib_3toK_not_1toKsub2and2toKsub1(K, K)
-	port1 := PORT1+K
-	port2 := PORT2+K
-	var ss1 transport2.ScribListener
-	var ss2 transport2.ScribListener
+	portsub2 := PORTsub2+K
+	portsub1 := PORTsub1+K
+	var sssub2 transport2.ScribListener
+	var sssub1 transport2.ScribListener
 	var err error
-	if ss1, err = LISTEN(port1); err != nil {
+	if sssub2, err = LISTEN(portsub2); err != nil {
 		panic(err)
 	}
-	defer ss1.Close()
-	if ss2, err = LISTEN(port2); err != nil {
+	defer sssub2.Close()
+	if sssub1, err = LISTEN(portsub1); err != nil {
 		panic(err)
 	}
-	defer ss2.Close()
-	if err = FK.Fib_1toKsub2and2toKsub1and3toK_Accept(K-2, ss1, FORMATTER()); err != nil {
+	defer sssub1.Close()
+
+	if err = FK.Fib_1toKsub2and2toKsub1and3toK_Accept(K-2, sssub2, FORMATTER()); err != nil {
 		panic(err)
 	}
-	fmt.Println("FK (" + strconv.Itoa(FK.Self) + ") accepted", K-2, "on", port1)
-	if err = FK.Fib_2toKsub1and3toK_not_1toKsub2_Accept(K-1, ss2, FORMATTER()); err != nil {
+	fmt.Println("FK (" + strconv.Itoa(FK.Self) + ") accepted", K-2, "on", portsub2)
+
+	if err = FK.Fib_2toKsub1and3toK_not_1toKsub2_Accept(K-1, sssub1, FORMATTER()); err != nil {
 		panic(err)
 	}
-	fmt.Println("FK (" + strconv.Itoa(FK.Self) + ") accepted", K-1, "on", port2)
+	fmt.Println("FK (" + strconv.Itoa(FK.Self) + ") accepted", K-1, "on", portsub1)
+
 	end := FK.Run(runFK)
 	wg.Done()
 	return &end
@@ -122,40 +125,41 @@ func serverclientFKsub1(wg *sync.WaitGroup, K int) *FKsub1.End {
 	self := K-1
 	P1 := Proto1.New()
 	FKsub1 := P1.New_family_1_Fib_2toKsub1and3toK_not_1toKsub2(K, self)
-	aport1 := PORT1+self
-	aport2 := PORT2+self
-	dport2 := PORT2+K
-	var ss1 transport2.ScribListener
-	var ss2 transport2.ScribListener
+	aportsub2 := PORTsub2+self
+	aportsub1 := PORTsub1+self
+	dportplus1 := PORTsub1+K
+	var sssub2 transport2.ScribListener
+	var sssub1 transport2.ScribListener
 	var err error
-	if ss1, err = LISTEN(aport1); err != nil {
+	if sssub2, err = LISTEN(aportsub2); err != nil {
 		panic(err)
 	}
-	defer ss1.Close()
-	if ss2, err = LISTEN(aport2); err != nil {
+	defer sssub2.Close()
+	if sssub1, err = LISTEN(aportsub1); err != nil {
 		panic(err)
 	}
-	defer ss2.Close()
+	defer sssub1.Close()
 
+	var acceptsub2 func(int, transport2.ScribListener, session2.ScribMessageFormatter) error 
 	if K == 5 {
-		if err = FKsub1. Fib_1toKsub2and2toKsub1_not_3toK_Accept(self-2, ss1, FORMATTER()); err != nil {
-			panic(err)
-		}
+		acceptsub2 = FKsub1.Fib_1toKsub2and2toKsub1_not_3toK_Accept
 	} else {  // K > 5
-		if err = FKsub1.Fib_1toKsub2and2toKsub1and3toK_Accept(self-2, ss1, FORMATTER()); err != nil {
-			panic(err)
-		}
+		acceptsub2 = FKsub1.Fib_1toKsub2and2toKsub1and3toK_Accept	
 	}
-	fmt.Println("FKsub1 (" + strconv.Itoa(FKsub1.Self) + ") accepted", self-2, "on", aport1)
-	if err = FKsub1.Fib_1toKsub2and2toKsub1and3toK_Accept(self-1, ss2, FORMATTER()); err != nil {
+	if err = acceptsub2(self-2, sssub2, FORMATTER()); err != nil {
 		panic(err)
 	}
-	fmt.Println("FKsub1 (" + strconv.Itoa(FKsub1.Self) + ") accepted", self-1, "on", aport2)
+	fmt.Println("FKsub1 (" + strconv.Itoa(FKsub1.Self) + ") accepted", self-2, "on", aportsub2)
 
-	if err = FKsub1.Fib_3toK_not_1toKsub2and2toKsub1_Dial(K, "localhost", dport2, DIAL, FORMATTER()); err != nil {
+	if err = FKsub1.Fib_1toKsub2and2toKsub1and3toK_Accept(self-1, sssub1, FORMATTER()); err != nil {
 		panic(err)
 	}
-	fmt.Println("FKsub1 (" + strconv.Itoa(FKsub1.Self) + ") connected", K, "on", dport2)
+	fmt.Println("FKsub1 (" + strconv.Itoa(FKsub1.Self) + ") accepted", self-1, "on", aportsub1)
+
+	if err = FKsub1.Fib_3toK_not_1toKsub2and2toKsub1_Dial(K, "localhost", dportplus1, DIAL, FORMATTER()); err != nil {
+		panic(err)
+	}
+	fmt.Println("FKsub1 (" + strconv.Itoa(FKsub1.Self) + ") connected", K, "on", dportplus1)
 
 	end := FKsub1.Run(runFKsub1)
 	wg.Done()
@@ -180,73 +184,69 @@ func runFKsub1(s *FKsub1.Init) FKsub1.End {
 func serverclientM(wg *sync.WaitGroup, K int, self int) *M.End {
 	P1 := Proto1.New()
 	M := P1.New_family_1_Fib_1toKsub2and2toKsub1and3toK(K, self)
-	aport1 := PORT1+self
-	aport2 := PORT2+self
-	dport1 := PORT1+self+2
-	dport2 := PORT2+self+1
-	var ss1 transport2.ScribListener
-	var ss2 transport2.ScribListener
+	aportsub2 := PORTsub2+self
+	aportsub1 := PORTsub1+self
+	dportplus2 := PORTsub2+self+2
+	dportplus1 := PORTsub1+self+1
+	var sssub2 transport2.ScribListener
+	var sssub1 transport2.ScribListener
 	var err error
-	if ss1, err = LISTEN(aport1); err != nil {
+	if sssub2, err = LISTEN(aportsub2); err != nil {
 		panic(err)
 	}
-	defer ss1.Close()
-	if ss2, err = LISTEN(aport2); err != nil {
+	defer sssub2.Close()
+	if sssub1, err = LISTEN(aportsub1); err != nil {
 		panic(err)
 	}
-	defer ss2.Close()
+	defer sssub1.Close()
 
+	var acceptsub2 func(int, transport2.ScribListener, session2.ScribMessageFormatter) error 
 	if self == 3 {
-		if err = M.Fib_1toKsub2_not_2toKsub1and3toK_Accept(1, ss1, FORMATTER()); err != nil {
-			panic(err)
-		}
+		acceptsub2 = M.Fib_1toKsub2_not_2toKsub1and3toK_Accept	
 	} else if self == 4 {
-		if err = M.Fib_1toKsub2and2toKsub1_not_3toK_Accept(2, ss1, FORMATTER()); err != nil {
-			panic(err)
-		}
+		acceptsub2 = M.Fib_1toKsub2and2toKsub1_not_3toK_Accept	
 	} else {  // self >= 5
-		if err = M.Fib_1toKsub2and2toKsub1and3toK_Accept(self-2, ss1, FORMATTER()); err != nil {
-			panic(err)
-		}
+		acceptsub2 = M.Fib_1toKsub2and2toKsub1and3toK_Accept	
 	}
-	fmt.Println("M (" + strconv.Itoa(M.Self) + ") accepted", self-2, "on", aport1)
+	if err = acceptsub2(self-2, sssub2, FORMATTER()); err != nil {
+		panic(err)
+	}
+	fmt.Println("M (" + strconv.Itoa(M.Self) + ") accepted", self-2, "on", aportsub2)
 
+	var acceptsub1 func(int, transport2.ScribListener, session2.ScribMessageFormatter) error 
 	if self == 3 {
-		if err = M.Fib_1toKsub2and2toKsub1_not_3toK_Accept(2, ss2, FORMATTER()); err != nil {
-			panic(err)
-		}
+		acceptsub1 = M.Fib_1toKsub2and2toKsub1_not_3toK_Accept	
 	} else {  // self >= 4
-		if err = M.Fib_1toKsub2and2toKsub1and3toK_Accept(self-1, ss2, FORMATTER()); err != nil {
-			panic(err)
-		}
+		acceptsub1 = M.Fib_1toKsub2and2toKsub1and3toK_Accept	
 	}	
-	fmt.Println("M (" + strconv.Itoa(M.Self) + ") accepted", self-1, "on", aport2)
+	if err = acceptsub1(self-1, sssub1, FORMATTER()); err != nil {
+		panic(err)
+	}
+	fmt.Println("M (" + strconv.Itoa(M.Self) + ") accepted", self-1, "on", aportsub1)
 
+	var dialplus2 func(int, string, int, func(string, int) (transport2.BinChannel, error), session2.ScribMessageFormatter) error
 	if self == K-2 {
-		if err = M.Fib_3toK_not_1toKsub2and2toKsub1_Dial(K, "localhost", dport1, DIAL, FORMATTER()); err != nil {
-			panic(err)
-		}
+		dialplus2 = M.Fib_3toK_not_1toKsub2and2toKsub1_Dial	
 	} else if self == K-3 {
-		if err = M.Fib_2toKsub1and3toK_not_1toKsub2_Dial(K-1, "localhost", dport1, DIAL, FORMATTER()); err != nil {
-			panic(err)
-		}
+		dialplus2 = M.Fib_2toKsub1and3toK_not_1toKsub2_Dial
 	} else {
-		if err = M.Fib_1toKsub2and2toKsub1and3toK_Dial(self+2, "localhost", dport1, DIAL, FORMATTER()); err != nil {
-			panic(err)
-		}
+		dialplus2 = M.Fib_1toKsub2and2toKsub1and3toK_Dial	
 	}
-	fmt.Println("M (" + strconv.Itoa(M.Self) + ") connected", self+2, "on", dport1)
+	if err = dialplus2(self+2, "localhost", dportplus2, DIAL, FORMATTER()); err != nil {
+		panic(err)
+	}
+	fmt.Println("M (" + strconv.Itoa(M.Self) + ") connected", self+2, "on", dportplus2)
 
+	var dialplus1 func(int, string, int, func(string, int) (transport2.BinChannel, error), session2.ScribMessageFormatter) error
 	if self == K-2 {
-		if err = M.Fib_2toKsub1and3toK_not_1toKsub2_Dial(K-1, "localhost", dport2, DIAL, FORMATTER()); err != nil {
-			panic(err)
-		}
+		dialplus1 = M.Fib_2toKsub1and3toK_not_1toKsub2_Dial
 	} else {  // self <= K-2
-		if err = M.Fib_1toKsub2and2toKsub1and3toK_Dial(self+1, "localhost", dport2, DIAL, FORMATTER()); err != nil {
-			panic(err)
-		}
+		dialplus1 = M.Fib_1toKsub2and2toKsub1and3toK_Dial
 	}
-	fmt.Println("M (" + strconv.Itoa(M.Self) + ") connected", self+1, "on", dport2)
+	if err = dialplus1(self+1, "localhost", dportplus1, DIAL, FORMATTER()); err != nil {
+		panic(err)
+	}
+	fmt.Println("M (" + strconv.Itoa(M.Self) + ") connected", self+1, "on", dportplus1)
 
 	end := M.Run(runM)
 	wg.Done()
@@ -274,25 +274,25 @@ func clientF2(wg *sync.WaitGroup, K int) *F2.End {
 	self := 2
 	P1 := Proto1.New()
 	F2 := P1.New_family_1_Fib_1toKsub2and2toKsub1_not_3toK(K, self)
-	dport1 := PORT1+self+2
-	dport2 := PORT2+self+1
+	dportplus2 := PORTsub2+self+2
+	dportplus1 := PORTsub1+self+1
 	var err error
 
+	var dialplus2 func(int, string, int, func(string, int) (transport2.BinChannel, error), session2.ScribMessageFormatter) error
 	if K == 5 {
-		if err = F2.Fib_2toKsub1and3toK_not_1toKsub2_Dial(4, "localhost", dport1, DIAL, FORMATTER()); err != nil {
-			panic(err)
-		}
+		dialplus2 = F2.Fib_2toKsub1and3toK_not_1toKsub2_Dial
 	} else {
-		if err = F2.Fib_1toKsub2and2toKsub1and3toK_Dial(self+2, "localhost", dport1, DIAL, FORMATTER()); err != nil {
-			panic(err)
-		}
+		dialplus2 = F2.Fib_1toKsub2and2toKsub1and3toK_Dial
 	}
-	fmt.Println("F2 (" + strconv.Itoa(F2.Self) + ") connected", self+2, "on", dport1)
-
-	if err = F2.Fib_1toKsub2and2toKsub1and3toK_Dial(self+1, "localhost", dport2, DIAL, FORMATTER()); err != nil {
+	if err = dialplus2(self+2, "localhost", dportplus2, DIAL, FORMATTER()); err != nil {
 		panic(err)
 	}
-	fmt.Println("F2 (" + strconv.Itoa(F2.Self) + ") connected", self+1, "on", dport2)
+	fmt.Println("F2 (" + strconv.Itoa(F2.Self) + ") connected", self+2, "on", dportplus2)
+
+	if err = F2.Fib_1toKsub2and2toKsub1and3toK_Dial(self+1, "localhost", dportplus1, DIAL, FORMATTER()); err != nil {
+		panic(err)
+	}
+	fmt.Println("F2 (" + strconv.Itoa(F2.Self) + ") connected", self+1, "on", dportplus1)
 
 	end := F2.Run(runF2)
 	wg.Done()
@@ -314,13 +314,13 @@ func clientF1(wg *sync.WaitGroup, K int) *F1.End {
 	self := 1
 	P1 := Proto1.New()
 	F1 := P1.New_family_1_Fib_1toKsub2_not_2toKsub1and3toK(K, self)
-	dport1 := PORT1+self+2
+	dportplus2 := PORTsub2+self+2
 	var err error
 
-	if err = F1.Fib_1toKsub2and2toKsub1and3toK_Dial(self+2, "localhost", dport1, DIAL, FORMATTER()); err != nil {
+	if err = F1.Fib_1toKsub2and2toKsub1and3toK_Dial(self+2, "localhost", dportplus2, DIAL, FORMATTER()); err != nil {
 		panic(err)
 	}
-	fmt.Println("F1 (" + strconv.Itoa(F1.Self) + ") connected", self+2, "on", dport1)
+	fmt.Println("F1 (" + strconv.Itoa(F1.Self) + ") connected", self+2, "on", dportplus2)
 
 	end := F1.Run(runF1)
 	wg.Done()
