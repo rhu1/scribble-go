@@ -1,5 +1,4 @@
 //Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
-//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/mesh/mesh02/Mesh2.scr -d test/mesh/mesh02/ -param Proto1 github.com/rhu1/scribble-go-runtime/test/mesh/mesh02/Mesh2 -param-api W
 //$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/mesh/mesh02/Mesh2.scr -d test/mesh/mesh02/ -param Proto3 github.com/rhu1/scribble-go-runtime/test/mesh/mesh02/Mesh2 -param-api W
 
 

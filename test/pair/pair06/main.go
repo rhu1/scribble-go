@@ -66,7 +66,7 @@ func main() {
 		}
 	}
 
-	time.Sleep(100 * time.Millisecond) //2017/12/11 11:21:40 cannot connect to 127.0.0.1:8891: dial tcp 127.0.0.1:8891: connectex: No connection could be made because the target machine actively refused it.
+	time.Sleep(1000 * time.Millisecond) //2017/12/11 11:21:40 cannot connect to 127.0.0.1:8891: dial tcp 127.0.0.1:8891: connectex: No connection could be made because the target machine actively refused it.
 
 	for j := 1; j <= y; j = j+1 {
 		go client_B(wg, K, session2.XY(1, j))
@@ -132,13 +132,13 @@ func server_M(wg *sync.WaitGroup, K session2.Pair, self session2.Pair) *M.End {
 	// Dial to above
 	if (self.X == K.X-1) {
 		peer := session2.XY(K.X, self.Y)
-		err := M.W_l1r1plusl1r0toKandl1r1toKsubl1r0_Dial(peer, util.LOCALHOST, PORT+peer.Flatten(K), DIAL, FORMATTER())
+		err := M.W_l1r1plusl1r0toK_not_l1r1toKsubl1r0_Dial(peer, util.LOCALHOST, PORT+peer.Flatten(K), DIAL, FORMATTER())
 		if err != nil {
 			panic(err)
 		}
 	} else {
 		peer := self.Plus(session2.XY(1, 0))
-		err := M.W_l1r1plusl1r0toK_not_l1r1toKsubl1r0_Dial(peer, util.LOCALHOST, PORT+peer.Flatten(K), DIAL, FORMATTER())
+		err := M.W_l1r1plusl1r0toKandl1r1toKsubl1r0_Dial(peer, util.LOCALHOST, PORT+peer.Flatten(K), DIAL, FORMATTER())
 		if err != nil {
 			panic(err)
 		}

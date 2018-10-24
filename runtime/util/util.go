@@ -1,7 +1,12 @@
 package util
 
+import "bufio"
 import "fmt"
+import "io/ioutil"
+import "os"
+import "os/exec"
 import "strconv"
+import "strings"
 import "github.com/rhu1/scribble-go-runtime/runtime/twodim/session2"
 
 var _ = fmt.Errorf
@@ -49,7 +54,14 @@ func isectIntInterval(ivals []IntInterval) []IntInterval {
 	return ivals[1:]
 }
 
-func (i1 IntInterval) SubIntInterval(i2 IntInterval) IntInterval {
+func (i IntInterval) SubIntIntervals(ivals []IntInterval) IntInterval {
+	if len(ivals) == 0 {
+		return i
+	}
+	return i.subIntInterval(ivals[0]).SubIntIntervals(ivals[1:])
+}
+
+func (i1 IntInterval) subIntInterval(i2 IntInterval) IntInterval {
 	var s int
 	var e int
 	if i1.Start < i2.Start {
@@ -151,3 +163,51 @@ func maxIntPair(x session2.Pair, y session2.Pair) session2.Pair {
 	return y
 }
 
+// Adapted from Z3Wrapper.checkSat
+func CheckSat(//GoJob job, ProtocolDecl<Global> gpd, 
+		smt2 string) bool {
+
+	smt2 = "(declare-datatypes (T1 T2) ((Pair (mk-pair (fst T1) (snd T2)))))\n" +
+			"(define-fun pair_max ((p!1 (Pair Int Int))) Int (ite (< (fst p!1) (snd p!1)) (snd p!1) (fst p!1) ) )\n" +
+			"(define-fun pair_min ((p!1 (Pair Int Int))) Int (ite (< (fst p!1) (snd p!1)) (fst p!1) (snd p!1)))\n" +
+			"(define-fun twopair_max ((p!1 (Pair Int Int)) (p!2 (Pair Int Int))) Int (ite (< (pair_max p!1) (pair_max p!2)) (pair_max p!2) (pair_max p!1)))\n" +
+			"(define-fun twopair_min ((p!1 (Pair Int Int)) (p!2 (Pair Int Int))) Int (ite (< (pair_min p!1) (pair_min p!2)) (pair_min p!1) (pair_min p!2)))\n" +
+			"(define-fun pair_lte ((p!1 (Pair Int Int)) (p!2 (Pair Int Int))) Bool (and (<= (fst p!1) (fst p!2)) (<= (snd p!1) (snd p!2)) ))\n" +
+			"(define-fun pair_lt ((p!1 (Pair Int Int)) (p!2 (Pair Int Int))) Bool (and (pair_lte p!1 p!2) (not (= p!1 p!2))))\n" +
+			"(define-fun pair_gte ((p!1 (Pair Int Int)) (p!2 (Pair Int Int))) Bool (pair_lte p!2 p!1))\n" +
+			"(define-fun pair_gt ((p!1 (Pair Int Int)) (p!2 (Pair Int Int))) Bool (pair_lt p!2 p!1))\n" +
+			"(define-fun pair_plus ((p!1 (Pair Int Int)) (p!2 (Pair Int Int))) (Pair Int Int) (mk-pair (+ (fst p!1) (fst p!2)) (+ (snd p!1) (snd p!2))))\n" +
+			"(define-fun pair_sub ((p!1 (Pair Int Int)) (p!2 (Pair Int Int))) (Pair Int Int) (mk-pair (- (fst p!1) (fst p!2)) (- (snd p!1) (snd p!2))))\n" +
+			smt2;
+	smt2 = smt2 + "\n(check-sat)\n(exit)";
+
+	file, err := ioutil.TempFile("", "scribble-go.*.smt2")
+	if err != nil {
+		panic(err)
+	}
+	defer os.Remove(file.Name())
+
+	w := bufio.NewWriter(file)
+	if _, err = w.WriteString(smt2); err != nil {
+		panic(err)
+	}
+	if err = w.Flush(); err != nil {
+		panic(err)
+	}
+
+	var cmdOut []byte
+	cmdName := "z3"
+	cmdArgs := []string{file.Name()}
+	if cmdOut, err = exec.Command(cmdName, cmdArgs...).Output(); err != nil {
+		//fmt.Fprintln(os.Stderr, "Error: ", err)
+		panic(err)
+	}
+	res := strings.Trim(string(cmdOut), "\r\n")
+	if res == "sat" {
+		return true	
+	} else if res == "unsat" {
+		return false
+	} else {
+		panic(res)
+	}
+}

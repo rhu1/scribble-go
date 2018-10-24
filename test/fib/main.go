@@ -52,7 +52,7 @@ const PORTsub1 = 44444  // For accepting/dialling self-/+1
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	K := 10
+	K := 5
 
 	wg := new(sync.WaitGroup)
 	wg.Add(K)
@@ -109,9 +109,9 @@ func runFK(s *FK.Init) FK.End {
 	x := make([]int, 1)
 	y := make([]int, 1)
 	s2 := s.Fib_selfsub2_Gather_T(x)
-	fmt.Println("FK (" + strconv.Itoa(s.Ept.Self) + ") received T:", x)
+	fmt.Println("FK (" + strconv.Itoa(s.Ept.Self) + ") received self-2:", x)
 	end := s2.Fib_selfsub1_Gather_T(y)
-	fmt.Println("FK (" + strconv.Itoa(s.Ept.Self) + ") received T:", y)
+	fmt.Println("FK (" + strconv.Itoa(s.Ept.Self) + ") received self-1:", y)
 
 	time.Sleep(100 * time.Millisecond)
 
@@ -170,12 +170,12 @@ func runFKsub1(s *FKsub1.Init) FKsub1.End {
 	x := make([]int, 1)
 	y := make([]int, 1)
 	s2 := s.Fib_selfsub2_Gather_T(x)
-	fmt.Println("FKsub1 (" + strconv.Itoa(s.Ept.Self) + ") received T:", x)
+	fmt.Println("FKsub1 (" + strconv.Itoa(s.Ept.Self) + ") received self-2:", x)
 	s3 := s2.Fib_selfsub1_Gather_T(y)
-	fmt.Println("FKsub1 (" + strconv.Itoa(s.Ept.Self) + ") received T:", y)
+	fmt.Println("FKsub1 (" + strconv.Itoa(s.Ept.Self) + ") received self-1:", y)
 	pay := []int{x[0]+y[0]}
 	end := s3.Fib_selfplus1_Scatter_T(pay)
-	fmt.Println("FKsub1 (" + strconv.Itoa(s.Ept.Self) + ") sent T:", pay)
+	fmt.Println("FKsub1 (" + strconv.Itoa(s.Ept.Self) + ") sent self+1:", pay)
 	return *end
 }
 
@@ -257,14 +257,14 @@ func runM(s *M.Init) M.End {
 	x := make([]int, 1)
 	y := make([]int, 1)
 	s2 := s.Fib_selfsub2_Gather_T(x)
-	fmt.Println("M (" + strconv.Itoa(s.Ept.Self) + ") received T:", x)
+	fmt.Println("M (" + strconv.Itoa(s.Ept.Self) + ") received self-2:", x)
 	s3 := s2.Fib_selfsub1_Gather_T(y)
-	fmt.Println("M (" + strconv.Itoa(s.Ept.Self) + ") received T:", y)
+	fmt.Println("M (" + strconv.Itoa(s.Ept.Self) + ") received self-1:", y)
 	pay := []int{x[0]+y[0]}
 	s4 := s3.Fib_selfplus1_Scatter_T(pay)
-	fmt.Println("M (" + strconv.Itoa(s.Ept.Self) + ") sent T:", pay)
+	fmt.Println("M (" + strconv.Itoa(s.Ept.Self) + ") sent self+1:", pay)
 	end := s4.Fib_selfplus2_Scatter_T(pay)
-	fmt.Println("M (" + strconv.Itoa(s.Ept.Self) + ") sent T:", pay)
+	fmt.Println("M (" + strconv.Itoa(s.Ept.Self) + ") sent self+2:", pay)
 	return *end
 }
 
@@ -302,9 +302,9 @@ func clientF2(wg *sync.WaitGroup, K int) *F2.End {
 func runF2(s *F2.Init) F2.End {
 	pay := []int{1}
 	s1 := s.Fib_selfplus1_Scatter_T(pay)
-	fmt.Println("F2 (" + strconv.Itoa(s.Ept.Self) + ") sent T:", pay)
+	fmt.Println("F2 (" + strconv.Itoa(s.Ept.Self) + ") sent self+1:", pay)
 	end := s1.Fib_selfplus2_Scatter_T(pay)
-	fmt.Println("F2 (" + strconv.Itoa(s.Ept.Self) + ") sent T:", pay)
+	fmt.Println("F2 (" + strconv.Itoa(s.Ept.Self) + ") sent self+2:", pay)
 	return *end
 }
 
@@ -330,6 +330,6 @@ func clientF1(wg *sync.WaitGroup, K int) *F1.End {
 func runF1(s *F1.Init) F1.End {
 	pay := []int{1}
 	end := s.Fib_selfplus2_Scatter_T(pay)
-	fmt.Println("F1 (" + strconv.Itoa(s.Ept.Self) + ") sent T:", pay)
+	fmt.Println("F1 (" + strconv.Itoa(s.Ept.Self) + ") sent self+2:", pay)
 	return *end
 }
