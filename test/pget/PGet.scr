@@ -1,6 +1,8 @@
 //Raymond@HZHL3 ~/code/go/src/github.com/nickng/scribble-go-examples
 //$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/pget/PGet.scr -d test/pget/ -param Proto1 github.com/rhu1/scribble-go-runtime/test/pget/PGet -param-api M -param-api F -param-api S
 
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/pget/PGet.scr -d test/pget/ -param Proto1 github.com/rhu1/scribble-go-runtime/test/pget/PGet -param-api M -param-api F -param-api S -parforeach
+
 
 module PGet;
 
@@ -25,6 +27,8 @@ global protocol Basic(role M, role F, role S) {
   Done from A[1] to B[1];
 }*/
 
+
+// Foreach
 global protocol Proto1(role M, role F, role S)
 {
   // Get metdata (size)

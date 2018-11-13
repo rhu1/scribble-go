@@ -70,7 +70,7 @@ func main() {
 		go server_C(wg, K, j)
 	}*/
 
-	time.Sleep(100 * time.Millisecond) //2017/12/11 11:21:40 cannot connect to 127.0.0.1:8891: dial tcp 127.0.0.1:8891: connectex: No connection could be made because the target machine actively refused it.
+	time.Sleep(500 * time.Millisecond) //2017/12/11 11:21:40 cannot connect to 127.0.0.1:8891: dial tcp 127.0.0.1:8891: connectex: No connection could be made because the target machine actively refused it.
 
 	for j := session2.XY(1, 1); j.Lte(K); j = j.Inc(K) {
 		go client_C(wg, K, j)

@@ -42,7 +42,7 @@ const PORT = 8888
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	K := 3
+	K := 4
 
 	wg := new(sync.WaitGroup)
 	wg.Add(K + 1)
@@ -83,7 +83,9 @@ func serverCode(wg *sync.WaitGroup, K int) *S_1.End {
 }
 
 func runS(s *S_1.Init) S_1.End {
-	return *s.Foreach(nested)
+	return *s.
+			//Foreach(nested)
+			Parallel(nested)
 }
 
 func nested(s *S_1.Init_6) S_1.End {

@@ -1,7 +1,12 @@
 package util
 
+import "bufio"
 import "fmt"
+import "io/ioutil"
+import "os"
+import "os/exec"
 import "strconv"
+import "strings"
 import "github.com/rhu1/scribble-go-runtime/runtime/twodim/session2"
 
 var _ = fmt.Errorf
@@ -49,25 +54,43 @@ func isectIntInterval(ivals []IntInterval) []IntInterval {
 	return ivals[1:]
 }
 
-/*func (this IntInterval) SubtIntIntervals(ivals []IntInterval) IntInterval {
-	if this.IsEmpty() {
-		return this
-	}
+func (i IntInterval) SubIntIntervals(ivals []IntInterval) IntInterval {
 	if len(ivals) == 0 {
-		return this
+		return i
 	}
-	if this.Start <= ivals[0].End && ivals[0].Start <= this.End {
-		//return IntInterval{max(this.Start+1, ivals[0].Start), min(this.End-1, ivals[0].End)}.SubtIntIntervals(ivals[1:])
-		// set difference
-		var x int
-		var y int
-		if this.Start < ivals[0].Start {
-			x = this.Start
-			
+	return i.subIntInterval(ivals[0]).SubIntIntervals(ivals[1:])
+}
+
+func (i1 IntInterval) subIntInterval(i2 IntInterval) IntInterval {
+	var s int
+	var e int
+	if i1.Start < i2.Start {
+		s = i1.Start
+		if i2.Start <= i1.End {
+			if i2.End < i1.End {
+				panic("TODO: " + i1.String() + " - " + i2.String())
+			} else {  // i1.End <= i2.End
+				e = i2.Start - 1
+			}
+		}	else {  // i1.End < i2.Start
+			e = i1.End
+		}
+	}	else {  // i1.Start >= i2.Start
+		if i1.Start <= i2.End {
+			if i1.End <= i2.End {
+				s = 0	
+				e = -1
+			} else {  // i2.End < i1.End
+				s = i2.End + 1	
+				e = i1.End
+			}
+		} else {  // i2.End < i1.Start
+			s = i2.End + 1	
+			e = i1.End
 		}
 	}
-	return this.SubtIntIntervals(ivals[1:])
-}*/
+	return IntInterval{s, e}
+}
 
 func min(x int, y int) int {
 	if x < y {
@@ -126,10 +149,6 @@ func isectIntPairInterval(ivals []IntPairInterval) []IntPairInterval {
 	return ivals[1:]
 }
 
-func SubtIntPairIntervals() {
-	
-}
-
 func minIntPair(x session2.Pair, y session2.Pair) session2.Pair {
 	if x.Lt(y) {
 		return	x
@@ -142,4 +161,53 @@ func maxIntPair(x session2.Pair, y session2.Pair) session2.Pair {
 		return	x
 	}
 	return y
+}
+
+// Adapted from Z3Wrapper.checkSat
+func CheckSat(//GoJob job, ProtocolDecl<Global> gpd, 
+		smt2 string) bool {
+
+	smt2 = "(declare-datatypes (T1 T2) ((Pair (mk-pair (fst T1) (snd T2)))))\n" +
+			"(define-fun pair_max ((p!1 (Pair Int Int))) Int (ite (< (fst p!1) (snd p!1)) (snd p!1) (fst p!1) ) )\n" +
+			"(define-fun pair_min ((p!1 (Pair Int Int))) Int (ite (< (fst p!1) (snd p!1)) (fst p!1) (snd p!1)))\n" +
+			"(define-fun twopair_max ((p!1 (Pair Int Int)) (p!2 (Pair Int Int))) Int (ite (< (pair_max p!1) (pair_max p!2)) (pair_max p!2) (pair_max p!1)))\n" +
+			"(define-fun twopair_min ((p!1 (Pair Int Int)) (p!2 (Pair Int Int))) Int (ite (< (pair_min p!1) (pair_min p!2)) (pair_min p!1) (pair_min p!2)))\n" +
+			"(define-fun pair_lte ((p!1 (Pair Int Int)) (p!2 (Pair Int Int))) Bool (and (<= (fst p!1) (fst p!2)) (<= (snd p!1) (snd p!2)) ))\n" +
+			"(define-fun pair_lt ((p!1 (Pair Int Int)) (p!2 (Pair Int Int))) Bool (and (pair_lte p!1 p!2) (not (= p!1 p!2))))\n" +
+			"(define-fun pair_gte ((p!1 (Pair Int Int)) (p!2 (Pair Int Int))) Bool (pair_lte p!2 p!1))\n" +
+			"(define-fun pair_gt ((p!1 (Pair Int Int)) (p!2 (Pair Int Int))) Bool (pair_lt p!2 p!1))\n" +
+			"(define-fun pair_plus ((p!1 (Pair Int Int)) (p!2 (Pair Int Int))) (Pair Int Int) (mk-pair (+ (fst p!1) (fst p!2)) (+ (snd p!1) (snd p!2))))\n" +
+			"(define-fun pair_sub ((p!1 (Pair Int Int)) (p!2 (Pair Int Int))) (Pair Int Int) (mk-pair (- (fst p!1) (fst p!2)) (- (snd p!1) (snd p!2))))\n" +
+			smt2;
+	smt2 = smt2 + "\n(check-sat)\n(exit)";
+
+	file, err := ioutil.TempFile("", "scribble-go.*.smt2")
+	if err != nil {
+		panic(err)
+	}
+	defer os.Remove(file.Name())
+
+	w := bufio.NewWriter(file)
+	if _, err = w.WriteString(smt2); err != nil {
+		panic(err)
+	}
+	if err = w.Flush(); err != nil {
+		panic(err)
+	}
+
+	var cmdOut []byte
+	cmdName := "z3"
+	cmdArgs := []string{file.Name()}
+	if cmdOut, err = exec.Command(cmdName, cmdArgs...).Output(); err != nil {
+		//fmt.Fprintln(os.Stderr, "Error: ", err)
+		panic(err)
+	}
+	res := strings.Trim(string(cmdOut), "\r\n")
+	if res == "sat" {
+		return true	
+	} else if res == "unsat" {
+		return false
+	} else {
+		panic(res)
+	}
 }

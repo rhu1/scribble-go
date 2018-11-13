@@ -58,7 +58,7 @@ func init() {
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	K := 4  // K >= 3
+	K := 4  // K > 3
 
 	wg := new(sync.WaitGroup)
 	wg.Add(K)

@@ -50,9 +50,9 @@ const PORT = 8888
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	h := 4;
+	hsub1 := 3;  // h > 2 for family_1
 	w := 2;
-	Khw := session2.XY(h+1, w)
+	Khw := session2.XY(hsub1+1, w)
 
 	wg := new(sync.WaitGroup)
 	wg.Add(Khw.Flatten(Khw.Plus(session2.XY(1,0))))
@@ -61,7 +61,7 @@ func main() {
 		go server_T(wg, Khw, session2.XY(h, j))
 	}*/
 
-	for i := 2; i < h+1; i = i+1 {
+	for i := 2; i < hsub1+1; i = i+1 {
 		for j := 1; j <= w; j = j+1 {
 			go server_M(wg, Khw, session2.XY(i, j))
 		}
@@ -70,7 +70,7 @@ func main() {
 	time.Sleep(100 * time.Millisecond) //2017/12/11 11:21:40 cannot connect to 127.0.0.1:8891: dial tcp 127.0.0.1:8891: connectex: No connection could be made because the target machine actively refused it.
 
 	for j := 1; j <= w; j = j+1 {
-		go server_T_and_client_B(wg, Khw, session2.XY(1, j), session2.XY(h+1, j))
+		go server_T_and_client_B(wg, Khw, session2.XY(1, j), session2.XY(hsub1+1, j))
 	}
 
 	wg.Wait()
