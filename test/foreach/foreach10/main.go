@@ -107,11 +107,11 @@ func server_WK(wg *sync.WaitGroup, K int, self int) *WK.End {
 func runWK(s *WK.Init) WK.End {
 	var end *WK.End
 	switch c := s.W_selfsub1_Branch().(type) {
-	case *WK.Foo: 
+	case *WK.Foo_W_Init: 
 		var x messages.Foo
 		end = c.Recv_Foo(&x)
 		fmt.Println("WK (" + strconv.Itoa(s.Ept.Self) + ") received Foo:", x)
-	case *WK.Bar: 
+	case *WK.Bar_W_Init: 
 		var x messages.Bar
 		end = c.Recv_Bar(&x)
 		fmt.Println("WK (" + strconv.Itoa(s.Ept.Self) + ") received Bar:", x)
@@ -122,7 +122,7 @@ func runWK(s *WK.Init) WK.End {
 // K > 3
 func server_M(wg *sync.WaitGroup, K int, self int) *M.End {
 	P1 := Proto1.New()
-	M := P1.New_family_2_W_2toKsub1and3toK_not_1to1and2to2(K, self)
+	M := P1.New_family_2_W_2toKsub1and3toK_not_1to1and2to2(K, self)  // FIXME: "_not_..._2to2"
 	var ss transport2.ScribListener
 	var err error
 	if ss, err = LISTEN(PORT+self); err != nil {
@@ -130,15 +130,15 @@ func server_M(wg *sync.WaitGroup, K int, self int) *M.End {
 	}
 	defer ss.Close()
 
-	/*if self == 3 {
-		if err = M.W_2to2and2toKsub1_not_1to1and3toK_Accept(self-1, ss, FORMATTER()); err != nil {  // FIXME: shouldn't have
+	if self == 2 {
+		if err = M.W_1to1_not_2to2and2toKsub1and3toK_Accept(self-1, ss, FORMATTER()); err != nil {
 			panic(err)
 		}
-	} else {*/
+	} else {
 		if err = M.W_2toKsub1and3toK_not_1to1and2to2_Accept(self-1, ss, FORMATTER()); err != nil {
 			panic(err)
 		}
-	//}
+	}
 	fmt.Println("M (" + strconv.Itoa(M.Self) + ") accepted", self-1, "on", PORT+self)
 
 	if self == K-1 {
