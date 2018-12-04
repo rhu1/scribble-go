@@ -43,7 +43,7 @@ const PORT = 33333
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	K := 3
+	K := 1
 
 	wg := new(sync.WaitGroup)
 	wg.Add(K + 1)

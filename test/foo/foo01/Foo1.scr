@@ -8,6 +8,9 @@
 module Foo1;
 
 
+//...scribble-go-examples TODO: merge nickng:master
+
+
 // scrib surface syntax -- partly done -- TODO: domain annotations, pair/pipe, multi-interval foreach, multidim intervals
 // internalise dial/accept peers -- partly done -- TODO: full "nested" API (as an extra option)
 // remove proto sig param decls -- done
