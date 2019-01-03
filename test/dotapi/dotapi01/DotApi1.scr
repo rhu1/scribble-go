@@ -1,0 +1,22 @@
+//Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/dotapi/dotapi01/DotApi1.scr -d test/dotapi/dotapi01/ -param Proto1 github.com/rhu1/scribble-go-runtime/test/dotapi/dotapi01/DotApi1 -param-api S -param-api W
+
+
+// http://sandbox.kidstrythisathome.com/erdos/
+
+
+module DotApi1;
+
+
+type <go> "int" from "..." as int;
+/*type <go> "string" from "..." as string;
+type <go> "TwoBuyer.Address" from "scrib/twobuyer/TwoBuyer/TwoBuyer/types.go" as Address;
+type <go> "TwoBuyer.Date" from "scrib/twobuyer/TwoBuyer/TwoBuyer/types.go" as Date;*/
+
+
+
+global protocol Proto1(role S, role W)
+{
+	A(int) from S[1,1] to W[1,K];
+}
+
