@@ -260,7 +260,6 @@ func runW2(s *W2.Init) W2.End {
 func client_W1(wg *sync.WaitGroup, K int, self int) *W1.End {
 	P1 := Proto1.New()
 	W1 := P1.New_family_2_W_1to1_not_2to2and2toKsub1and3toKandKtoK(K, self)
-			// FIXME: "not_2to2" suffix incorrect after subsumption
 	var ss transport2.ScribListener
 	var err error
 	if ss, err = LISTEN(PORT+self); err != nil {
