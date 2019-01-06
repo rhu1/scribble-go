@@ -260,17 +260,17 @@ func runW2(s *W2.Init) W2.End {
 func client_W1(wg *sync.WaitGroup, K int, self int) *W1.End {
 	P1 := Proto1.New()
 	W1 := P1.New_family_2_W_1to1_not_2to2and2toKsub1and3toKandKtoK(K, self)
+			// FIXME: "not_2to2" suffix incorrect after subsumption
 	var ss transport2.ScribListener
 	var err error
 	if ss, err = LISTEN(PORT+self); err != nil {
 		panic(err)
 	}
 	defer ss.Close();
-	if err := W1.W_2toKsub1and3toK_not_1to1and2to2andKtoK_Dial(self+1, util.LOCALHOST, PORT+self+1, DIAL, FORMATTER());
+	if err := W1.W_2to2and2toKsub1_not_1to1and3toKandKtoK_Dial(self+1, util.LOCALHOST, PORT+self+1, DIAL, FORMATTER());
 			err != nil {
 		panic(err)
 	}
-	//FIXME: W1.W_1to1_not_2to2and2toKsub1and3toKandKtoK_Accept ??
 	fmt.Println("W1 (" + strconv.Itoa(W1.Self) + ") connected to", self+1, "on", PORT+self+1)
 	if err = W1.W_3toKandKtoK_not_1to1and2to2and2toKsub1_Accept(self+K-1, ss, FORMATTER());
 			err != nil {
