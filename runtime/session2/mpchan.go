@@ -110,6 +110,9 @@ func (c *MPChan) MRecv(r string, i int, msg *ScribMessage) error {
 
 // Close closes all connected channels.
 func (c *MPChan) Close() error {
+
+	// FIXME: use ("End") lin counter to check session completion
+
 	var err error
 	for _, cs := range c.Conns {
 		for _, c := range cs {

@@ -18,8 +18,8 @@ import (
 
 	"github.com/rhu1/scribble-go-runtime/test/foreach/foreach04/Foreach4/Proto1"
 	S_1  "github.com/rhu1/scribble-go-runtime/test/foreach/foreach04/Foreach4/Proto1/family_1/S_1to1"
-	W_1  "github.com/rhu1/scribble-go-runtime/test/foreach/foreach04/Foreach4/Proto1/W_1to1and1toK"
-	W_2K "github.com/rhu1/scribble-go-runtime/test/foreach/foreach04/Foreach4/Proto1/W_1toK_not_1to1"
+	W_1  "github.com/rhu1/scribble-go-runtime/test/foreach/foreach04/Foreach4/Proto1/family_1/W_1to1and1toK"
+	W_2K "github.com/rhu1/scribble-go-runtime/test/foreach/foreach04/Foreach4/Proto1/family_1/W_1toK_not_1to1"
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 
@@ -89,15 +89,15 @@ func serverCode(wg *sync.WaitGroup, K int) *S_1.End {
 
 func runS(s *S_1.Init) S_1.End {
 	pay := []int{123}
-	s1 := s.W_1to1_Scatter_A(pay)
+	s1 := s.W_1_Scatter_A(pay)
 	fmt.Println("S scattered A:", pay)
 	end := s1.Foreach(nested)
 	return *end
 }
 
-func nested(s *S_1.Init_18) S_1.End {
+func nested(s *S_1.Init_7) S_1.End {
 	pay := make([]int, 1)
-	end := s.W_ItoI_Gather_B(pay)
+	end := s.W_I_Gather_B(pay)
 	fmt.Println("S gathered B:", pay)
 	return *end
 }
@@ -105,7 +105,7 @@ func nested(s *S_1.Init_18) S_1.End {
 func client1Code(wg *sync.WaitGroup, K int) *W_1.End {
 	self := 1
 	P1 := Proto1.New()
-	W := P1.New_W_1to1and1toK(K, self)  // Endpoint needs n to check self
+	W := P1.New_family_1_W_1to1and1toK(K, self)  // Endpoint needs n to check self
 	if err := W.S_1to1_Dial(1, util.LOCALHOST, PORT+self, DIAL, FORMATTER()); err != nil {
 		panic(err)
 	}
@@ -117,17 +117,17 @@ func client1Code(wg *sync.WaitGroup, K int) *W_1.End {
 
 func runW1(w *W_1.Init) W_1.End {
 	pay := make([]int, 1)
-	w2 := w.S_1to1_Gather_A(pay)
+	w2 := w.S_1_Gather_A(pay)
 	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") gathered A:", pay)
 	rep := []int{pay[0]*pay[0]}
-	end := w2.S_1to1_Scatter_B(rep)
+	end := w2.S_1_Scatter_B(rep)
 	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") scattered B:", rep)
 	return *end
 }
 
 func client2KCode(wg *sync.WaitGroup, K int, self int) *W_2K.End {
 	P1 := Proto1.New()
-	W := P1.New_W_1toK_not_1to1(K, self)  // Endpoint needs n to check self
+	W := P1.New_family_1_W_1toK_not_1to1(K, self)  // Endpoint needs n to check self
 	if err := W.S_1to1_Dial(1, util.LOCALHOST, PORT+self, DIAL, FORMATTER()); err != nil {
 		panic(err)
 	}
@@ -139,7 +139,7 @@ func client2KCode(wg *sync.WaitGroup, K int, self int) *W_2K.End {
 
 func runW(w *W_2K.Init) W_2K.End {
 	pay := []int{w.Ept.Self}
-	end := w.S_1to1_Scatter_B(pay)
+	end := w.S_1_Scatter_B(pay)
 	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") scattered B:", pay)
 	return *end
 }

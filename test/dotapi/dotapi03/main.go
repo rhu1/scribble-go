@@ -138,11 +138,15 @@ func Server_middle(wg *sync.WaitGroup, K int, self int) *Middle.End {
 func runMiddle(s *Middle.Init) Middle.End {
 	//pay := make([]int, 1)
 	pay := make([]messages.Foo, 1)
-	s2 := s.W_selfsub1.Gather.Foo(pay)
+
+	s2 := s. W_selfsub1. Gather. Foo(pay)
+
 	fmt.Println("Middle (" + strconv.Itoa(s.Ept.Self) + ") received:", pay)
 	//pay = []int{s.Ept.Self}
 	pay = []messages.Foo{messages.Foo{s.Ept.Self}}
-	end := s2.W_selfplus1.Scatter.Foo(pay)
+
+	end := s2. W_selfplus1. Scatter. Foo(pay)
+
 	fmt.Println("Middle (" + strconv.Itoa(s.Ept.Self) + ") sent Foo:", pay)
 	fmt.Println("Middle (" + strconv.Itoa(s.Ept.Self) + ") finished")
 	return *end

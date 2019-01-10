@@ -1,6 +1,6 @@
 //rhu@HZHL4 ~/code/go
-//$ go install github.com/rhu1/scribble-go-runtime/test/dotapi/dotapi01
-//$ bin/dotapi01.exe
+//$ go install github.com/rhu1/scribble-go-runtime/test/dotapi/dotapi02
+//$ bin/dotapi02.exe
 
 package main
 
@@ -16,9 +16,9 @@ import (
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2/shm"
 	"github.com/rhu1/scribble-go-runtime/runtime/transport2/tcp"
 
-	"github.com/rhu1/scribble-go-runtime/test/dotapi/dotapi01/DotApi1/Proto1"
-	S_1 "github.com/rhu1/scribble-go-runtime/test/dotapi/dotapi01/DotApi1/Proto1/S_1to1"
-	"github.com/rhu1/scribble-go-runtime/test/dotapi/dotapi01/DotApi1/Proto1/W_1toK"
+	"github.com/rhu1/scribble-go-runtime/test/dotapi/dotapi04/DotApi4/Proto1"
+	S_1 "github.com/rhu1/scribble-go-runtime/test/dotapi/dotapi04/DotApi4/Proto1/S_1to1"
+	"github.com/rhu1/scribble-go-runtime/test/dotapi/dotapi04/DotApi4/Proto1/W_1toK"
 	"github.com/rhu1/scribble-go-runtime/test/util"
 )
 
@@ -35,6 +35,7 @@ var LISTEN = shm.Listen
 var DIAL = shm.Dial
 var FORMATTER = func() *session2.PassByPointer { return new(session2.PassByPointer) } 
 //*/
+
 
 
 const PORT = 33333
@@ -95,7 +96,7 @@ func runS(s *S_1.Init) S_1.End {
 	K := s.Ept.K  // Good API? -- generate param values as direct fields? (instead of generic map)
 	pay := data[0:K]
 	//end := s.W_1toK_Scatter_A(pay)
-	end := s.W_1toK.Scatter.A(pay)
+	end := s.W_1toK.Scatter.Foo(pay)
 	fmt.Println("S scattered A:", pay)
 	return *end
 }
@@ -121,9 +122,16 @@ func clientCode(wg *sync.WaitGroup, K int, self int) *W_1toK.End {
 }
 
 func runW(w *W_1toK.Init) W_1toK.End {
-	pay := make([]int, 1)
+	//pay := make([]int, 1)
 	//end := w.S_1_Gather_A(pay)
-	end := w.S_1.Gather.A(pay)
-	fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") gathered:", pay)
+	var end *W_1toK.End
+	switch c := w.S_1.Branch().(type) {
+	case *W_1toK.Foo: var x int
+                  end = c.Foo(&x)
+	                fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received A:", x)
+	case *W_1toK.Bar: var x int
+	                end = c.Bar(&x)
+	                fmt.Println("W(" + strconv.Itoa(w.Ept.Self) + ") received B:", x)
+	}
 	return *end
 }
