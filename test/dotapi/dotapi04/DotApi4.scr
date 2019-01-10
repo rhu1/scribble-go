@@ -1,5 +1,5 @@
 //Raymond@HZHL3 ~/code/go/src/github.com/rhu1/scribble-go-runtime
-//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/dotapi/dotapi04/DotApi4.scr -d test/dotapi/dotapi04/ -dotapi -param Proto1 github.com/rhu1/scribble-go-runtime/test/dotapi/dotapi04 -param-api W
+//$ ~/code/eclipse/scribble/github.com/rhu1-go/scribble-java/bin/scribblec-param.sh test/dotapi/dotapi04/DotApi4.scr -d test/dotapi/dotapi04/ -param Proto1 github.com/rhu1/scribble-go-runtime/test/dotapi/dotapi04 -param-api W -dotapi
 
 
 // http://sandbox.kidstrythisathome.com/erdos/
