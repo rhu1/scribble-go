@@ -1,6 +1,6 @@
 //rhu@HZHL4 ~/code/go
-//$ go install github.com/rhu1/scribble-go-runtime/test/dotapi/dotapi02
-//$ bin/dotapi02.exe
+//$ go install github.com/rhu1/scribble-go-runtime/test/dotapi/dotapi03
+//$ bin/dotapi03.exe
 
 package main
 
